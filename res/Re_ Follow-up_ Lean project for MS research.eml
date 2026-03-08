@@ -1,0 +1,439 @@
+Received: from ZR0P278MB1696.CHEP278.PROD.OUTLOOK.COM (2603:10a6:910:a1::7) by
+ GV0P278MB1298.CHEP278.PROD.OUTLOOK.COM with HTTPS; Thu, 27 Nov 2025 10:51:16
+ +0000
+Received: from ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM (2603:10a6:918::2cd)
+ by ZR0P278MB1696.CHEP278.PROD.OUTLOOK.COM (2603:10a6:910:a1::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9366.13; Thu, 27 Nov
+ 2025 10:51:16 +0000
+Received: from ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM
+ ([fe80::c698:b57a:23b2:eabf]) by ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM
+ ([fe80::c698:b57a:23b2:eabf%8]) with mapi id 15.20.9366.012; Thu, 27 Nov 2025
+ 10:51:15 +0000
+From: Thomas Vidick <thomas.vidick@epfl.ch>
+To: Sean Perazzolo <sean.perazzolo@epfl.ch>
+Subject: Re: Follow-up: Lean project for MS research
+Thread-Topic: Follow-up: Lean project for MS research
+Thread-Index: AQHcVmNuTwYGls5XFEqdtBXG0wLsR7T2xc/8gAAXxTOAD4zaXw==
+Date: Thu, 27 Nov 2025 10:51:15 +0000
+Message-ID:
+	<ZR2PPF36BA5837A08C21790966279D2FE41F8DFA@ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM>
+References:
+	<GV0P278MB12985F292381F9C9521B70569DCBA@GV0P278MB1298.CHEP278.PROD.OUTLOOK.COM>
+ <ZR2PPF36BA5837AEA613C73AB988D18AF58F8C9A@ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM>
+ <GV0P278MB1298749C8F733BBF233077E19DC9A@GV0P278MB1298.CHEP278.PROD.OUTLOOK.COM>
+In-Reply-To:
+	<GV0P278MB1298749C8F733BBF233077E19DC9A@GV0P278MB1298.CHEP278.PROD.OUTLOOK.COM>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthAs: Internal
+X-MS-Exchange-Organization-AuthMechanism: 04
+X-MS-Exchange-Organization-AuthSource:
+	ZR2PPF36BA5837A.CHEP278.PROD.OUTLOOK.COM
+X-MS-Has-Attach:
+X-MS-Exchange-Organization-Network-Message-Id:
+	b222a417-eb6f-452f-48d9-08de2da2e37d
+X-MS-Exchange-Organization-SCL: 1
+X-MS-TNEF-Correlator:
+X-MS-Exchange-Organization-RecordReviewCfmType: 0
+msip_labels:
+x-ms-publictraffictype: Email
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;auth:0;dest:I;ENG:(910005)(944506478)(944626604)(920097)(425001)(930097)(140003);
+X-Microsoft-Antispam-Message-Info:
+	rdXrzx/ePobL4iFnt2msdDcSBscchKk6E326tWPNb8ZpACTlQbvan1H36Xx7CwPTI+07Z4JY6Lzf5Fv6AS9qz9O7oQKEtPM2h32fh63KNBwk4EmCf3gx4N7AvikUHLGN3Yk3qdVvZPLCvxHs/Po3QfhuqxLuK30pQrXR50DfEmRc6Pi4xVKr5BfQ2+RDqs9aD0+fcQEx+0Yp2fRt5+vGi7HdDBFV8DB8/G9xoukyx4u0jDaAA1AeRC7+gPY95VmERvrq4vQNZvijtpuI+NuCsVxeeH0QO1i+PVqwEz/AZa/O1WdXNwTt+/xls1kUOYtf3DT1LRgNT1SnWqL97M2cBXLSk3hmQQX0oNJ5AMHajoirkY0e3flNr+lIq/tmcVkdsfIYsXYNPiVTnnoP/008SpGoHabcvIF8GEbjxeUvBZCCXMB6Vdlpof6cpm2MgYupK/BbXSxhhaPumclRUnauFGNcZRRbYoq7HXD+IxpvY7wQwGg4sKCbUj+rAzTEcxe+BYuhETjPwxInFuDgq6Sy/wj2SgTjlSf2No5Pb5cBAjlSMKhq+OpJbUumOp/HwbE6wiKU4uDAcQd8CCZ/GahKi/m3xN7my3M/uFll7ZygSNQxFzwmefP7iF0Cn6ES/Glxm54TqZNRysAmqxmOUnKel11238SApEOgp/ISeEwqvCmxGHqbm6DgKxyanmooWCDaeePH5Q1UktWA+MGoIbR8Z25GGYNcv3NGZAtf8g33/eWRtbbdiBQMM7kBWXoJ9r0YHL/A3zul8DhHTSI9pUVKk5fdPFbopot3RYHEqIyd/Z3maC2tLG+rYrK6+JEcDbBRaia2CvjPTINeXlmfYMjjVQ==
+Content-Type: multipart/alternative;
+	boundary="_000_ZR2PPF36BA5837A08C21790966279D2FE41F8DFAZR2PPF36BA5837A_"
+MIME-Version: 1.0
+
+--_000_ZR2PPF36BA5837A08C21790966279D2FE41F8DFAZR2PPF36BA5837A_
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+Bonjour,
+
+Comme promis, j'=E9cris pour faire suite au projet. Il y a deux choses que =
+je peux sugg=E9rer. Elles sont relativement ind=E9pendantes; en fonction du=
+ temps qu'on a on peut mettre les deux ensemble en une troisi=E8me mais je =
+pense que ce sera d=E9j=E0 assez comme =E7a.
+
+Premi=E8rement, il y a la d=E9composition "sum of squares" (SOS) du jeu mag=
+ic square. Ce serait un analogue de la "explicit SOS decomposition" pour CH=
+SH qui est d=E9j=E0 dans mathlib, cf https://leanprover-community.github.io=
+/mathlib4_docs/Mathlib/Algebra/Star/CHSH.html#tsirelson_inequality.
+
+Cette d=E9composition SOS est annonc=E9e =E0 la Section 4.7 de la th=E8se d=
+e Mehta https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3=
+c06-4808-a685-deeda43f8fd3/content. Cette section est plus g=E9n=E9rale. Po=
+ur pouvoir la comprendre il faut savoir ce qu'est un linear system game (LC=
+S). Ceci est expliqu=E9 dans la Section 3 de https://arxiv.org/pdf/1709.092=
+67, qui fait la connection avec le Magic Square (cf. Figure 5). Comme backg=
+round plus g=E9n=E9ral sur les LCS il y a ce papier https://arxiv.org/pdf/1=
+209.2729, qui est peut-=EAtre plus facile =E0 parcourir (du moins les parti=
+es d'introduction).
+
+La deuxi=E8me partie est de prouver, en Lean, le Lemma 4.7 de la r=E9f=E9re=
+nce pr=E9c=E9dente (https://arxiv.org/pdf/1709.09267). Pour =E7a il faut d=
+=E9j=E0 comprendre la preuve. Elle ne fait qu'une page mais il y a pas mal =
+d'alg=E8bre lin=E9aire et un peu de repr=E9sentation des groupes. Je ne sai=
+s pas si tu te sentiras =E0 l'aise avec =E7a; le mieux serait que tu jettes=
+ un coup d'oeil, tu essaies une heure ou deux, et puis on en parle. Je ne c=
+onnais pas de r=E9f=E9rence suffisemment introductive pour =E7a.
+
+Voil=E0, je voulais que tu aies des r=E9f=E9rence =E0 regarder si tu as le =
+temps vers f=E9vrier. L'id=E9e c'est d'explorer un peu les maths n=E9cessai=
+res, essayer de comprendre l'=E9nonc=E9 du th=E9or=E8me que l'on veut =E9ta=
+blir, et puis doucement explorer comment le faire en Lean, en fonction de c=
+e qui existe d=E9j=E0 dans le mathlib.
+
+Thomas
+
+________________________________
+From: Sean Perazzolo <sean.perazzolo@epfl.ch>
+Sent: Monday, November 17, 2025 2:24 PM
+To: Thomas Vidick <thomas.vidick@epfl.ch>
+Subject: Re: Follow-up: Lean project for MS research
+
+Great, I will come by during your office hours, just like last week.
+
+Looking forward to it,
+Sean
+________________________________
+From: Thomas Vidick <thomas.vidick@epfl.ch>
+Sent: Monday, November 17, 2025 1:01 PM
+To: Sean Perazzolo <sean.perazzolo@epfl.ch>
+Subject: Re: Follow-up: Lean project for MS research
+
+Hi Sean,
+
+Yes, the magic square is a potential starting point. That would probably be=
+ enough for a semester project. I have a bigger goal in the background, I c=
+an tell you about that too.
+
+If you're curious, here is an example of a recent paper that was written de=
+tailing a small group's experience with formalizing a quantum information p=
+roof in Lean https://arxiv.org/abs/2510.08672. For us, the project would be=
+ smaller and we would keep a flavor of cryptography. Here is what is alread=
+y written about the CHSH game in mathlib: https://leanprover-community.gith=
+ub.io/mathlib4_docs/Mathlib/Algebra/Star/CHSH.html#CHSH_id
+
+We can talk the same time on Thursday (3pm), or Wednesday at 14h30 or Frida=
+y at 14h?
+
+Thomas
+________________________________
+From: Sean Perazzolo <sean.perazzolo@epfl.ch>
+Sent: Monday, November 17, 2025 8:00 AM
+To: Thomas Vidick <thomas.vidick@epfl.ch>
+Subject: Follow-up: Lean project for MS research
+
+Dear Professor Vidick,
+
+Thank you for meeting with us last week.
+
+The semester project on formally verifying proofs using Lean, though challe=
+nging, has definitely sparked my interest. I am particularly interested in =
+its potential to contribute to the community and to link my knowledge of qu=
+antum mechanics with computer science.
+
+From our discussion, I understood you are interested in verifying proofs in=
+ Lean that have not yet been formalized, such as the Mermin and Peres Magic=
+ Square.
+
+I have been exploring the subject the last few days and believe there is gr=
+eat potential here, possibly even for a research project for my MS in Cyber=
+security.
+
+Could we meet again this week to talk more about this idea?
+
+Best regards,
+Sean Perazzolo
+
+--_000_ZR2PPF36BA5837A08C21790966279D2FE41F8DFAZR2PPF36BA5837A_
+Content-Type: text/html; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Diso-8859-=
+1">
+<style type=3D"text/css" style=3D"display:none;"> P {margin-top:0;margin-bo=
+ttom:0;} </style>
+</head>
+<body dir=3D"ltr">
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Bonjour,</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Comme promis, j'=E9cris pour faire suite au projet. Il y a deux choses que =
+je peux sugg=E9rer. Elles sont relativement ind=E9pendantes; en fonction du=
+ temps qu'on a on peut mettre les deux ensemble en une troisi=E8me mais je =
+pense que ce sera d=E9j=E0 assez comme =E7a.&nbsp;</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Premi=E8rement, il y a la d=E9composition &quot;sum of squares&quot; (SOS) =
+du jeu magic square. Ce serait un analogue de la &quot;explicit SOS decompo=
+sition&quot; pour CHSH qui est d=E9j=E0 dans mathlib, cf
+<a class=3D"OWAAutoLink" id=3D"OWAf8d01d4d-e87f-1203-0c9c-0dce84bb284c" hre=
+f=3D"https://leanprover-community.github.io/mathlib4_docs/Mathlib/Algebra/S=
+tar/CHSH.html#tsirelson_inequality">
+https://leanprover-community.github.io/mathlib4_docs/Mathlib/Algebra/Star/C=
+HSH.html#tsirelson_inequality</a>.&nbsp;</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Cette d=E9composition SOS est annonc=E9e =E0 la Section 4.7 de la th=E8se d=
+e Mehta <a class=3D"OWAAutoLink" id=3D"OWA9f756120-a60d-7dfa-c9e5-30dea6147=
+77c" href=3D"https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8=
+f11-3c06-4808-a685-deeda43f8fd3/content">
+https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3c06-4808=
+-a685-deeda43f8fd3/content</a>. Cette section est plus g=E9n=E9rale. Pour p=
+ouvoir la comprendre il faut savoir ce qu'est un linear system game (LCS). =
+Ceci est expliqu=E9 dans la Section 3
+ de <a class=3D"OWAAutoLink" id=3D"OWAa1b775b0-d303-5f00-6146-0552abe26720"=
+ href=3D"https://arxiv.org/pdf/1709.09267">
+https://arxiv.org/pdf/1709.09267</a>, qui fait la connection avec le Magic =
+Square (cf. Figure 5). Comme background plus g=E9n=E9ral sur les LCS il y a=
+ ce papier
+<a class=3D"OWAAutoLink" id=3D"OWA6a9362ab-c2c3-fec1-5546-69759761afa5" hre=
+f=3D"https://arxiv.org/pdf/1209.2729">
+https://arxiv.org/pdf/1209.2729</a>, qui est peut-=EAtre plus facile =E0 pa=
+rcourir (du moins les parties d'introduction).&nbsp;</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+La deuxi=E8me partie est de prouver, en Lean, le Lemma 4.7 de la r=E9f=E9re=
+nce pr=E9c=E9dente (<a class=3D"OWAAutoLink" id=3D"OWAaf737668-f76b-f068-94=
+d9-a637beed64bf" href=3D"https://arxiv.org/pdf/1709.09267">https://arxiv.or=
+g/pdf/1709.09267</a>). Pour =E7a il faut d=E9j=E0 comprendre
+ la preuve. Elle ne fait qu'une page mais il y a pas mal d'alg=E8bre lin=E9=
+aire et un peu de repr=E9sentation des groupes. Je ne sais pas si tu te sen=
+tiras =E0 l'aise avec =E7a; le mieux serait que tu jettes un coup d'oeil, t=
+u essaies une heure ou deux, et puis on en
+ parle. Je ne connais pas de r=E9f=E9rence suffisemment introductive pour =
+=E7a.</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Voil=E0, je voulais que tu aies des r=E9f=E9rence =E0 regarder si tu as le =
+temps vers f=E9vrier. L'id=E9e c'est d'explorer un peu les maths n=E9cessai=
+res, essayer de comprendre l'=E9nonc=E9 du th=E9or=E8me que l'on veut =E9ta=
+blir, et puis doucement explorer comment le faire en Lean,
+ en fonction de ce qui existe d=E9j=E0 dans le mathlib.&nbsp;</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+<br>
+</div>
+<div style=3D"font-family: Aptos, &quot;Aptos_EmbeddedFont&quot;, &quot;Apt=
+os_MSFontService&quot;, Calibri, Helvetica, sans-serif; font-size: 12pt; co=
+lor: rgb(0, 0, 0);" class=3D"elementToProof">
+Thomas</div>
+<div style=3D"font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, =
+Calibri, Helvetica, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" clas=
+s=3D"elementToProof">
+<br>
+</div>
+<div id=3D"appendonsend"></div>
+<hr style=3D"display:inline-block;width:98%" tabindex=3D"-1">
+<div id=3D"divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" st=
+yle=3D"font-size:11pt" color=3D"#000000"><b>From:</b> Sean Perazzolo &lt;se=
+an.perazzolo@epfl.ch&gt;<br>
+<b>Sent:</b> Monday, November 17, 2025 2:24 PM<br>
+<b>To:</b> Thomas Vidick &lt;thomas.vidick@epfl.ch&gt;<br>
+<b>Subject:</b> Re: Follow-up: Lean project for MS research</font>
+<div>&nbsp;</div>
+</div>
+<style type=3D"text/css" style=3D"display:none">
+<!--
+p
+	{margin-top:0;
+	margin-bottom:0}
+-->
+</style>
+<div dir=3D"ltr">
+<div data-darkreader-inline-color=3D"" class=3D"x_elementToProof" style=3D"=
+font-family:Aptos,Aptos_EmbeddedFont,Aptos_MSFontService,Calibri,Helvetica,=
+sans-serif; font-size:12pt; color:rgb(0,0,0)">
+Great, I will come by during your office hours, just like last week.<br>
+<br>
+Looking forward to it,<br>
+Sean&nbsp;</div>
+<div id=3D"x_appendonsend"></div>
+<hr tabindex=3D"-1" style=3D"display:inline-block; width:98%">
+<div id=3D"x_divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" =
+color=3D"#000000" style=3D"font-size:11pt"><b>From:</b> Thomas Vidick &lt;t=
+homas.vidick@epfl.ch&gt;<br>
+<b>Sent:</b> Monday, November 17, 2025 1:01 PM<br>
+<b>To:</b> Sean Perazzolo &lt;sean.perazzolo@epfl.ch&gt;<br>
+<b>Subject:</b> Re: Follow-up: Lean project for MS research</font>
+<div>&nbsp;</div>
+</div>
+<style type=3D"text/css" style=3D"display:none">
+<!--
+p
+	{margin-top:0;
+	margin-bottom:0}
+-->
+</style>
+<div dir=3D"ltr">
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+Hi Sean,</div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+<br>
+Yes, the magic square is a potential starting point. That would probably be=
+ enough for a semester project. I have a bigger goal in the background, I c=
+an tell you about that too.&nbsp;</div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+If you're curious, here is an example of a recent paper that was written de=
+tailing a small group's experience with formalizing a quantum information p=
+roof in Lean
+<a href=3D"https://arxiv.org/abs/2510.08672">https://arxiv.org/abs/2510.086=
+72</a>. For us, the project would be smaller and we would keep a flavor of =
+cryptography. Here is what is already written about the CHSH game in mathli=
+b:
+<a href=3D"https://leanprover-community.github.io/mathlib4_docs/Mathlib/Alg=
+ebra/Star/CHSH.html#CHSH_id">
+https://leanprover-community.github.io/mathlib4_docs/Mathlib/Algebra/Star/C=
+HSH.html#CHSH_id</a></div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+We can talk the same time on Thursday (3pm), or Wednesday at 14h30 or Frida=
+y at 14h?</div>
+<div class=3D"x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedded=
+Font,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; colo=
+r:rgb(0,0,0)">
+<br>
+Thomas</div>
+<div id=3D"x_x_appendonsend"></div>
+<hr tabindex=3D"-1" style=3D"display:inline-block; width:98%">
+<div id=3D"x_x_divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif=
+" color=3D"#000000" style=3D"font-size:11pt"><b>From:</b> Sean Perazzolo &l=
+t;sean.perazzolo@epfl.ch&gt;<br>
+<b>Sent:</b> Monday, November 17, 2025 8:00 AM<br>
+<b>To:</b> Thomas Vidick &lt;thomas.vidick@epfl.ch&gt;<br>
+<b>Subject:</b> Follow-up: Lean project for MS research</font>
+<div>&nbsp;</div>
+</div>
+<div><span style=3D"font-family:Aptos,Aptos_EmbeddedFont,Aptos_MSFontServic=
+e,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)">Dear Prof=
+essor Vidick,
+</span>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+Thank you for meeting with us last week.</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+The semester project on formally verifying proofs using Lean, though challe=
+nging, has definitely sparked my interest. I am particularly interested in =
+its potential to contribute to the community and to link my knowledge of qu=
+antum mechanics with computer science.</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+From our discussion, I understood you are interested in verifying proofs in=
+ Lean that have not yet been formalized, such as the Mermin and Peres Magic=
+ Square.</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+I have been exploring the subject the last few days and believe there is gr=
+eat potential here, possibly even for a research project for my MS in Cyber=
+security.</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+Could we meet again this week to talk more about this idea?</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+<br>
+</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+Best regards,</div>
+<div class=3D"x_x_x_elementToProof" style=3D"font-family:Aptos,Aptos_Embedd=
+edFont,Aptos_MSFontService,Calibri,Helvetica,sans-serif; font-size:12pt; co=
+lor:rgb(0,0,0)">
+Sean Perazzolo</div>
+</div>
+</div>
+</div>
+</body>
+</html>
+
+--_000_ZR2PPF36BA5837A08C21790966279D2FE41F8DFAZR2PPF36BA5837A_--
