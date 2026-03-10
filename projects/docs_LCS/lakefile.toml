@@ -1,0 +1,22 @@
+name = "docs_LCS"
+version = "0.1.0"
+defaultTargets = ["docs_lcs"]
+
+[[lean_lib]]
+name = "DocsLCS"
+
+[[lean_exe]]
+name = "docs_lcs"
+root = "Main"
+
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso.git"
+rev = "v4.28.0"
+
+[[lean_exe]]
+name = "generate-blog"
+root = "Main"
+
+

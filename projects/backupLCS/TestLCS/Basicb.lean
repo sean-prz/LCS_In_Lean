@@ -5,8 +5,8 @@ import Mathlib.Data.Fintype.Pi
 open scoped BigOperators
 
 -- From the docs : A *-ring R is a non-unital, non-associative (semi)ring
--- with an involutive star operation 
--- which is additive which makes R with its multiplicative structure into a *-multiplication. 
+-- with an involutive star operation
+-- which is additive which makes R with its multiplicative structure into a *-multiplication.
 variable {R : Type*} [Ring R] [StarRing R]
 
 
@@ -15,13 +15,12 @@ variable {R : Type*} [Ring R] [StarRing R]
    2. Each element is idempotent (applying it twice is the same as applying it once)
    3. Distinct elements are orthogonal (applying one after the other gives 0)
    4. Each element is self-adjoint (Hermitian condition)
--/ 
+-/
 structure IsMeasurementSystem {I : Type*} [Fintype I] (f : I → R) : Prop where
-  sum_one      : ∑ x, f x = 1 
-  idempotent   : ∀ x, f x * f x = f x 
-  orthogonal   : ∀ x y, x ≠ y → f x * f y = 0 
-  self_adjoint : ∀ x, star (f x) = f x 
-
+  sum_one      : ∑ x, f x = 1
+  idempotent   : ∀ x, f x * f x = f x
+  orthogonal   : ∀ x y, x ≠ y → f x * f y = 0
+  self_adjoint : ∀ x, star (f x) = f x
 
 
 /-- a function that assigns to each variable in V i a value in {0,1}. -/
@@ -36,15 +35,15 @@ abbrev Assignment {r s : ℕ} (V : Fin r → Finset (Fin s)) (i : Fin r) : Type 
     5. For each i, j, and each possible assignment α and β, E_(i,α) commutes with F_(j,β).
 -/
 structure LCSStrategy (R : Type*) [Ring R] [StarRing R] {r s : ℕ} (V : Fin r → Finset (Fin s)) where
-  -- For each equation i in [r], 
+  -- For each equation i in [r],
   -- and each possible combined, simultaneous assignment of values to ALL the variables in V i,
   -- we have an element of R.
   -- (i in [r], α : Assignment V i) ↦ E_(i,α) in R
-  E : ∀ i, (Assignment V i → R) 
+  E : ∀ i, (Assignment V i → R)
   F : Fin s → (Fin 2 → R)
-  alice_ms : ∀ i, IsMeasurementSystem (E i) 
-  bob_ms   : ∀ j, IsMeasurementSystem (F j) 
-  commute  : ∀ i j α β, E i α * F j β = F j β * E i α 
+  alice_ms : ∀ i, IsMeasurementSystem (E i)
+  bob_ms   : ∀ j, IsMeasurementSystem (F j)
+  commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 
 
 
@@ -76,6 +75,6 @@ noncomputable def Alice_A {R : Type*} [Ring R] [StarRing R] {r s : ℕ} {V : Fin
 
 
 lemma alice_observables_commute {R : Type*} [Ring R] [StarRing R] {r s : ℕ} {V : Fin r → Finset (Fin s)}
-  (strat : LCSStrategy R V) (i : Fin r) (j j' : V i) : 
+  (strat : LCSStrategy R V) (i : Fin r) (j j' : V i) :
   (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by
-  sorry -- To be proven 
+  sorry -- To be proven

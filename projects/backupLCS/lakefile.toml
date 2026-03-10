@@ -1,7 +1,7 @@
 name = "testLCS"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["TestLCS"]
+defaultTargets = ["TestLCS", "generate-blog"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -16,3 +16,13 @@ rev = "v4.29.0-rc4"
 
 [[lean_lib]]
 name = "TestLCS"
+
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso.git"
+rev = "v4.29.0-rc4"
+
+[[lean_exe]]
+name = "generate-blog"
+root = "TestLCS"
