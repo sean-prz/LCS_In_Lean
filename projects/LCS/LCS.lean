@@ -56,91 +56,17 @@ structure LCSStrategy (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 
 
-
-
-def V_merinPeres : Fin 6 → Finset (Fin 9) := fun i =>
-  match i with
-  | 0 => {0, 1, 2}
-  | 1 => {3, 4, 5}
-  | 2 => {6, 7, 8}
-  | 3 => {0, 3, 6}
-  | 4 => {1, 4, 7}
-  | 5 => {2, 5, 8}
-
-noncomputable section
-
-open scoped Matrix
-open Kronecker
-
-
-
--- Base Pauli Matrices
-def I2 : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, 1]
-def X : Matrix (Fin 2) (Fin 2) ℂ := !![0, 1; 1, 0]
-def Y : Matrix (Fin 2) (Fin 2) ℂ := !![0, -Complex.I; Complex.I, 0]
-def Z : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, -1]
-
-
-def toFin4 {R : Type*} (M : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) R) : Matrix (Fin 4) (Fin 4) R :=
-  Matrix.reindex finProdFinEquiv finProdFinEquiv M
-
--- The Mermin-Peres Grid
-def MP_observables : Fin 9 → Matrix (Fin 4) (Fin 4) ℂ
-| 0 => toFin4 (X  ⊗ₖ I2)
-| 1 => toFin4 (I2 ⊗ₖ X)
-| 2 => toFin4 (X  ⊗ₖ X)
-| 3 => toFin4 (Y  ⊗ₖ I2)
-| 4 => toFin4 (I2 ⊗ₖ Y)
-| 5 => toFin4 (Y  ⊗ₖ Y)
-| 6 => toFin4 (X  ⊗ₖ Y)
-| 7 => toFin4 (Y  ⊗ₖ X)
-| 8 => toFin4 (Z  ⊗ₖ Z)
-end
-
-
-noncomputable def ObservableToProjector {R : Type*} [Ring R] [Algebra ℂ R]
-  (O : R) (a : Fin 2) : R := 
-  let sign : ℂ := if a = 0 then 1 else -1
-  (1/2 : ℂ) • (1 + sign • O)
-
-
-#check (inferInstance : StarRing ℂ)
-#check (inferInstance : Fintype (Fin 4))
-#check (inferInstance : DecidableEq (Fin 4))
-set_option trace.Meta.synthInstance true in
-noncomputable def Strat_merinPeres : LCSStrategy (Matrix (Fin 4) (Fin 4) ℂ) V_merinPeres := {
-  E := fun i assignment => 
-    (V_merinPeres i).attach.prod (fun j => 
-      ObservableToProjector (MP_observables j.val) (assignment j)
-    ),
-  F := fun j outcome => ObservableToProjector (MP_observables j) outcome
-  alice_ms := sorry, -- To be proven
-  bob_ms   := sorry, -- To be proven
-  commute  := sorry, -- To be proven
-} 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-noncomputable def Alice_A {R : Type*} [Ring R] [StarRing R] {r s : ℕ} {V : Fin r → Finset (Fin s)}
+noncomputable def Alice_A {r s : ℕ} {V : Fin r → Finset (Fin s)}
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
   (strat : LCSStrategy R V) (i : Fin r) (j : V i) : R :=
   (∑ x ∈ Finset.univ.filter (fun (x : Assignment V i) => x j = 0), strat.E i x) -
   (∑ x ∈ Finset.univ.filter (fun (x : Assignment V i) => x j = 1), strat.E i x)
 
 
 
-/- lemma alice_observables_commute {R : Type*} [Ring R] [StarRing R] {r s : ℕ} {V : Fin r → Finset (Fin s)} -/
-/-   (strat : LCSStrategy R V) (i : Fin r) (j j' : V i) : -/
-/-   (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by -/
-/-   sorry -- To be proven -/
+lemma alice_observables_commute
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {r s : ℕ} {V : Fin r → Finset (Fin s)}
+  (strat : LCSStrategy R V) (i : Fin r) (j j' : V i) :
+  (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by
+    sorry
