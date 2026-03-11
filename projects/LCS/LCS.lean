@@ -1,7 +1,19 @@
 -- ANCHOR: import
+
 import Mathlib.Algebra.Star.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.Algebra.Algebra.Basic        -- For the [Algebra ℂ R] typeclass
+import Mathlib.Algebra.Module.Basic         -- For the scalar action (•)
 import Mathlib.Data.Fintype.Pi
+import Mathlib.Data.Finset.Sum
+import Mathlib.Data.Complex.Basic           -- For the Complex numbers (ℂ)
+import Mathlib.Data.Matrix.Basic
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.LinearAlgebra.Matrix.Notation
+import Mathlib.LinearAlgebra.Matrix.Kronecker
+import Mathlib.Algebra.Star.Module
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.LinearAlgebra.Matrix.ConjTranspose
 
 open scoped BigOperators
 
@@ -10,7 +22,6 @@ open scoped BigOperators
 -- which is additive which makes R with its multiplicative structure into a *-multiplication.
 variable {R : Type*} [Ring R] [StarRing R]
 -- ANCHOR_END: import
-
 -- ANCHOR: IsMeasurementSystem
 structure IsMeasurementSystem {I : Type*} [Fintype I] 
   (f : I → R) : Prop where
@@ -32,7 +43,8 @@ abbrev Assignment {r s : ℕ} (V : Fin r → Finset (Fin s)) (i : Fin r) : Type 
     4. For each variable j, the family of elements given by F j forms a measurement system.
     5. For each i, j, and each possible assignment α and β, E_(i,α) commutes with F_(j,β).
 -/
-structure LCSStrategy (R : Type*) [Ring R] [StarRing R] {r s : ℕ} (V : Fin r → Finset (Fin s)) where
+structure LCSStrategy (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
+{r s : ℕ} (V : Fin r → Finset (Fin s)) where
   -- For each equation i in [r],
   -- and each possible combined, simultaneous assignment of values to ALL the variables in V i,
   -- we have an element of R.
@@ -46,10 +58,66 @@ structure LCSStrategy (R : Type*) [Ring R] [StarRing R] {r s : ℕ} (V : Fin r �
 
 
 
+def V_merinPeres : Fin 6 → Finset (Fin 9) := fun i =>
+  match i with
+  | 0 => {0, 1, 2}
+  | 1 => {3, 4, 5}
+  | 2 => {6, 7, 8}
+  | 3 => {0, 3, 6}
+  | 4 => {1, 4, 7}
+  | 5 => {2, 5, 8}
+
+noncomputable section
+
+open scoped Matrix
+open Kronecker
 
 
 
+-- Base Pauli Matrices
+def I2 : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, 1]
+def X : Matrix (Fin 2) (Fin 2) ℂ := !![0, 1; 1, 0]
+def Y : Matrix (Fin 2) (Fin 2) ℂ := !![0, -Complex.I; Complex.I, 0]
+def Z : Matrix (Fin 2) (Fin 2) ℂ := !![1, 0; 0, -1]
 
+
+def toFin4 {R : Type*} (M : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) R) : Matrix (Fin 4) (Fin 4) R :=
+  Matrix.reindex finProdFinEquiv finProdFinEquiv M
+
+-- The Mermin-Peres Grid
+def MP_observables : Fin 9 → Matrix (Fin 4) (Fin 4) ℂ
+| 0 => toFin4 (X  ⊗ₖ I2)
+| 1 => toFin4 (I2 ⊗ₖ X)
+| 2 => toFin4 (X  ⊗ₖ X)
+| 3 => toFin4 (Y  ⊗ₖ I2)
+| 4 => toFin4 (I2 ⊗ₖ Y)
+| 5 => toFin4 (Y  ⊗ₖ Y)
+| 6 => toFin4 (X  ⊗ₖ Y)
+| 7 => toFin4 (Y  ⊗ₖ X)
+| 8 => toFin4 (Z  ⊗ₖ Z)
+end
+
+
+noncomputable def ObservableToProjector {R : Type*} [Ring R] [Algebra ℂ R]
+  (O : R) (a : Fin 2) : R := 
+  let sign : ℂ := if a = 0 then 1 else -1
+  (1/2 : ℂ) • (1 + sign • O)
+
+
+#check (inferInstance : StarRing ℂ)
+#check (inferInstance : Fintype (Fin 4))
+#check (inferInstance : DecidableEq (Fin 4))
+set_option trace.Meta.synthInstance true in
+noncomputable def Strat_merinPeres : LCSStrategy (Matrix (Fin 4) (Fin 4) ℂ) V_merinPeres := {
+  E := fun i assignment => 
+    (V_merinPeres i).attach.prod (fun j => 
+      ObservableToProjector (MP_observables j.val) (assignment j)
+    ),
+  F := fun j outcome => ObservableToProjector (MP_observables j) outcome
+  alice_ms := sorry, -- To be proven
+  bob_ms   := sorry, -- To be proven
+  commute  := sorry, -- To be proven
+} 
 
 
 
