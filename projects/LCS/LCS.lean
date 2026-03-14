@@ -17,7 +17,9 @@ open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]
 -- ANCHOR: IsMeasurementSystem
-structure IsMeasurementSystem {I : Type*} [Fintype I] (f : I → R) : Prop where
+structure IsMeasurementSystem
+  {I : Type*} [Fintype I]
+  (f : I → R) : Prop where
   sum_one      : ∑ x, f x = 1
   idempotent   : ∀ x, f x * f x = f x
   orthogonal   : ∀ x y, x ≠ y → f x * f y = 0
@@ -43,8 +45,9 @@ structure LCSGame (G : LCSLayout) where
 -- ANCHOR_END: LCSGame
 
 -- ANCHOR: LCSStrategy
-structure LCSStrategy (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
-(G : LCSLayout) where
+structure LCSStrategy
+  (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
+  (G : LCSLayout) where
   E : ∀ i, (Assignment G i → R)
   F : Fin G.s → (Fin 2 → R)
   alice_ms : ∀ i, IsMeasurementSystem (E i)
@@ -52,23 +55,31 @@ structure LCSStrategy (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 -- ANCHOR_END: LCSStrategy
 
-
-noncomputable def Alice_A {G : LCSLayout}
+-- ANCHOR: Alice_A
+noncomputable def Alice_A
+  {G : LCSLayout}
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
   (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 0), strat.E i x) -
   (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 1), strat.E i x)
+-- ANCHOR_END: Alice_A
 
-
-def Bob_B {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+-- ANCHOR: Bob_B
+def Bob_B
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G : LCSLayout}
+  (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   strat.F j 0 - strat.F j 1
+-- ANCHOR_END: Bob_B
 
 
-
-def winning_assignments {G : LCSLayout} (game : LCSGame G) (i : Fin G.r) : 
+-- ANCHOR: winning_assignments
+def winning_assignments
+  {G : LCSLayout}
+  (game : LCSGame G) (i : Fin G.r) : 
   Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i , (α j : ZMod 2)) = game.b i)
+-- ANCHOR_END: winning_assignments
 
 
 
@@ -107,17 +118,12 @@ lemma alice_observables_commute
   {G : LCSLayout}
   (strat : LCSStrategy R G) (i : Fin G.r) (j j' : G.V i) :
   (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by
-  -- Expand Alice_A using the definition
   unfold Alice_A
-  -- Let A = sum where j = 0, B = sum where j = 1
-  -- Let C = sum where j' = 0, D = sum where j' = 1
   let A := ∑ x ∈ Finset.univ.filter (fun x => x j = 0), strat.E i x -- x_j = 0
   let B := ∑ x ∈ Finset.univ.filter (fun x => x j = 1), strat.E i x -- x_j = 1
   let C := ∑ x ∈ Finset.univ.filter (fun x => x j' = 0), strat.E i x -- x_j' = 0
   let D := ∑ x ∈ Finset.univ.filter (fun x => x j' = 1), strat.E i x -- x_j' = 1
-   
   change (A - B) * (C - D) = (C - D) * (A - B)
-  -- Show that A and C commute, etc. using Lemma 2
   have h_AC : A * C = C * A := by
     apply sum_of_commuting_projectors_commute
     exact strat.alice_ms i
@@ -130,7 +136,6 @@ lemma alice_observables_commute
   have h_BD : B * D = D * B := by
     apply sum_of_commuting_projectors_commute
     exact strat.alice_ms i
-  
   simp [mul_sub, sub_mul]
   simp [h_AC, h_AD, h_BC, h_BD]
   abel
