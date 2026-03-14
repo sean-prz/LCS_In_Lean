@@ -60,8 +60,8 @@ noncomputable def Alice_A {G : LCSLayout}
   (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 1), strat.E i x)
 
 
-def Bob_B  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G: LCSLayout} (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+def Bob_B {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G : LCSLayout} (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   strat.F j 0 - strat.F j 1
 
 
@@ -80,19 +80,9 @@ lemma measurement_system_projectors_commute
   (x y : I) : f x * f y = f y * f x := by
   by_cases hxy : x = y
   · rw [hxy]
-  · -- When x ≠ y, use orthogonality and self-adjoint property
-    have h_orth : f x * f y = 0 := h.orthogonal x y hxy
-    have h_self_x : star (f x) = f x := h.self_adjoint x
-    have h_self_y : star (f y) = f y := h.self_adjoint y
-    -- Since f x and f y are self-adjoint, (f x * f y)^* = f y * f x
-    -- But f x * f y = 0 (orthogonal), so f y * f x = 0
-    have h_eq : f y * f x = star (f x * f y) := by 
-      rw [star_mul, h_self_y, h_self_x]
-    rw [h_orth] at h_eq
-    rw [h_eq, star_zero]
-    -- Now we have f x * f y = 0 and f y * f x = 0, so they are equal
-    rw [h_orth]
-    
+  · have h_orth_xy : f x * f y = 0 := h.orthogonal x y hxy
+    have h_orth_yx : f y * f x = 0 := h.orthogonal y x (Ne.symm hxy)
+    rw [h_orth_xy, h_orth_yx]    
 
 
 -- Lemma 2: Sums of commuting projectors commute
@@ -103,12 +93,8 @@ lemma sum_of_commuting_projectors_commute
   (∑ x ∈ S, f x) * (∑ y ∈ T, f y) = (∑ y ∈ T, f y) * (∑ x ∈ S, f x) := by
   -- Use distributivity to expand both sides
   rw [Finset.sum_mul, Finset.mul_sum]
-  -- Now we need to show: ∑ x ∈ S, (f x * ∑ y ∈ T, f y) = ∑ x ∈ S, ((∑ y ∈ T, f y) * f x)
-  -- This reduces to showing f x * ∑ y ∈ T, f y = (∑ y ∈ T, f y) * f x for each x
   apply Finset.sum_congr rfl
   intro x hx
-  -- Now we need to show: f x * ∑ y ∈ T, f y = (∑ y ∈ T, f y) * f x
-  -- We can prove this by showing f x commutes with each f y
   rw [Finset.mul_sum, Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro y hy
@@ -122,14 +108,15 @@ lemma alice_observables_commute
   (strat : LCSStrategy R G) (i : Fin G.r) (j j' : G.V i) :
   (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by
   -- Expand Alice_A using the definition
-  rw [Alice_A, Alice_A]
+  unfold Alice_A
   -- Let A = sum where j = 0, B = sum where j = 1
   -- Let C = sum where j' = 0, D = sum where j' = 1
   let A := ∑ x ∈ Finset.univ.filter (fun x => x j = 0), strat.E i x -- x_j = 0
   let B := ∑ x ∈ Finset.univ.filter (fun x => x j = 1), strat.E i x -- x_j = 1
   let C := ∑ x ∈ Finset.univ.filter (fun x => x j' = 0), strat.E i x -- x_j' = 0
   let D := ∑ x ∈ Finset.univ.filter (fun x => x j' = 1), strat.E i x -- x_j' = 1
-  
+   
+  change (A - B) * (C - D) = (C - D) * (A - B)
   -- Show that A and C commute, etc. using Lemma 2
   have h_AC : A * C = C * A := by
     apply sum_of_commuting_projectors_commute
@@ -144,9 +131,6 @@ lemma alice_observables_commute
     apply sum_of_commuting_projectors_commute
     exact strat.alice_ms i
   
-  -- Now compute both sides
-  change (A - B) * (C - D) = (C - D) * (A - B)
   simp [mul_sub, sub_mul]
   simp [h_AC, h_AD, h_BC, h_BD]
   abel
- 
