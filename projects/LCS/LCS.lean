@@ -1,4 +1,3 @@
--- ANCHOR: imported
 import Mathlib.Algebra.Star.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.Algebra.Basic        -- For the [Algebra ℂ R] typeclass
@@ -13,14 +12,10 @@ import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.Algebra.Star.Module
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
--- ANCHOR_END: imported
+
 open scoped BigOperators
 
--- From the docs : A *-ring R is a non-unital, non-associative (semi)ring
--- with an involutive star operation
--- which is additive which makes R with its multiplicative structure into a *-multiplication.
 variable {R : Type*} [Ring R] [StarRing R]
--- ANCHOR_END: import
 -- ANCHOR: IsMeasurementSystem
 structure IsMeasurementSystem {I : Type*} [Fintype I] (f : I → R) : Prop where
   sum_one      : ∑ x, f x = 1
@@ -29,54 +24,51 @@ structure IsMeasurementSystem {I : Type*} [Fintype I] (f : I → R) : Prop where
   self_adjoint : ∀ x, star (f x) = f x
 -- ANCHOR_END: IsMeasurementSystem
 
+-- ANCHOR: LCSLayout
+structure LCSLayout where
+  r : ℕ
+  s : ℕ
+  V : Fin r → Finset (Fin s)
+-- ANCHOR_END: LCSLayout
 
-/-- Assignemnt is an abreviation/aliases for the type, (function type). the type of functions that represents all possible assignments of values to the variables in V i. A type that represents all possible assignments of values to the variables in V i. -/ 
 -- ANCHOR: Assignment
-abbrev Assignment {r s : ℕ} (V : Fin r → Finset (Fin s)) (i : Fin r) : Type :=
-  (V i) → Fin 2
+abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
+  (G.V i) → Fin 2
 -- ANCHOR_END: Assignment
 
-/-- A strategy for an LCS game consists of:
-    1. For each question i, and each possible assignment of values to the variables in V i, we have an element of R (this is the E function).
-    2. For each variable j, and each possible outcome (0 or 1), we have an element of R (this is the F function).
-    3. For each question i, the family of elements given by E i forms a measurement system.
-    4. For each variable j, the family of elements given by F j forms a measurement system.
-    5. For each i, j, and each possible assignment α and β, E_(i,α) commutes with F_(j,β).
--/
+
+-- ANCHOR: LCSGame
+structure LCSGame (G : LCSLayout) where
+  b : Fin G.r → ZMod 2
+-- ANCHOR_END: LCSGame
+
+-- ANCHOR: LCSStrategy
 structure LCSStrategy (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
-{r s : ℕ} (V : Fin r → Finset (Fin s)) where
-  -- For each equation i in [r],
-  -- and each possible combined, simultaneous assignment of values to ALL the variables in V i,
-  -- we have an element of R.
-  -- (i in [r], α : Assignment V i) ↦ E_(i,α) in R
-  E : ∀ i, (Assignment V i → R)
-  F : Fin s → (Fin 2 → R)
+(G : LCSLayout) where
+  E : ∀ i, (Assignment G i → R)
+  F : Fin G.s → (Fin 2 → R)
   alice_ms : ∀ i, IsMeasurementSystem (E i)
   bob_ms   : ∀ j, IsMeasurementSystem (F j)
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
+-- ANCHOR_END: LCSStrategy
 
 
-noncomputable def Alice_A {r s : ℕ} {V : Fin r → Finset (Fin s)}
+noncomputable def Alice_A {G : LCSLayout}
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  (strat : LCSStrategy R V) (i : Fin r) (j : V i) : R :=
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment V i) => x j = 0), strat.E i x) -
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment V i) => x j = 1), strat.E i x)
+  (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
+  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 0), strat.E i x) -
+  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 1), strat.E i x)
 
 
-def Bob_B {r s : ℕ} {V : Fin r → Finset (Fin s)}
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  (strat : LCSStrategy R V) (j : Fin s) : R :=
+def Bob_B  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G: LCSLayout} (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   strat.F j 0 - strat.F j 1
 
 
 
-structure LCSGame (r s : ℕ) where
-  V : Fin r → Finset (Fin s)
-  b : Fin r → ZMod 2  -- Target parity bit
-
-def winning_assignments {r s : ℕ} (game : LCSGame r s) (i : Fin r) : 
-  Finset (Assignment game.V i) :=
-  Finset.univ.filter (fun α => (∑ j, (α j : ZMod 2)) = game.b i)
+def winning_assignments {G : LCSLayout} (game : LCSGame G) (i : Fin G.r) : 
+  Finset (Assignment G i) :=
+  Finset.univ.filter (fun α => (∑ j : G.V i , (α j : ZMod 2)) = game.b i)
 
 
 
@@ -126,8 +118,8 @@ lemma sum_of_commuting_projectors_commute
 -- Main lemma: Alice_A observables commute
 lemma alice_observables_commute
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {r s : ℕ} {V : Fin r → Finset (Fin s)}
-  (strat : LCSStrategy R V) (i : Fin r) (j j' : V i) :
+  {G : LCSLayout}
+  (strat : LCSStrategy R G) (i : Fin G.r) (j j' : G.V i) :
   (Alice_A strat i j) * (Alice_A strat i j') = (Alice_A strat i j') * (Alice_A strat i j) := by
   -- Expand Alice_A using the definition
   rw [Alice_A, Alice_A]
