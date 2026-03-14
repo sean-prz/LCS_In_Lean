@@ -1,5 +1,4 @@
--- ANCHOR: import
-
+-- ANCHOR: imported
 import Mathlib.Algebra.Star.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.Algebra.Basic        -- For the [Algebra ℂ R] typeclass
@@ -14,7 +13,7 @@ import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.Algebra.Star.Module
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
-
+-- ANCHOR_END: imported
 open scoped BigOperators
 
 -- From the docs : A *-ring R is a non-unital, non-associative (semi)ring
@@ -32,8 +31,10 @@ structure IsMeasurementSystem {I : Type*} [Fintype I] (f : I → R) : Prop where
 
 
 /-- Assignemnt is an abreviation/aliases for the type, (function type). the type of functions that represents all possible assignments of values to the variables in V i. A type that represents all possible assignments of values to the variables in V i. -/ 
+-- ANCHOR: Assignment
 abbrev Assignment {r s : ℕ} (V : Fin r → Finset (Fin s)) (i : Fin r) : Type :=
   (V i) → Fin 2
+-- ANCHOR_END: Assignment
 
 /-- A strategy for an LCS game consists of:
     1. For each question i, and each possible assignment of values to the variables in V i, we have an element of R (this is the E function).
