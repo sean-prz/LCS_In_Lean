@@ -53,11 +53,11 @@
         "shortTitle": null,
         "number": "1"}]},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
-   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Assignements":
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Assignments":
    [{"id":
-     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Assignements",
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Assignments",
      "data":
-     {"title": "Assignements",
+     {"title": "Assignments",
       "shortTitle": null,
       "sectionNum": "3.2.",
       "context":
@@ -67,7 +67,7 @@
        {"title": "Formalising Linear Constraint System Games",
         "shortTitle": null,
         "number": "3"},
-       {"title": "Assignements", "shortTitle": null, "number": "2"}]},
+       {"title": "Assignments", "shortTitle": null, "number": "2"}]},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Alice-and-Bob___s-Observables--Bob___s-observable":
    [{"id":
@@ -415,7 +415,7 @@
        "context":
        ["Formalisation of Linear Constraints Systems games in Lean4",
         "Formalising Linear Constraint System Games",
-        "Assignements"]}},
+        "Assignments"]}},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "Alice_A":
    [{"id": "Alice_A",
