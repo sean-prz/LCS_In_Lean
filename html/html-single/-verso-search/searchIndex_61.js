@@ -1,0 +1,1 @@
+window.docContents[61].resolve({"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4":{"contents":"\n\n\n\n\n\n","context":"","header":"Formalisation of Linear Constraints Systems games in Lean4","id":"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4"}});

@@ -1,0 +1,1 @@
+window.docContents[202].resolve({"/Introduction/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction":{"contents":"Does this go into a new page ???\n\n","context":"Formalisation of Linear Constraints Systems games in Lean4","header":"1. Introduction","id":"/Introduction/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction"}});
