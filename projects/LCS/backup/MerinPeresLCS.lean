@@ -73,8 +73,14 @@ noncomputable def Strat_merinPeres : LCSStrategy
    mat4 magic_square_layout := 
   {
   F := fun j outcome => ObservableToProjector (MP_observables j) outcome
-  E := fun i assignement => 
-    Π j ∈ magic_square_layout.V i, ObservableToProjector (MP_observables j) (assignement j)
+  E := fun i assignement =>
+    let V_i : Finset (Fin 9) := magic_square_layout.V i
+    V_i.attach.noncommProd 
+        (fun j_idx => 
+          let obs := MP_observables j_idx
+          let val := assignement j_idx
+          ObservableToProjector obs val)
+        (by sorry)
   alice_ms := sorry-- To be proven
   bob_ms   := sorry -- To be proven
   commute  := sorry -- To be proven
