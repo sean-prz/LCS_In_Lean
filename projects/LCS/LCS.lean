@@ -93,7 +93,7 @@ lemma measurement_system_projectors_commute
   · rw [hxy]
   · have h_orth_xy : f x * f y = 0 := h.orthogonal x y hxy
     have h_orth_yx : f y * f x = 0 := h.orthogonal y x (Ne.symm hxy)
-    rw [h_orth_xy, h_orth_yx]    
+    rw [h_orth_xy, h_orth_yx]
 
 
 -- Lemma 2: Sums of commuting projectors commute
@@ -139,3 +139,25 @@ lemma alice_observables_commute
   simp [mul_sub, sub_mul]
   simp [h_AC, h_AD, h_BC, h_BD]
   abel
+
+/-- The Winning Operator `v` for a given Strategy and Game. -/
+noncomputable def winning_operator
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G) : R :=
+  -- We sum over all questions i (Alice) and j (Bob) where j is in Alice's set
+  ∑ i : Fin G.r, ∑ j : G.V i,
+  let normalization : ℂ := (G.r * (G.V i).card : ℕ)
+  (1 / normalization) • (∑ x ∈ winning_assignments game i, strat.E i x * strat.F j (x j))
+
+
+
+lemma lemma_4_7_1
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G)
+  (i : Fin G.r) :
+  (∑ x ∈ winning_assignments game i, strat.E i x) = 
+  (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val • 
+  ((G.V i).attach.noncommProd 
+    (fun j => Alice_A strat i j) 
+    (fun j hj j' hj' _ => alice_observables_commute strat i j j'))) :=
+  by sorry
