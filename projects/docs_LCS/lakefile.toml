@@ -19,4 +19,8 @@ rev = "v4.28.0"
 name = "generate-blog"
 root = "Main"
 
+[[lean_exe]]
+name = "generate-docs"
+root = "MainManual"
+
 

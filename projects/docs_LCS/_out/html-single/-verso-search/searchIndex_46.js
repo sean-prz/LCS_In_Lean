@@ -1,0 +1,1 @@
+window.docContents[46].resolve({"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Proving-Properties-of-LCS-Games-":{"contents":"","context":"Formalisation of Linear Constraints Systems games in Lean4","header":"3. Proving Properties of LCS Games ","id":"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Proving-Properties-of-LCS-Games-"}});

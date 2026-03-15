@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      (function(){
+  const {protocol:proto, host:hostName, pathname:path, search:srch, hash:hsh} = window.location;
+  if (!(path.endsWith("/") || path.endsWith(".html"))) {
+    window.location.replace(`${proto}//${hostName}${path}/${srch}${hsh}`);
+  }
+})()</script>
+    <base href="./../../"><meta charset="utf-8">
+    <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <title>Measurement Systems</title><link rel="stylesheet" href="book.css">
+    <link rel="stylesheet" href="verso-vars.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script>
+    <script src="-verso-search/elasticlunr.min.js"></script>
+    <script src="-verso-search/fuzzysort.min.js"></script>
+    <script src="-verso-search/searchIndex.js"></script>
+    <script type="module" src="-verso-search/search-init.js"></script>
+    <link rel="stylesheet" href="-verso-search/search-box.css">
+    <link rel="stylesheet" href="-verso-search/search-highlight.css">
+    <link rel="stylesheet" href="-verso-search/domain-display.css">
+    <script src="-verso-data/katex/math.js"></script>
+    <script src="-verso-data/katex/katex.js"></script>
+    <link rel="stylesheet" href="-verso-data/katex/katex.css">
+    <script src="-verso-search/search-highlight.js" defer="defer"></script>
+    </head>
+  <body>
+    <header>
+      <div class="header-logo-wrapper"></div>
+      <div class="header-title-wrapper">
+        <a href="" class="header-title"><h1>
+            LCS in Lean4</h1>
+          </a></div>
+      </header>
+    <label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc">
+      <div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div>
+      <nav id="toc">
+        <input type="checkbox" id="toggle-toc"><div class="first">
+          <a href="" class="toc-title"><h1>
+              LCS in Lean4</h1>
+            </a><div class="split-tocs">
+            <div class="split-toc book">
+              <div class="title">
+                <label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot"></label><span class="">Table of Contents</span></div>
+              <table><tr class="current numbered"><td class="num">1.</td><td><a href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4">Formalisation of Linear Constraints Systems games in Lean4</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="Yeah-But-Not-Sure-it-works/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Yeah-But-Not-Sure-it-works">Yeah But Not Sure it works</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <label for="--verso-manual-toc-Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4" checked="checked"></label><span class="number">1.</span> <span class=""><a href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4">Formalisation of Linear Constraints Systems games in Lean4</a></span></div>
+              <table><tr class="numbered"><td class="num">1.1.</td><td><a href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/Introduction/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction">Introduction</a></td></tr><tr class="current numbered"><td class="num">1.2.</td><td><a href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/Measurement-Systems/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Measurement-Systems">Measurement Systems</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <span class="no-toggle"></span><span class="number">1.2.</span> <span class="current"><a href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/Measurement-Systems/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Measurement-Systems">Measurement Systems</a></span></div>
+              </div>
+            </div>
+          </div>
+        <div class="last"></div>
+        </nav>
+      <main><div class="content-wrapper">
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/Introduction/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction" rel="prev" title="1.1. Introduction"><span class="arrow">←</span><span class="where">1.1. Introduction</span></a><a class="local-button active" href="Yeah-But-Not-Sure-it-works/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Yeah-But-Not-Sure-it-works" rel="next" title="2. Yeah But Not Sure it works"><span class="where">2. Yeah But Not Sure it works</span><span class="arrow">→</span></a></nav>
+          <section>
+            <h1>
+              1.2. Measurement Systems<span class="permalink-widget inline"><a href="find/?domain=Verso.Genre.Manual.section&amp;name=Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Measurement-Systems" title="Permalink">🔗</a></span></h1>
+            </section>
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="Formalisation-of-Linear-Constraints-Systems-games-in-Lean4/Introduction/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction" rel="prev" title="1.1. Introduction"><span class="arrow">←</span><span class="where">1.1. Introduction</span></a><a class="local-button active" href="Yeah-But-Not-Sure-it-works/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Yeah-But-Not-Sure-it-works" rel="next" title="2. Yeah But Not Sure it works"><span class="where">2. Yeah But Not Sure it works</span><span class="arrow">→</span></a></nav>
+          </div>
+        </main></div>
+    </body>
+  </html>
+

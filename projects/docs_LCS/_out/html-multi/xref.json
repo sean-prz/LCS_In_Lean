@@ -1,0 +1,255 @@
+{"Verso.Genre.Manual.section":
+ {"title": "Sections or chapters of the manual",
+  "description": null,
+  "contents":
+  {"Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Proving-Properties-of-LCS-Games-":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Proving-Properties-of-LCS-Games-",
+     "data":
+     {"title": "Proving Properties of LCS Games ",
+      "shortTitle": null,
+      "sectionNum": "3.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Proving Properties of LCS Games ",
+        "shortTitle": null,
+        "number": "3"}]},
+     "address": "/Proving-Properties-of-LCS-Games-/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games--Mermin-Peres-Magic-Square-Game":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games--Mermin-Peres-Magic-Square-Game",
+     "data":
+     {"title": "Mermin Peres Magic Square Game",
+      "shortTitle": null,
+      "sectionNum": "1.1.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Introduction to Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "1"},
+       {"title": "Mermin Peres Magic Square Game",
+        "shortTitle": null,
+        "number": "1"}]},
+     "address":
+     "/Introduction-to-Linear-Constraint-System-Games/Mermin-Peres-Magic-Square-Game/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games",
+     "data":
+     {"title": "Introduction to Linear Constraint System Games",
+      "shortTitle": null,
+      "sectionNum": "1.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Introduction to Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "1"}]},
+     "address": "/Introduction-to-Linear-Constraint-System-Games/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--The-___-algebra":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--The-___-algebra",
+     "data":
+     {"title": "The *-algebra",
+      "shortTitle": null,
+      "sectionNum": "2.1.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"},
+       {"title": "The *-algebra", "shortTitle": null, "number": "1"}]},
+     "address":
+     "/Formalising-Linear-Constraint-System-Games/The-___-algebra/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy--Measurement-Systems":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy--Measurement-Systems",
+     "data":
+     {"title": "Measurement Systems",
+      "shortTitle": null,
+      "sectionNum": "2.2.1.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"},
+       {"title": "A LCS Strategy", "shortTitle": null, "number": "2"},
+       {"title": "Measurement Systems", "shortTitle": null, "number": "1"}]},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy--Assignements___":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy--Assignements___",
+     "data":
+     {"title": "Assignements.",
+      "shortTitle": null,
+      "sectionNum": "2.2.2.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"},
+       {"title": "A LCS Strategy", "shortTitle": null, "number": "2"},
+       {"title": "Assignements.", "shortTitle": null, "number": "2"}]},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Strategy",
+     "data":
+     {"title": "A LCS Strategy",
+      "shortTitle": null,
+      "sectionNum": "2.2.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"},
+       {"title": "A LCS Strategy", "shortTitle": null, "number": "2"}]},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Game":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--A-LCS-Game",
+     "data":
+     {"title": "A LCS Game",
+      "shortTitle": null,
+      "sectionNum": "2.3.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"},
+       {"title": "A LCS Game", "shortTitle": null, "number": "3"}]},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Game/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games":
+   [{"id":
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games",
+     "data":
+     {"title": "Formalising Linear Constraint System Games",
+      "shortTitle": null,
+      "sectionNum": "2.",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null},
+       {"title": "Formalising Linear Constraint System Games",
+        "shortTitle": null,
+        "number": "2"}]},
+     "address": "/Formalising-Linear-Constraint-System-Games/"}],
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4":
+   [{"id": "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4",
+     "data":
+     {"title": "Formalisation of Linear Constraints Systems games in Lean4",
+      "shortTitle": "LCS in Lean4",
+      "sectionNum": "",
+      "context":
+      [{"title": "Formalisation of Linear Constraints Systems games in Lean4",
+        "shortTitle": "LCS in Lean4",
+        "number": null}]},
+     "address": "/"}]}},
+ "Verso.Genre.Manual.example":
+ {"title": "Verso.Genre.Manual.example",
+  "description": null,
+  "contents":
+  {"IsMeasurementSystem.sum_one":
+   [{"id": "IsMeasurementSystem___sum_one",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#IsMeasurementSystem___sum_one":
+      {"display": "sum_one",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Measurement Systems"]}},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "IsMeasurementSystem.self_adjoint":
+   [{"id": "IsMeasurementSystem___self_adjoint",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#IsMeasurementSystem___self_adjoint":
+      {"display": "self_adjoint",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Measurement Systems"]}},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "IsMeasurementSystem.orthogonal":
+   [{"id": "IsMeasurementSystem___orthogonal",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#IsMeasurementSystem___orthogonal":
+      {"display": "orthogonal",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Measurement Systems"]}},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "IsMeasurementSystem.idempotent":
+   [{"id": "IsMeasurementSystem___idempotent",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#IsMeasurementSystem___idempotent":
+      {"display": "idempotent",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Measurement Systems"]}},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "IsMeasurementSystem":
+   [{"id": "IsMeasurementSystem",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#IsMeasurementSystem":
+      {"display": "IsMeasurementSystem",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Measurement Systems"]}},
+     "address": "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}],
+   "Assignment":
+   [{"id": "Assignment",
+     "data":
+     {"/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/#Assignment":
+      {"display": "Assignment",
+       "context":
+       ["Formalisation of Linear Constraints Systems games in Lean4",
+        "Formalising Linear Constraint System Games",
+        "A LCS Strategy",
+        "Assignements."]}},
+     "address":
+     "/Formalising-Linear-Constraint-System-Games/A-LCS-Strategy/"}]}},
+ "Verso.Genre.Manual.doc.tech":
+ {"title": "Terminology",
+  "description": "Definitions of technical terms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic.conv":
+ {"title": "Conversion Tactics",
+  "description": "Tactics for performing targeted rewriting of subterms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic":
+ {"title": "Tactic Documentation",
+  "description": "Detailed descriptions of tactics",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.suggestion":
+ {"title": "Lean constant suggestions",
+  "description": "Search suggestions for Lean constants",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.option":
+ {"title": "Compiler options", "description": null, "contents": {}},
+ "Verso.Genre.Manual.doc":
+ {"title": "Lean constant reference",
+  "description": "Documentation for Lean constants",
+  "contents": {}}}
