@@ -17,7 +17,7 @@ def CodeCSS : CSS := "code { font-family: var(--verso-code-font-family); color: 
 
 def config : RenderConfig where
   emitTeX := false
-  htmlDepth := 2
+  htmlDepth := 1
   emitHtmlSingle := .immediately
   extraCss := {smallHead, CodeCSS} 
 

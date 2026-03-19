@@ -33,13 +33,13 @@ Specifically the current end goal as of \[W04\] is to formalise the sum of squar
 
 The exact statements this project is verifying are taken from section 4.7 of Arthur Mehta Thesis  [entanglement and non-locality in games and graphs](https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3c06-4808-a685-deeda43f8fd3/content)
 
-The source files for this project are available on GitHub at the following link: [Github](https://github.com/)
+The source files for this project are available [here](./source/LCS/)
 
 The current structure is as follows:
-    - LCS.Basic : contains the basic definitions of LCS games, including the definition of a measurement system, and the definition of a LCS game.
-    - LCS.MagicSquare : contains the formalisation of the Mermin Peres Magic Square game, and the proof that it has a perfect quantum strategy.
-    - LCS.MeasurementLemmas : contains some lemmas about measurement systems that are used in the proofs of the other modules.
-    - LCS.WinningCondition : Contains the formalisation of the sum of squares argument that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
+    - *LCS.Basic* : contains the basic definitions of LCS games, including the definition of a measurement system, and the definition of a LCS game.
+    - *LCS.MagicSquare* : contains the formalisation of the Mermin Peres Magic Square game, and the proof that it has a perfect quantum strategy.
+    - *LCS.MeasurementLemmas* : contains some lemmas about measurement systems that are used in the proofs of the other modules.
+    - *LCS.WinningCondition* : contains the formalisation of the sum of squares argument that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
 
 
 # Introduction to Linear Constraint System Games

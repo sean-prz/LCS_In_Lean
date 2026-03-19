@@ -43,6 +43,21 @@
 
 
 
+#let week4_1 = [
+  #set text(8pt)
+   #set align(left + top)
+  - Made&Published documentation
+  - Reworked the LCS framework (geometry of the game)
+  - Defined an LCS game
+]
+#let week4_2 = [
+   #set text(8pt)
+   #set align(left + top)
+  - Proved some measurement Lemmas
+  - Tried Mermin-Peres square strategy.
+]
+
+
 
 
 
@@ -61,7 +76,10 @@
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt +  gray.transparentize(80%)))],
   [*Week 3*], [Formalising a LCS Strategy], [4.7 SOS approach to solution group], // WEEK 03
   [ ], [#week3_1], [#week3_2],
-  // [], [ *|* ], [ *|* ], 
+  [], [], [],
+  table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt +  gray.transparentize(80%)))],
+  [*Week 4*], table.cell(colspan: 2)[Starting Proofs, Meremin-Peres & Documentation],
+  [ ], [#week4_1], [#week4_2],
   [], [], [],
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt +  gray.transparentize(80%)))],
   // [], [ *|* ], [ *|* ], 
@@ -84,9 +102,47 @@
 #line()
  *Monday 11.15am in BC110* to debrief previous week and plan the next one. 
 
-== Week 4 : 
+
+== Week 5 :
+
 - Prouver 4.71 & 4.72 du papier.
 - Commencer la SOS decomposition d'un LCS game.
+
+
+
+
+== Week 4 : 
+
+
+1. *Made&Published documentation*
+
+Available for consultation, to use while debriefing and throughout the weeks to check on the progress.
+The source raw files are also available at src/
+
+_Use docs for the rest of the debrief._
+
+2. *Reworked the LCS framework*
+added geometry of the game to remove long signature.
+
+3. *Defined an LCS game*
+as just a function from index of contraints to the value of the constriants
+
+4. *Tried Mermin-Peres square strategy*
+Multiple challenges:
+- Noncomputable because of complex numbers.
+- Working with matrices
+- Proving commutation. 
+- Gave up for now.
+
+
+5. *Proved some measurement Lemmas to get to Alice observable commutes.*
+- Proved that Alice measurement commute for the same question but different answer.
+- Starting to define the 4.7.1 & 4.7.2
+
+6. Typo in the Original Paper ? 
+
+
+
 
 == Week 3 : 
 - Formaliser la construction d'une stratégie pour un LCS game. 
