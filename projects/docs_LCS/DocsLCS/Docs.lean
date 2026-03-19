@@ -71,18 +71,17 @@ Note that this layout does not contain any information about the specific values
 
 ## Assignments
 
-Assignemnt is an abreviation/aliases for the type, (function type)  that represents all possible assignments of values to the variables in V i. 
+Assignment is an abbreviation for the function type representing all possible assignments of values to the variables within a specific constraint i.
 
-An assignement is defined for a specific LCS layout and a specific constraint i.
-The assignment of the variable to the constraint i is represented as a function that takes a variable from $`V_i` and returns a value in $`Fin 2` (i.e. 0 or 1). This captures the idea that Alice must assign a value of 0 or 1 to each variable used in the i-th constraint.
+For a given LCSLayout and a constraint i, an assignment is a function that maps each variable in Vi to a value in Fin 2 (0 or 1). This captures the requirement that Alice must provide a binary value for every variable involved in the i-th equation.
 
-Leans know that this is a function type that has a finite domain which will allow us for example to sum over all possible assignments in a finite way, which is important for the rest of the formalisation.
-
+Because the domain Vi is finite, Lean can automatically infer that the type Assignment G i is also a Fintype. This is crucial for the formalization, as it allows us to sum over the entire space of possible assignments when defining Alice's observables.
 
 ```anchor Assignment
 abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
   (G.V i) → Fin 2
 ```
+
 ## A LCS Game
 So far we have defined the geometry of the game, and the requirement for a strategy to be valid without ever specifying the specific values of the constraints. However as we will need to talk about winning assignements or winning strategies, we need to define
 the values of the contraints.
@@ -96,7 +95,7 @@ structure LCSGame (G : LCSLayout) where
 
 
 ## A Valid Strategy for an LCS Game
-A strategy for an LCS game is modeled by a family of projectors for Alice and a family of projectors for Bob, that satisfy certain conditions. Specifically, the projectors for Alice must form a measurement system for each constraint, and the projectors for Bob must be consistent with the projectors for Alice in a certain way. This is captured by the definition of a valid strategy for an LCS game.
+A strategy for an LCS game is modeled by two families of projectors. For each constraint i, Alice has a measurement system Ei over satisfying assignments. For each variable j, Bob has a measurement system Fj over binary outcomes. To ensure the strategy is physically realizable in the commuting operator framework, we require that all of Alice's projectors commute with all of Bob's projectors.
 
 ```anchor LCSStrategy
 structure LCSStrategy
@@ -109,7 +108,7 @@ structure LCSStrategy
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 ```
 
-### Measurement Systems
+### Measurement Systems (Projective Measurements)
 The mathematical structure that captures the idea of a quantum measurement in the context of our LCS game.
 
 ```anchor IsMeasurementSystem (module := LCS.Basic) 
@@ -126,11 +125,11 @@ structure IsMeasurementSystem
 ## Alice and Bob's Observables
 
 Given a strategy for an LCS game, we can define the observables for Alice and Bob.
-The observable for Alice corresponding to the variable j in the constraint i is defined as the difference between the sum of the projectors corresponding to the assignments that assign 0 to j and the sum of the projectors corresponding to the assignments that assign 1 to j.
 
-For Bob, the observable corresponding to the variable j is defined as the difference between the projectors corresponding to the assignment that assigns 0 to j and the projectors corresponding to the assignment that assigns 1 to j. 
+Alice’s observable for a given equation i and variable j (where j is in equation i) is defined as the difference between two sums: the sum of projectors for all assignments x of equation i that assign 0 to j, and the sum of projectors for all assignments x that assign 1 to j.
 
-Alice and Bob's observables are completly defined by the LCSstrategy object, which contains the projectors for Alice and Bob. 
+For Bob, the observable for a given variable j is defined as the difference between the projector that assigns 0 to j and the projector that assigns 1 to j.
+
 
 ### Alice's observable
 
