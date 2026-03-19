@@ -2,7 +2,7 @@ import Std.Data.HashMap
 import VersoManual
 
 import DocsLCS.Docs 
-
+import DocsLCS.Section1
 open Verso Doc
 open Verso.Genre Manual
 
