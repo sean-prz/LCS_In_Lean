@@ -1,1 +1,0 @@
-window.docContents[13].resolve({"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Yeah-But-Not-Sure-it-works":{"contents":"","context":"Formalisation of Linear Constraints Systems games in Lean4","header":"2. Yeah But Not Sure it works","id":"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Yeah-But-Not-Sure-it-works"}});

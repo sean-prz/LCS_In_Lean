@@ -1,1 +1,0 @@
-window.docContents[202].resolve({"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Section-1":{"contents":"Hi this is flume.\n\n\n","context":"Formalisation of Linear Constraints Systems games in Lean4","header":"1. Section 1","id":"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Section-1"}});
