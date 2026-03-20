@@ -71,4 +71,3 @@ def Bob_B
   (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   strat.F j 0 - strat.F j 1
 -- ANCHOR_END: Bob_B
-
