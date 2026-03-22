@@ -1,6 +1,5 @@
 import LCS.Basic
 import LCS.Observables
-import Mathlib.Data.ZMod.Basic
 import Mathlib.Order.Fin.Basic
 
 open scoped BigOperators
@@ -10,7 +9,7 @@ def winning_assignments
   {G : LCSLayout}
   (game : LCSGame G) (i : Fin G.r) :
   Finset (Assignment G i) :=
-  Finset.univ.filter (fun α => (∑ j : G.V i , (α j : ZMod 2)) = game.b i)
+  Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = game.b i)
 -- ANCHOR_END: winning_assignments
 
 
@@ -37,17 +36,6 @@ private lemma fin2_eq_zero_or_one (a : Fin 2) : a = 0 ∨ a = 1 := by
     exact Fin.ext h0
   · right
     exact Fin.ext h1
-
-private lemma zmod2_eq_zero_or_one (a : ZMod 2) : a = 0 ∨ a = 1 := by
-  have hval : a.val = 0 ∨ a.val = 1 := by
-    have hlt : a.val < 2 := ZMod.val_lt a
-    omega
-  rcases hval with h0 | h1
-  · exact Or.inl ((ZMod.val_eq_zero a).mp h0)
-  · exact Or.inr <| by
-      have ha : ((a.val : ZMod 2) = a) := ZMod.natCast_zmod_val a
-      rw [h1] at ha
-      simpa [eq_comm] using ha
 
 private lemma measurement_sum_mul_projector
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -111,10 +99,10 @@ private lemma alice_partial_prod_mul_projector
 private lemma prod_sign_eq_sum_sign
   {G : LCSLayout} (i : Fin G.r) (x : Assignment G i) :
   ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
-    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : ZMod 2)).val) := by
+    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) := by
   classical
   let s : Finset (G.V i) := (G.V i).attach
-  change (s.prod fun j => (-1 : ℂ) ^ (x j).val) = (-1 : ℂ) ^ ((s.sum fun j => (x j : ZMod 2)).val)
+  change (s.prod fun j => (-1 : ℂ) ^ (x j).val) = (-1 : ℂ) ^ ((s.sum fun j => (x j : Fin 2)).val)
   induction s using Finset.cons_induction_on with
   | empty =>
       simp
@@ -123,16 +111,16 @@ private lemma prod_sign_eq_sum_sign
       have hxa_cases : x a = 0 ∨ x a = 1 := fin2_eq_zero_or_one (x a)
       rcases hxa_cases with hxa | hxa
       · simp [hxa]
-      · let t : ZMod 2 := s.sum fun j => (x j : ZMod 2)
-        have ht_cases : t = 0 ∨ t = 1 := zmod2_eq_zero_or_one t
+      · let t : Fin 2 := s.sum fun j => (x j : Fin 2)
+        have ht_cases : t = 0 ∨ t = 1 := fin2_eq_zero_or_one t
         rcases ht_cases with ht | ht <;> simp [hxa, t, ht]
 
 /-- Arithmetic helper: the sign factor `(1/2)(1 + (-1)^b * (-1)^s)` equals the indicator `s = b`. -/
-private lemma sign_indicator (b s : ZMod 2) :
+private lemma sign_indicator (b s : Fin 2) :
     (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
   rcases fin2_eq_zero_or_one b with rfl | rfl <;>
   rcases fin2_eq_zero_or_one s with rfl | rfl <;>
-  simp [ZMod.val] <;> norm_num
+  simp <;> norm_num
 
 lemma lemma_4_7_1
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -171,7 +159,7 @@ lemma lemma_4_7_1
     alice_partial_prod_mul_projector strat i _ x
       (fun j _ j' _ _ => alice_observables_commute strat i j j')
   have hsign : ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
-      (-1 : ℂ) ^ ((∑ j : G.V i, (x j : ZMod 2)).val) :=
+      (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
     prod_sign_eq_sum_sign i x
   -- Expand rhs * E i x
   -- Directly compute both sides and match via sign_indicator
@@ -180,9 +168,9 @@ lemma lemma_4_7_1
     rw [smul_mul_assoc, add_mul, one_mul, smul_mul_assoc, hprod, hsign, smul_add,
         smul_smul, smul_smul, ← add_smul]
   have hsign2 : (1/2 : ℂ) + (1/2 : ℂ) * (-1 : ℂ) ^ (game.b i).val *
-                  (-1 : ℂ) ^ (∑ j : G.V i, (x j : ZMod 2)).val
-        = if (∑ j : G.V i, (x j : ZMod 2)) = game.b i then 1 else 0 := by
-    exact sign_indicator (game.b i) (∑ j : G.V i, (x j : ZMod 2))
+                  (-1 : ℂ) ^ (∑ j : G.V i, (x j : Fin 2)).val
+        = if (∑ j : G.V i, (x j : Fin 2)) = game.b i then 1 else 0 := by
+    exact sign_indicator (game.b i) (∑ j : G.V i, (x j : Fin 2))
   rw [hsign2]
   simp [winning_assignments, Finset.mem_filter]
 

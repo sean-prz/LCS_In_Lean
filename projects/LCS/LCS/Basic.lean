@@ -16,6 +16,7 @@ import Mathlib.LinearAlgebra.Matrix.ConjTranspose
 open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]
+
 -- ANCHOR: IsMeasurementSystem
 structure IsMeasurementSystem
   {I : Type*} [Fintype I]
@@ -41,7 +42,7 @@ abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
 
 -- ANCHOR: LCSGame
 structure LCSGame (G : LCSLayout) where
-  b : Fin G.r → ZMod 2
+  b : Fin G.r → Fin 2
 -- ANCHOR_END: LCSGame
 
 -- ANCHOR: LCSStrategy
@@ -54,4 +55,3 @@ structure LCSStrategy
   bob_ms   : ∀ j, IsMeasurementSystem (F j)
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 -- ANCHOR_END: LCSStrategy
-
