@@ -26,14 +26,14 @@ structure IsObservable
   self_adjoint : star O = O
 
 
-lemma measurement_commute {I R} [Ring R] [StarRing R] [Fintype I] {f : I → R}
+private lemma measurement_commute {I R} [Ring R] [StarRing R] [Fintype I] {f : I → R}
   (h : IsMeasurementSystem f) (x y : I) : Commute (f x) (f y) := by
   dsimp [Commute, SemiconjBy]
   by_cases hxy : x = y
   · rw [hxy]
   · rw [h.orthogonal x y hxy, h.orthogonal y x (Ne.symm hxy)]
 
-lemma measurement_commute_sum {I R} [Ring R] [StarRing R] [Fintype I] {f : I → R}
+private lemma measurement_commute_sum {I R} [Ring R] [StarRing R] [Fintype I] {f : I → R}
   (h : IsMeasurementSystem f) (A B : Finset I) :
   Commute (∑ x ∈ A, f x) (∑ y ∈ B, f y) :=
   Commute.sum_left _ _ _ fun x _ => Commute.sum_right _ _ _ fun y _ => measurement_commute h x y
