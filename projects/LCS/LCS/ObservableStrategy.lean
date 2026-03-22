@@ -1,15 +1,10 @@
 import LCS.Basic
+import LCS.Observables
 import Mathlib.Algebra.Star.Module
 
 open scoped BigOperators
 
 namespace ObservableStrategy
-
-structure IsObservable
-  (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
-  (O : R) : Prop where
-  involutive   : O * O = 1
-  self_adjoint : star O = O
 
 structure ObservableStrategyData
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
