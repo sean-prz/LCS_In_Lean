@@ -127,6 +127,13 @@ private lemma prod_sign_eq_sum_sign
         have ht_cases : t = 0 ∨ t = 1 := zmod2_eq_zero_or_one t
         rcases ht_cases with ht | ht <;> simp [hxa, t, ht]
 
+/-- Arithmetic helper: the sign factor `(1/2)(1 + (-1)^b * (-1)^s)` equals the indicator `s = b`. -/
+private lemma sign_indicator (b s : ZMod 2) :
+    (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
+  rcases fin2_eq_zero_or_one b with rfl | rfl <;>
+  rcases fin2_eq_zero_or_one s with rfl | rfl <;>
+  simp [ZMod.val] <;> norm_num
+
 lemma lemma_4_7_1
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
   {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G)
@@ -135,82 +142,49 @@ lemma lemma_4_7_1
   (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val •
   ((G.V i).attach.noncommProd
     (fun j => Alice_A strat i j)
-    (fun j _ j' _ _ => alice_observables_commute strat i j j'))) :=
-  by
-    classical
-    let lhs : R := ∑ x ∈ winning_assignments game i, strat.E i x
-    let prodA : R :=
-      (G.V i).attach.noncommProd
-        (fun j => Alice_A strat i j)
-        (fun j hj j' hj' _ => alice_observables_commute strat i j j')
-    let rhs : R := (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val • prodA)
-    have hsum_one := (strat.alice_ms i).sum_one
-    change lhs = rhs
-    calc
-      lhs = lhs * 1 := by simp [lhs]
-      _ = lhs * (∑ x : Assignment G i, strat.E i x) := by rw [hsum_one]
-      _ = ∑ x : Assignment G i, lhs * strat.E i x := by rw [Finset.mul_sum]
-      _ = ∑ x : Assignment G i, rhs * strat.E i x := by
-        apply Finset.sum_congr rfl
-        intro x hx
-        have hlhs :
-            lhs * strat.E i x =
-              if x ∈ winning_assignments game i then strat.E i x else 0 := by
-          unfold lhs
-          simpa using measurement_sum_mul_projector strat i (winning_assignments game i) x
-        have hprod :
-            prodA * strat.E i x =
-              (((G.V i).attach).prod fun j => (-1 : ℂ) ^ (x j).val) • strat.E i x := by
-          unfold prodA
-          simpa using alice_partial_prod_mul_projector strat i (G.V i).attach x
-            (fun j hj j' hj' hne => alice_observables_commute strat i j j')
-        have hsign :
-            (((G.V i).attach).prod fun j => (-1 : ℂ) ^ (x j).val) =
-              (-1 : ℂ) ^ ((∑ j : G.V i, (x j : ZMod 2)).val) := by
-          simpa using prod_sign_eq_sum_sign i x
-        have hrhs :
-            rhs * strat.E i x =
-              ((1/2 : ℂ) * (1 + (-1 : ℂ)^(game.b i).val *
-                (-1 : ℂ) ^ ((∑ j : G.V i, (x j : ZMod 2)).val))) • strat.E i x := by
-          unfold rhs
-          rw [smul_mul_assoc, add_mul, one_mul, smul_mul_assoc, hprod, hsign]
-          rw [smul_add, smul_smul, smul_smul]
-          rw [← add_smul]
-          congr 1
-          ring
-        rw [hlhs, hrhs]
-        by_cases hwin : x ∈ winning_assignments game i
-        · have hEq : (∑ j : G.V i, (x j : ZMod 2)) = game.b i := by
-            simpa [winning_assignments, Finset.mem_filter] using hwin
-          have hval : ((∑ j : G.V i, (x j : ZMod 2)).val) = (game.b i).val := by
-            simpa using congrArg (fun z : ZMod 2 => z.val) hEq
-          rw [if_pos hwin, hval]
-          have hb_cases : game.b i = 0 ∨ game.b i = 1 := zmod2_eq_zero_or_one (game.b i)
-          rcases hb_cases with hb | hb
-          · simp [hb]
-            norm_num
-          · simp [hb]
-            have hval1 : ((1 : ZMod 2).val) = 1 := by decide
-            norm_num [hval1]
-        · have hne : (∑ j : G.V i, (x j : ZMod 2)) ≠ game.b i := by
-            simpa [winning_assignments, Finset.mem_filter] using hwin
-          have hsum_cases :
-              (∑ j : G.V i, (x j : ZMod 2)) = 0 ∨ (∑ j : G.V i, (x j : ZMod 2)) = 1 := by
-            exact zmod2_eq_zero_or_one (∑ j : G.V i, (x j : ZMod 2))
-          have hb_cases : game.b i = 0 ∨ game.b i = 1 := by
-            exact zmod2_eq_zero_or_one (game.b i)
-          rw [if_neg hwin]
-          rcases hsum_cases with hsum | hsum <;> rcases hb_cases with hb | hb
-          · exact False.elim (hne (hsum.trans hb.symm))
-          · have hval1 : ((1 : ZMod 2).val) = 1 := by decide
-            rw [hsum, hb]
-            norm_num [hval1]
-          · rw [hsum, hb]
-            norm_num
-          · exact False.elim (hne (hsum.trans hb.symm))
-      _ = rhs * (∑ x : Assignment G i, strat.E i x) := by rw [← Finset.mul_sum]
-      _ = rhs * 1 := by rw [hsum_one]
-      _ = rhs := by simp
+    (fun j _ j' _ _ => alice_observables_commute strat i j j'))) := by
+  classical
+  have hsum_one := (strat.alice_ms i).sum_one
+  let prodA : R := (G.V i).attach.noncommProd
+    (fun j => Alice_A strat i j) (fun j _ j' _ _ => alice_observables_commute strat i j j')
+  let rhs : R := (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val • prodA)
+  -- The key step: show per-projector equality, then sum
+  suffices h : ∀ x : Assignment G i,
+      (∑ y ∈ winning_assignments game i, strat.E i y) * strat.E i x = rhs * strat.E i x by
+    calc ∑ x ∈ winning_assignments game i, strat.E i x
+        = (∑ x ∈ winning_assignments game i, strat.E i x) * 1 := by exact (mul_one _).symm
+      _ = (∑ x ∈ winning_assignments game i, strat.E i x) * ∑ x, strat.E i x := by rw [hsum_one]
+      _ = ∑ x, (∑ y ∈ winning_assignments game i, strat.E i y) * strat.E i x :=
+            by rw [Finset.mul_sum]
+      _ = ∑ x, rhs * strat.E i x := by
+            apply Finset.sum_congr rfl
+            intro x _
+            exact h x
+      _ = rhs * ∑ x, strat.E i x := by rw [← Finset.mul_sum]
+      _ = rhs := by rw [hsum_one, mul_one]
+  intro x
+  -- LHS
+  rw [measurement_sum_mul_projector strat i (winning_assignments game i) x]
+  -- RHS: expand
+  have hprod : prodA * strat.E i x =
+      ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) • strat.E i x :=
+    alice_partial_prod_mul_projector strat i _ x
+      (fun j _ j' _ _ => alice_observables_commute strat i j j')
+  have hsign : ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
+      (-1 : ℂ) ^ ((∑ j : G.V i, (x j : ZMod 2)).val) :=
+    prod_sign_eq_sum_sign i x
+  -- Expand rhs * E i x
+  -- Directly compute both sides and match via sign_indicator
+  conv_rhs =>
+    unfold rhs
+    rw [smul_mul_assoc, add_mul, one_mul, smul_mul_assoc, hprod, hsign, smul_add,
+        smul_smul, smul_smul, ← add_smul]
+  have hsign2 : (1/2 : ℂ) + (1/2 : ℂ) * (-1 : ℂ) ^ (game.b i).val *
+                  (-1 : ℂ) ^ (∑ j : G.V i, (x j : ZMod 2)).val
+        = if (∑ j : G.V i, (x j : ZMod 2)) = game.b i then 1 else 0 := by
+    exact sign_indicator (game.b i) (∑ j : G.V i, (x j : ZMod 2))
+  rw [hsign2]
+  simp [winning_assignments, Finset.mem_filter]
 
 lemma lemma_4_7_2
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -219,72 +193,26 @@ lemma lemma_4_7_2
   (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = y), strat.E i x) =
     (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • Alice_A strat i j) := by
   classical
-  unfold Alice_A
-  set A : R := ∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x
-  set B : R := ∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x
-  have hsum_one := (strat.alice_ms i).sum_one
-  have hnot :
-      Finset.univ.filter (fun x : Assignment G i => ¬ x j = 0) =
-        Finset.univ.filter (fun x : Assignment G i => x j = 1) := by
-    ext x
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
-    constructor
-    · intro hx
-      rcases fin2_eq_zero_or_one (x j) with h0 | h1
-      · exact False.elim (hx h0)
-      · exact h1
-    · intro hx
-      simp [hx]
+  let A : R := ∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x
+  let B : R := ∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x
+  -- InducedMeasurementSystem.sum_one gives A + B = 1 directly,
+  -- replacing the manual partition argument (hnot + hpart)
+  have hind := induced_measurement_system_is_measurement_system
+    (strat.E i) (strat.alice_ms i) (fun x => x j)
   have hpart : A + B = 1 := by
-    dsimp [A, B]
-    calc
-      (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x) +
-          (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x)
-          =
-            (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x) +
-            (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => ¬ x j = 0), strat.E i x) := by
-              rw [hnot]
-      _ = ∑ x : Assignment G i, strat.E i x := by
-            rw [← Finset.sum_filter_add_sum_filter_not (s := Finset.univ)
-              (f := fun x : Assignment G i => strat.E i x) (p := fun x => x j = 0)]
-      _ = 1 := hsum_one
+    have h := hind.sum_one
+    rw [Fin.sum_univ_two] at h
+    simp only [InducedMeasurementSystem] at h
+    exact h
+  unfold Alice_A
   rcases fin2_eq_zero_or_one y with rfl | rfl
-  · have hA : A = (1 / 2 : ℂ) • (A + A) := by
-      symm
-      calc
-        (1 / 2 : ℂ) • (A + A) = (1 / 2 : ℂ) • A + (1 / 2 : ℂ) • A := by rw [smul_add]
-        _ = ((1 / 2 : ℂ) + (1 / 2 : ℂ)) • A := by rw [← add_smul]
-        _ = A := by norm_num
-    have hform : 1 + (A - B) = A + A := by
-      rw [← hpart]
-      abel
-    calc
-      (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x) = A := by rfl
-      _ = (1 / 2 : ℂ) • (A + A) := hA
-      _ = (1 / 2 : ℂ) • (1 + (A - B)) := by rw [hform]
-      _ = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (0 : Fin 2).val • (A - B)) := by simp
-      _ = (1 / 2 : ℂ) •
-            (1 + (-1 : ℂ) ^ (0 : Fin 2).val •
-              ((∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x) -
-               (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x))) := by
-            simp [A, B]
-  · have hB : B = (1 / 2 : ℂ) • (B + B) := by
-      symm
-      calc
-        (1 / 2 : ℂ) • (B + B) = (1 / 2 : ℂ) • B + (1 / 2 : ℂ) • B := by rw [smul_add]
-        _ = ((1 / 2 : ℂ) + (1 / 2 : ℂ)) • B := by rw [← add_smul]
-        _ = B := by norm_num
-    have hform : 1 + (-1 : ℂ) • (A - B) = B + B := by
-      rw [← hpart]
-      simp
-      abel
-    calc
-      (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x) = B := by rfl
-      _ = (1 / 2 : ℂ) • (B + B) := hB
-      _ = (1 / 2 : ℂ) • (1 + (-1 : ℂ) • (A - B)) := by rw [hform]
-      _ = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (1 : Fin 2).val • (A - B)) := by simp
-      _ = (1 / 2 : ℂ) •
-            (1 + (-1 : ℂ) ^ (1 : Fin 2).val •
-              ((∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 0), strat.E i x) -
-               (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = 1), strat.E i x))) := by
-            simp [A, B]
+  · change A = _
+    simp only [Fin.val_zero, pow_zero, one_smul]
+    have hform : 1 + (A - B) = A + A := by rw [← hpart]; abel
+    rw [hform, smul_add, ← add_smul]
+    norm_num
+  · change B = _
+    simp only [Fin.val_one, pow_one]
+    have hform : 1 + (-1 : ℂ) • (A - B) = B + B := by rw [← hpart]; module
+    rw [hform, smul_add, ← add_smul]
+    norm_num
