@@ -1,5 +1,5 @@
 import LCS.Basic
-import LCS.MeasurementLemmas
+import LCS.Observables
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Order.Fin.Basic
 
@@ -8,7 +8,7 @@ open scoped BigOperators
 -- ANCHOR: winning_assignments
 def winning_assignments
   {G : LCSLayout}
-  (game : LCSGame G) (i : Fin G.r) : 
+  (game : LCSGame G) (i : Fin G.r) :
   Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i , (α j : ZMod 2)) = game.b i)
 -- ANCHOR_END: winning_assignments
@@ -131,10 +131,10 @@ lemma lemma_4_7_1
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
   {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G)
   (i : Fin G.r) :
-  (∑ x ∈ winning_assignments game i, strat.E i x) = 
-  (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val • 
-  ((G.V i).attach.noncommProd 
-    (fun j => Alice_A strat i j) 
+  (∑ x ∈ winning_assignments game i, strat.E i x) =
+  (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val •
+  ((G.V i).attach.noncommProd
+    (fun j => Alice_A strat i j)
     (fun j _ j' _ _ => alice_observables_commute strat i j j'))) :=
   by
     classical
