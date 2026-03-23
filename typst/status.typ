@@ -58,6 +58,21 @@
 ]
 
 
+#let week5_1 = [
+  #set text(8pt)
+   #set align(left + top)
+  - Defined A strategy given in terms of Observable.
+  - Proving that given a strategy defined in terms of observable, we can construct a strategy defined in terms of projectors.
+  - Proved that $A^i_j$ $B_j$ are valid observables (Introduce InducedMeasurementSystem)
+  - Reformulated the proof that Alice observable commute for different variables of the same equation. 
+]
+#let week5_2 = [
+   #set text(8pt)
+   #set align(left + top)
+  - Prove 4.7.1 & 4.7.2 of the paper (fully automated by Lean).
+]
+
+
 
 
 
@@ -82,12 +97,16 @@
   [ ], [#week4_1], [#week4_2],
   [], [], [],
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt +  gray.transparentize(80%)))],
-  // [], [ *|* ], [ *|* ], 
-  [*W.?*  _(Milestone 1)_], table.cell(colspan: 2)[--- *CHSH SOS Decomposition in Lean*---],
-  // [], [ *|* ], [ *|* ], 
+  [*Week 5*], [Observable to Strategy], [Prove 4.7.1 & 4.7.2],
+  [ ], [#week5_1], [#week5_2],
   [], [], [],
-  // [], [ *|* ], [ *|* ], 
-  [*W.?*  _(Milestone 2)_ ], table.cell(colspan: 2)[--- *MerPer SOS Decomposition in Lean*---],
+  table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt +  gray.transparentize(80%)))],
+
+  [*Week ?*  _(Milestone 1)_], table.cell(colspan: 2)[--- *Show MerPer is a valid strategy*---],
+
+  [*Week ?*  _(Milestone 2)_ ], table.cell(colspan: 2)[--- *LCS SOS Decomposition in Lean*---],
+
+  [*Week ?*  _(Milestone 3)_ ], table.cell(colspan: 2)[--- *???*---],
 )
 
 //   [W. ?], [#align(right)[-----------------------------------]], [#align(left)[-----------------------------------]],
@@ -102,14 +121,47 @@
 #line()
  *Monday 11.15am in BC110* to debrief previous week and plan the next one. 
 
+== Week 6
 
-== Week 5 :
+Goal : 
 
-- Prouver 4.71 & 4.72 du papier.
-- Commencer la SOS decomposition d'un LCS game.
+- Read & Understand Proofs in Observable and WinningCondiiton.
+- Try to finalize the Observable->Strategy file to show that the Mermin-Peres square strategy is valid. 
+- Start Main proof if tims allows.
+- Catch up with the documentation.
 
 
+== Week 5 
 
+1. *Showing that $A^i_j$ and $B_j$ are valid observables*.
+
+_Observable.lean_
+
+- Defining IsObservable as element that are self-adjoint and square to identity.
+- Proving that $A^i_j$ and $B_j$ are valid observables so that we can use these properties in the main proof.
+- To do this we introduce inducesMeasurementSystem
+   + If we have a valid Projector family we can construct another family by mapping outcomes to 0 and 1.
+   + Prove that for a binary projector family, P(0) - P(1) is an observable.
+   + So we prove that $A^i_j$ is valid by showing that it is an induced measurement system where the parition function is given by the value of the variable in the equation, thus the observable that is the difference of the two projectors is exactly $A^i_j$.
+
+2. *Proving 4.7.1 & 4.7.2* of the paper.
+
+_WinningCondition.lean_
+
+- Both Lemmas are needed in the main proof.
+- Proofs were written fully by LLMs and then simplified with another pass of LLMs.
+
+3. *Generalize last week attempt to show that the Mermin-Peres square strategy is valid*.
+
+_ObservableStrategy.lean_
+
+- Define a strategy given in terms of observable and try to prove that we can construct a strategy given in terms of projectors, which is the form of strategy we need for the proof.
+- Endgoal is to use this to show that the Mermin-Peres square strategy is valid.
+- LLMs switched to Module instead of Algebra.
+- File is not worth looking at right now. 
+
+4. *General remarks*.
+- Tried Codex and Antigravity, ran out of budget in one hour.
 
 == Week 4 : 
 
@@ -139,42 +191,31 @@ Multiple challenges:
 - Proved that Alice measurement commute for the same question but different answer.
 - Starting to define the 4.7.1 & 4.7.2
 
-6. Typo in the Original Paper ? 
-
-
+6. *Noticed Typo in the Original Paper* 
 
 
 == Week 3 : 
-- Formaliser la construction d'une stratégie pour un LCS game. 
-- Assimiler la construction de l'observable pour une stratégie LCS.
+1. *Defined a strategy for a LCS game in Lean*.
+
+2. *Getting familiar with the notation of the paper and the construction of the observable*.
+
 == *Week 1 & 2*
-_Debrief Week 1&2  and plan Week 3_
 
-- [ ] Voir le Recap ci-dessus pour les details de ce qui a été fait.
-- [ ] Discuter de la différence entre CHSH SOS et Mermin-Peres SOS, et de ce que nous voulons prouver exactement.
-- [ ] Clarifier l'objectif de la formalisation.
-- [ ] Adapter le Milestone 1 
-- [ ] Clarifier si des notions de "solution group" ou de "robust self-testing" sont nécessaires pour la formalisation.
-- [ ] Clarifier si des notions *d'algèbre d'opérateurs* sont nécessaires pour la formalisation.
-- [ ] *Agender la réunion de la semaine prochaine*
+1. *Clarify Project Goal and Scope*
 
-//
-// #pagebreak()
-// = To Do
-// #line()
-//
-// == Week 1 & 2.
-// -[] aha
-//
-// == Week 3 
-//
+Clarify that the goal is to formalize a proof that is general to LCS game and not just the Mermin-Peres square.
+The proof gives a condition on the existence of a perfect strategy for an LCS game.
 
-
+2. *Learn about the Context of the Mermin-Peres square and LCS games*
 
 #pagebreak()
 = Notes
 
+== Week 6
 
+== Week 5
+
+== Week 4
 
 == Week 3
 We assume the minimum framework to make the proof work. 
