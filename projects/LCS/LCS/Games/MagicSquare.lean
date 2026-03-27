@@ -1,4 +1,5 @@
 import LCS.Basic
+import LCS.Observables
 
 -- define type mat4 as 4x4 matrices over ℂ
 abbrev mat4 := Matrix (Fin 4) (Fin 4) ℂ
@@ -46,13 +47,6 @@ def MP_observables : Fin 9 → mat4
   | 6 => toFin4 (X  ⊗ₖ Y)
   | 7 => toFin4 (Y  ⊗ₖ X)
   | 8 => toFin4 (Z  ⊗ₖ Z)
-
-
-noncomputable def ObservableToProjector {R : Type*} [Ring R] [Algebra ℂ R]
-  (O : R) (a : Fin 2) : R := 
-  let sign : ℂ := if a = 0 then 1 else -1
-  (1/2 : ℂ) • (1 + sign • O)
-
 
 
 noncomputable def Strat_merinPeres : LCSStrategy 
