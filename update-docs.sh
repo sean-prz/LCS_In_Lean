@@ -15,7 +15,7 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
 	# 2. Generate the interactive source
 	echo "Generating Interactive Source"
-	cd "$BASE_DIR/projects/LCS
+	cd "$BASE_DIR/projects/LCS"
 	lake build LCS:literate
 	lake exe verso-html .lake/build/literate ../../docs/source
 else 
