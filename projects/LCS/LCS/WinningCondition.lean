@@ -28,33 +28,20 @@ noncomputable def loss_operator
   1 - winning_operator game strat
 
 private lemma fin2_eq_zero_or_one (a : Fin 2) : a = 0 ∨ a = 1 := by
-  have hval : a.val = 0 ∨ a.val = 1 := by
-    have hlt : a.val < 2 := a.is_lt
-    omega
-  rcases hval with h0 | h1
-  · left
-    exact Fin.ext h0
-  · right
-    exact Fin.ext h1
+  match a with | 0 => left; rfl | 1 => right; rfl
 
-private lemma measurement_sum_mul_projector
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (strat : LCSStrategy R G)
-  (i : Fin G.r) (S : Finset (Assignment G i)) (x : Assignment G i) :
-  (∑ y ∈ S, strat.E i y) * strat.E i x =
-    if x ∈ S then strat.E i x else 0 := by
+private lemma measurement_sum_mul_projector {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
+  {G : LCSLayout} (strat : LCSStrategy R G) (i : Fin G.r)
+  (S : Finset (Assignment G i)) (x : Assignment G i) :
+  (∑ y ∈ S, strat.E i y) * strat.E i x = if x ∈ S then strat.E i x else 0 := by
   classical
-  by_cases hx : x ∈ S
-  · rw [if_pos hx, Finset.sum_mul, Finset.sum_eq_single_of_mem x hx]
-    · simpa using (strat.alice_ms i).idempotent x
-    · intro y hy hyx
-      exact (strat.alice_ms i).orthogonal y x hyx
-  · rw [if_neg hx, Finset.sum_mul, Finset.sum_eq_zero]
+  split_ifs with hx
+  · rw [Finset.sum_mul, Finset.sum_eq_single_of_mem x hx]
+    · exact (strat.alice_ms i).idempotent x
+    · intro y _ hyx; exact (strat.alice_ms i).orthogonal y x hyx
+  · rw [Finset.sum_mul, Finset.sum_eq_zero]
     intro y hy
-    exact (strat.alice_ms i).orthogonal y x (by
-      intro hyx
-      apply hx
-      simpa [hyx] using hy)
+    exact (strat.alice_ms i).orthogonal y x (by rintro rfl; exact hx hy)
 
 private lemma alice_A_mul_projector
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -63,20 +50,11 @@ private lemma alice_A_mul_projector
   (j : G.V i) (x : Assignment G i) :
   Alice_A strat i j * strat.E i x = ((-1 : ℂ) ^ (x j).val) • strat.E i x := by
   classical
-  unfold Alice_A
-  by_cases hx0 : x j = 0
-  · have hx1 : x j ≠ 1 := by simp [hx0]
-    rw [sub_mul]
-    rw [measurement_sum_mul_projector strat i _ x, measurement_sum_mul_projector strat i _ x]
-    simp [Finset.mem_filter, hx0]
-  · have hx1 : x j = 1 := by
-      have hx_cases : x j = 0 ∨ x j = 1 := fin2_eq_zero_or_one (x j)
-      rcases hx_cases with h | h
-      · contradiction
-      · exact h
-    rw [sub_mul]
-    rw [measurement_sum_mul_projector strat i _ x, measurement_sum_mul_projector strat i _ x]
-    simp [Finset.mem_filter, hx1]
+  unfold Alice_A ObservableOfMeasurementSystem InducedMeasurementSystem
+  rw [sub_mul, measurement_sum_mul_projector, measurement_sum_mul_projector]
+  match h : x j with
+  | 0 => simp [h]
+  | 1 => simp [h]
 
 private lemma alice_partial_prod_mul_projector
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -96,31 +74,31 @@ private lemma alice_partial_prod_mul_projector
       · rw [Algebra.mul_smul_comm, alice_A_mul_projector]
         simp [smul_smul, mul_comm]
 
-private lemma prod_sign_eq_sum_sign
-  {G : LCSLayout} (i : Fin G.r) (x : Assignment G i) :
-  ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
-    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) := by
-  classical
-  let s : Finset (G.V i) := (G.V i).attach
-  change (s.prod fun j => (-1 : ℂ) ^ (x j).val) = (-1 : ℂ) ^ ((s.sum fun j => (x j : Fin 2)).val)
+private lemma sign_mul (a b : Fin 2) :
+    (-1 : ℂ) ^ a.val * (-1 : ℂ) ^ b.val = (-1 : ℂ) ^ (a + b).val := by
+  fin_cases a <;> fin_cases b <;> simp
+
+private lemma prod_sign_eq_sum_sign_aux {G : LCSLayout} {i : Fin G.r}
+  (x : Assignment G i) (s : Finset (G.V i)) :
+  (s.prod fun j => (-1 : ℂ) ^ (x j).val) =
+    (-1 : ℂ) ^ ((s.sum fun j => (x j : Fin 2)).val) := by
   induction s using Finset.cons_induction_on with
-  | empty =>
-      simp
-  | cons a s ha ih =>
-      rw [Finset.prod_cons, Finset.sum_cons, ih]
-      have hxa_cases : x a = 0 ∨ x a = 1 := fin2_eq_zero_or_one (x a)
-      rcases hxa_cases with hxa | hxa
-      · simp [hxa]
-      · let t : Fin 2 := s.sum fun j => (x j : Fin 2)
-        have ht_cases : t = 0 ∨ t = 1 := fin2_eq_zero_or_one t
-        rcases ht_cases with ht | ht <;> simp [hxa, t, ht]
+  | empty => simp
+  | cons a s ha ih => rw [Finset.prod_cons, Finset.sum_cons, ih, sign_mul]
+
+private lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignment G i) :
+  ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
+    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
+  prod_sign_eq_sum_sign_aux x _
 
 /-- Arithmetic helper: the sign factor `(1/2)(1 + (-1)^b * (-1)^s)` equals the indicator `s = b`. -/
 private lemma sign_indicator (b s : Fin 2) :
     (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
-  rcases fin2_eq_zero_or_one b with rfl | rfl <;>
-  rcases fin2_eq_zero_or_one s with rfl | rfl <;>
-  simp <;> norm_num
+  match b, s with
+  | 0, 0 => norm_num
+  | 0, 1 => norm_num
+  | 1, 0 => norm_num
+  | 1, 1 => norm_num
 
 lemma lemma_4_7_1
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
@@ -192,7 +170,7 @@ lemma lemma_4_7_2
     rw [Fin.sum_univ_two] at h
     simp only [InducedMeasurementSystem] at h
     exact h
-  unfold Alice_A
+  unfold Alice_A ObservableOfMeasurementSystem InducedMeasurementSystem
   rcases fin2_eq_zero_or_one y with rfl | rfl
   · change A = _
     simp only [Fin.val_zero, pow_zero, one_smul]
@@ -201,6 +179,7 @@ lemma lemma_4_7_2
     norm_num
   · change B = _
     simp only [Fin.val_one, pow_one]
-    have hform : 1 + (-1 : ℂ) • (A - B) = B + B := by rw [← hpart]; module
+    have hform : 1 + (-1 : ℂ) • (A - B) = B + B := by
+      rw [← hpart]; simp only [neg_smul, one_smul]; abel
     rw [hform, smul_add, ← add_smul]
     norm_num
