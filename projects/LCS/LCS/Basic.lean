@@ -6,11 +6,9 @@ import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Finset.Sum
 import Mathlib.Data.Complex.Basic
 import Mathlib.Data.Matrix.Basic
-import Mathlib.Analysis.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.Algebra.Star.Module
-import Mathlib.Analysis.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
 
 open scoped BigOperators
