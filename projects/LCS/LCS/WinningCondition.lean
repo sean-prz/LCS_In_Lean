@@ -1,37 +1,43 @@
 import LCS.Basic
 import LCS.Observables
 import Mathlib.Order.Fin.Basic
+import Mathlib.Tactic.Abel
 
 open scoped BigOperators
 
+set_option linter.unusedSectionVars false
+
+variable {G : LCSLayout} (game : LCSGame G)
+variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
+variable (strat : LCSStrategy R G)
+
 -- ANCHOR: winning_assignments
-def winning_assignments
-  {G : LCSLayout}
-  (game : LCSGame G) (i : Fin G.r) :
-  Finset (Assignment G i) :=
+def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = game.b i)
 -- ANCHOR_END: winning_assignments
 
+/-- The local winning probability for a single edge (i, j). -/
+noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=
+  ∑ x ∈ winning_assignments game i, strat.E i x * strat.F j (x j)
 
-/-- The Winning Operator `v` for a given Strategy and Game. -/
-noncomputable def winning_operator
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G) : R :=
+/-- The local loss operator for a single edge (i, j). -/
+noncomputable def local_loss_operator (i : Fin G.r) (j : G.V i) : R :=
+  1 - local_winning_operator game strat i j
+
+/-- The total Winning Operator `v` is the average of local winning probabilities. -/
+noncomputable def winning_operator : R :=
   ∑ i : Fin G.r, ∑ j : G.V i,
   let normalization : ℂ := (G.r * (G.V i).card : ℕ)
-  (1 / normalization) • (∑ x ∈ winning_assignments game i, strat.E i x * strat.F j (x j))
+  (1 / normalization) • local_winning_operator game strat i j
 
-
-noncomputable def loss_operator
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G) : R :=
+/-- The total Loss Operator `1 - v`. -/
+noncomputable def loss_operator : R :=
   1 - winning_operator game strat
 
 private lemma fin2_eq_zero_or_one (a : Fin 2) : a = 0 ∨ a = 1 := by
   match a with | 0 => left; rfl | 1 => right; rfl
 
-private lemma measurement_sum_mul_projector {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (strat : LCSStrategy R G) (i : Fin G.r)
+private lemma measurement_sum_mul_projector (i : Fin G.r)
   (S : Finset (Assignment G i)) (x : Assignment G i) :
   (∑ y ∈ S, strat.E i y) * strat.E i x = if x ∈ S then strat.E i x else 0 := by
   classical
@@ -43,10 +49,7 @@ private lemma measurement_sum_mul_projector {R : Type*} [Ring R] [StarRing R] [A
     intro y hy
     exact (strat.alice_ms i).orthogonal y x (by rintro rfl; exact hx hy)
 
-private lemma alice_A_mul_projector
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout}
-  (strat : LCSStrategy R G) (i : Fin G.r)
+private lemma alice_A_mul_projector (i : Fin G.r)
   (j : G.V i) (x : Assignment G i) :
   Alice_A strat i j * strat.E i x = ((-1 : ℂ) ^ (x j).val) • strat.E i x := by
   classical
@@ -56,10 +59,7 @@ private lemma alice_A_mul_projector
   | 0 => simp [h]
   | 1 => simp [h]
 
-private lemma alice_partial_prod_mul_projector
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout}
-  (strat : LCSStrategy R G) (i : Fin G.r)
+private lemma alice_partial_prod_mul_projector (i : Fin G.r)
   (s : Finset (G.V i)) (x : Assignment G i)
   (comm :
     (s : Set (G.V i)).Pairwise (fun j j' => Commute (Alice_A strat i j) (Alice_A strat i j'))) :
@@ -91,7 +91,7 @@ private lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignmen
     (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
   prod_sign_eq_sum_sign_aux x _
 
-/-- Arithmetic helper: the sign factor `(1/2)(1 + (-1)^b * (-1)^s)` equals the indicator `s = b`. -/
+/-- Arithmetic helper: the sign factor `$(1/2)(1 + (-1)^b * (-1)^s)$` equals the indicator `s = b`. -/
 private lemma sign_indicator (b s : Fin 2) :
     (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
   match b, s with
@@ -100,10 +100,7 @@ private lemma sign_indicator (b s : Fin 2) :
   | 1, 0 => norm_num
   | 1, 1 => norm_num
 
-lemma lemma_4_7_1
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (game : LCSGame G) (strat : LCSStrategy R G)
-  (i : Fin G.r) :
+lemma lemma_4_7_1 (i : Fin G.r) :
   (∑ x ∈ winning_assignments game i, strat.E i x) =
   (1/2 : ℂ) • (1 + (-1 : ℂ)^(game.b i).val •
   ((G.V i).attach.noncommProd
@@ -152,10 +149,7 @@ lemma lemma_4_7_1
   rw [hsign2]
   simp [winning_assignments, Finset.mem_filter]
 
-lemma lemma_4_7_2
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout} (strat : LCSStrategy R G)
-  (i : Fin G.r) (j : G.V i) (y : Fin 2) :
+lemma lemma_4_7_2 (i : Fin G.r) (j : G.V i) (y : Fin 2) :
   (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = y), strat.E i x) =
     (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • Alice_A strat i j) := by
   classical
@@ -183,3 +177,11 @@ lemma lemma_4_7_2
       rw [← hpart]; simp only [neg_smul, one_smul]; abel
     rw [hform, smul_add, ← add_smul]
     norm_num
+
+lemma bob_observable_sq (j : Fin G.s) :
+  Bob_B strat j * Bob_B strat j = 1 :=
+  (bob_is_observable strat j).involutive
+
+lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
+  Alice_A strat i j * Alice_A strat i j = 1 :=
+  (alice_is_observable strat i j).involutive
