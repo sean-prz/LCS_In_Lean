@@ -1,6 +1,6 @@
 import LCS.Basic
 import LCS.ObservableStrategy
-import LCS.MeasurementLemmas
+import LCS.Observables
 import LCS.WinningCondition
 import LCS.MagicSquare
 
