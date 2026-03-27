@@ -1,5 +1,7 @@
 import LCS.Basic
-import LCS.Observables
+import LCS.Observable
+import LCS.Common
+import LCS.Strategy.ProjectorStrategy
 import Mathlib.Order.Fin.Basic
 import Mathlib.Tactic.Abel
 
@@ -34,8 +36,6 @@ noncomputable def winning_operator : R :=
 noncomputable def loss_operator : R :=
   1 - winning_operator game strat
 
-private lemma fin2_eq_zero_or_one (a : Fin 2) : a = 0 ∨ a = 1 := by
-  match a with | 0 => left; rfl | 1 => right; rfl
 
 private lemma measurement_sum_mul_projector (i : Fin G.r)
   (S : Finset (Assignment G i)) (x : Assignment G i) :
@@ -74,9 +74,6 @@ private lemma alice_partial_prod_mul_projector (i : Fin G.r)
       · rw [Algebra.mul_smul_comm, alice_A_mul_projector]
         simp [smul_smul, mul_comm]
 
-private lemma sign_mul (a b : Fin 2) :
-    (-1 : ℂ) ^ a.val * (-1 : ℂ) ^ b.val = (-1 : ℂ) ^ (a + b).val := by
-  fin_cases a <;> fin_cases b <;> simp
 
 private lemma prod_sign_eq_sum_sign_aux {G : LCSLayout} {i : Fin G.r}
   (x : Assignment G i) (s : Finset (G.V i)) :
@@ -91,14 +88,6 @@ private lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignmen
     (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
   prod_sign_eq_sum_sign_aux x _
 
-/-- Arithmetic helper: the sign factor `$(1/2)(1 + (-1)^b * (-1)^s)$` equals the indicator `s = b`. -/
-private lemma sign_indicator (b s : Fin 2) :
-    (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
-  match b, s with
-  | 0, 0 => norm_num
-  | 0, 1 => norm_num
-  | 1, 0 => norm_num
-  | 1, 1 => norm_num
 
 lemma lemma_4_7_1 (i : Fin G.r) :
   (∑ x ∈ winning_assignments game i, strat.E i x) =

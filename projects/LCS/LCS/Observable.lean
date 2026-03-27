@@ -1,0 +1,31 @@
+import LCS.Basic
+import LCS.Measurement
+import Mathlib.Algebra.Star.Module
+import Mathlib.Tactic.Abel
+import Mathlib.Tactic.Ring
+
+set_option linter.unusedSectionVars false
+
+variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
+variable {G : LCSLayout}
+
+structure IsObservable (O : R) : Prop where
+  involutive   : O * O = 1
+  self_adjoint : star O = O
+
+def ObservableOfMeasurementSystem (f : Fin 2 → R) : R :=
+  f 0 - f 1
+
+
+lemma is_observable_of_measurement_system
+  (f : Fin 2 → R) (h : IsMeasurementSystem f) :
+  IsObservable (ObservableOfMeasurementSystem f) where
+  involutive := by
+    dsimp [ObservableOfMeasurementSystem]
+    rw [sub_mul, mul_sub, mul_sub, h.idempotent 0, h.idempotent 1]
+    rw [h.orthogonal 0 1 (by decide), h.orthogonal 1 0 (by decide)]
+    rw [sub_zero, zero_sub, sub_neg_eq_add]
+    exact (Fin.sum_univ_two f).symm.trans h.sum_one
+  self_adjoint := by
+    dsimp [ObservableOfMeasurementSystem]
+    rw [star_sub, h.self_adjoint 0, h.self_adjoint 1]

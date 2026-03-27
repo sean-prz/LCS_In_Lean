@@ -15,15 +15,6 @@ open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]
 
--- ANCHOR: IsMeasurementSystem
-structure IsMeasurementSystem
-  {I : Type*} [Fintype I]
-  (f : I → R) : Prop where
-  sum_one      : ∑ x, f x = 1
-  idempotent   : ∀ x, f x * f x = f x
-  orthogonal   : ∀ x y, x ≠ y → f x * f y = 0
-  self_adjoint : ∀ x, star (f x) = f x
--- ANCHOR_END: IsMeasurementSystem
 
 -- ANCHOR: LCSLayout
 structure LCSLayout where
@@ -42,14 +33,3 @@ abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
 structure LCSGame (G : LCSLayout) where
   b : Fin G.r → Fin 2
 -- ANCHOR_END: LCSGame
-
--- ANCHOR: LCSStrategy
-structure LCSStrategy
-  (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
-  (G : LCSLayout) where
-  E : ∀ i, (Assignment G i → R)
-  F : Fin G.s → (Fin 2 → R)
-  alice_ms : ∀ i, IsMeasurementSystem (E i)
-  bob_ms   : ∀ j, IsMeasurementSystem (F j)
-  commute  : ∀ i j α β, E i α * F j β = F j β * E i α
--- ANCHOR_END: LCSStrategy
