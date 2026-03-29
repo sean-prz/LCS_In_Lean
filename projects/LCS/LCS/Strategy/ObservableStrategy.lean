@@ -9,10 +9,14 @@ namespace ObservableStrategy
 structure ObservableStrategyData
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   (G : LCSLayout) where
-  obs : Fin G.s → R
-  observable : ∀ j, IsObservable (obs j)
+  alice_obs : Fin G.s → R
+  bob_obs : Fin G.s -> R
+  alice_observable : ∀ j, IsObservable (alice_obs j)
+  bob_observable : ∀ j, IsObservable (bob_obs j)
   sameEquation_comm :
-    ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))
+    ∀ i, Pairwise (fun j k : G.V i => Commute (alice_obs j.1) (alice_obs k.1))
+  alice_bob_commute :
+    ∀ j k, Commute (alice_obs j) (bob_obs k)
 
 
 end ObservableStrategy

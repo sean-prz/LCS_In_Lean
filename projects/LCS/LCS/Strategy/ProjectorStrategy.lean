@@ -2,6 +2,8 @@ import LCS.Basic
 import LCS.Common
 import LCS.Measurement
 import LCS.Observable
+import LCS.Strategy.ObservableToProjector
+
 open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
@@ -20,30 +22,16 @@ structure LCSStrategy
 -- ANCHOR_END: LCSStrategy
 
 -- ANCHOR: Alice_A
-/-
-noncomputable def Alice_A (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 0), strat.E i x) -
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 1), strat.E i x)
--/
 noncomputable def Alice_A
   (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
 -- ANCHOR_END: Alice_A
 
 -- ANCHOR: Bob_B
-/-
-def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
-  strat.F j 0 - strat.F j 1
--/
 def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
 -- ANCHOR_END: Bob_B
 
-
-
-noncomputable def ObservableToProjector
-  (O : R) (a : Fin 2) : R :=
-  (1 / 2 : ℂ) • (1 + observableSign a • O)
 
 lemma bob_is_observable (strat : LCSStrategy R G) (j : Fin G.s) :
   IsObservable (Bob_B strat j) :=
