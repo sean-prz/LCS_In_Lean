@@ -25,6 +25,20 @@ fi
 
 echo "Done! Docs are updated."
 
+
+read -p "Do you want to build doc4  [y/N]: " doc_response
+if [[ "$doc_response" =~ ^([yY][eE][sS]|[yY])$ ]]
+then
+	echo "Building doc4"
+	cd "$BASE_DIR/projects/LCS/docbuild"
+	lake build LCS:docs
+	cp -r .lake/build/doc "$BASE_DIR/postprocess_docs/source"
+	cd "$BASE_DIR/postprocess_docs"
+	.venv/bin/python3 main.py
+	cp -r source/doc "$BASE_DIR/docs/doc4"
+fi
+
+
 read -p "Do you want to serve the docs at http://localhost:8004? [y/N]: " serve_response
 if [[ "$serve_response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then

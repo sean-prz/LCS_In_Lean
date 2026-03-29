@@ -25,17 +25,17 @@ set_option verso.exampleModule "LCS.Basic"
 
 
 This semester research project is about formalising Linear Constraint System (LCS) games in Lean4.
-Specifically the current end goal as of \[W05\] is to formalise the sum of square argument in LCS that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
+Specifically the current end goal as of \[W06\] is to formalise the sum of square argument in LCS that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
 
 The exact statements this project is verifying are taken from section 4.7 of Arthur Mehta Thesis  [entanglement and non-locality in games and graphs](https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3c06-4808-a685-deeda43f8fd3/content)
 
-# The CodeBase 
+# The CodeBase
 
 - The Interactive source view for this project is available [here](./source/LCS/)
 
 - The raw source files are available on the public github repository for this project [here](https://github.com/sean-prz/LCS_In_Lean/tree/main/projects/LCS/LCS)
 
-*Structure* 
+*Structure*
 
 The codebase is structured in the following way:
 
@@ -45,4 +45,4 @@ The codebase is structured in the following way:
     - *LCS.WinningCondition* : contains the formalisation of the sum of squares argument that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
 
 
-Section 3 of this manual documents the content of the module *LCS.Basic*.  
+Section 3 of this manual documents the content of the module *LCS.Basic*.

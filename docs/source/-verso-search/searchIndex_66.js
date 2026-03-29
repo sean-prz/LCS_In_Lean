@@ -1,0 +1,1 @@
+window.docContents[66].resolve({"/LCS/WinningCondition/#local_winning_operator":{"contents":"The local winning probability for a single edge (i, j).","context":"","header":"local_winning_operator","id":"/LCS/WinningCondition/#local_winning_operator"}});

@@ -26,6 +26,7 @@ authors := ["Sean Perazzolo, Spring 2026"]
 shortTitle := "LCS in Lean4"
 %%%
 
+New : Documentation by Docs4 following standard mathlib format available [here](./doc4/)
 
 {include 1 DocsLCS.Section1}
 
@@ -35,11 +36,11 @@ shortTitle := "LCS in Lean4"
 # Formalising Linear Constraint System Games
 _To even start proving anything about LCS games, we first need to formalise what an LCS game is and what is a valid strategy for a game. This involves defining the geometry of the game, the requirements for a strategy to be valid, and the specific values of the constraints that define the game._
 
-All of the content below is defined in the module [LCS.Basic](./). 
+All of the content below is defined in the module [LCS.Basic](./).
 
 
 
-## Defining the Layout of an LCS Game 
+## Defining the Layout of an LCS Game
 A LCS Game is defined by his sets of variables and constraints.
 
 We choose to represent the geometry of the game using a structure called LCSLayout, which contains the following data:
@@ -79,14 +80,14 @@ A LCS game is defined for a layout G. It is represent as a function that takes a
 
 ```anchor LCSGame
 structure LCSGame (G : LCSLayout) where
-  b : Fin G.r → ZMod 2
+  b : Fin G.r → Fin 2
 ```
 
 
 ## A Valid Strategy for an LCS Game
 A strategy for an LCS game is modeled by two families of projectors. For each constraint i, Alice has a measurement system Ei over satisfying assignments. For each variable j, Bob has a measurement system Fj over binary outcomes. To ensure the strategy is physically realizable in the commuting operator framework, we require that all of Alice's projectors commute with all of Bob's projectors.
 
-```anchor LCSStrategy
+```anchor LCSStrategy (module := LCS.Strategy.ProjectorStrategy)
 structure LCSStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   (G : LCSLayout) where
@@ -100,7 +101,7 @@ structure LCSStrategy
 ### Measurement Systems (Projective Measurements)
 The mathematical structure that captures the idea of a quantum measurement in the context of our LCS game.
 
-```anchor IsMeasurementSystem (module := LCS.Basic) 
+```anchor IsMeasurementSystem (module := LCS.Measurement)
 structure IsMeasurementSystem
   {I : Type*} [Fintype I]
   (f : I → R) : Prop where
@@ -122,20 +123,14 @@ For Bob, the observable for a given variable j is defined as the difference betw
 
 ### Alice's observable
 
-```anchor Alice_A
+```anchor Alice_A (module := LCS.Strategy.ProjectorStrategy)
 noncomputable def Alice_A
-  {G : LCSLayout}
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
   (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 0), strat.E i x) -
-  (∑ x ∈ Finset.univ.filter (fun (x : Assignment G i) => x j = 1), strat.E i x)
+  ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
 ```
 ### Bob's observable
 
-```anchor Bob_B
-def Bob_B
-  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R]
-  {G : LCSLayout}
-  (strat : LCSStrategy R G) (j : Fin G.s) : R :=
-  strat.F j 0 - strat.F j 1
+```anchor Bob_B (module := LCS.Strategy.ProjectorStrategy)
+def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+  ObservableOfMeasurementSystem (strat.F j)
 ```

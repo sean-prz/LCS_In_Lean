@@ -1,0 +1,1 @@
+window.docContents[200].resolve({"/LCS/Common/#sign_indicator":{"contents":"Arithmetic helper: the sign factor $(1/2)(1 + (-1)^b * (-1)^s)$ equals the indicator s = b.","context":"","header":"sign_indicator","id":"/LCS/Common/#sign_indicator"}});

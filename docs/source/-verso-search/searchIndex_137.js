@@ -1,0 +1,1 @@
+window.docContents[137].resolve({"/LCS/Strategy/ObservableToProjector/#sum_one_observableToProjector":{"contents":"The two projectors associated to a single observable form a complete binary measurement:\n$P_0 + P_1 = 1$.","context":"","header":"sum_one_observableToProjector","id":"/LCS/Strategy/ObservableToProjector/#sum_one_observableToProjector"}});

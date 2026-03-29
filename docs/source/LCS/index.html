@@ -882,10 +882,30 @@ Some CSS frameworks customize details/summary in ways not compatible with Verso'
             <details open=""><summary class="current"><a href="LCS/" title="LCS">LCS</a></summary><div class="leaf">
                 <a href="LCS/Basic/" title="LCS.Basic">Basic</a></div>
               <div class="leaf">
+                <a href="LCS/Common/" title="LCS.Common">Common</a></div>
+              <details><summary>Games</summary><div class="leaf">
+                  <a href="LCS/Games/MagicSquare/" title="LCS.Games.MagicSquare">MagicSquare</a></div>
+                </details><div class="leaf">
                 <a href="LCS/MagicSquare/" title="LCS.MagicSquare">MagicSquare</a></div>
+              <div class="leaf">
+                <a href="LCS/Measurement/" title="LCS.Measurement">Measurement</a></div>
               <div class="leaf">
                 <a href="LCS/MeasurementLemmas/" title="LCS.MeasurementLemmas">MeasurementLemmas</a></div>
               <div class="leaf">
+                <a href="LCS/Observable/" title="LCS.Observable">Observable</a></div>
+              <div class="leaf">
+                <a href="LCS/ObservableStrategy/" title="LCS.ObservableStrategy">ObservableStrategy</a></div>
+              <div class="leaf">
+                <a href="LCS/Observables/" title="LCS.Observables">Observables</a></div>
+              <details><summary>Strategy</summary><div class="leaf">
+                  <a href="LCS/Strategy/Equivalence/" title="LCS.Strategy.Equivalence">Equivalence</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ObservableStrategy/" title="LCS.Strategy.ObservableStrategy">ObservableStrategy</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ObservableToProjector/" title="LCS.Strategy.ObservableToProjector">ObservableToProjector</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ProjectorStrategy/" title="LCS.Strategy.ProjectorStrategy">ProjectorStrategy</a></div>
+                </details><div class="leaf">
                 <a href="LCS/WinningCondition/" title="LCS.WinningCondition">WinningCondition</a></div>
               </details></nav>
           </div>
@@ -896,10 +916,14 @@ Some CSS frameworks customize details/summary in ways not compatible with Verso'
             </ol>
           </header>
         <section class="code-content" id="LCS">
-          <code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-0">import</span><span class="inter-text"> </span><a href="LCS/Basic/#LCS___Basic" title="Module `LCS.Basic`"><span class="module-name token" data-binding="module-name-LCS.Basic">LCS.Basic</span></a><span class="inter-text">
-</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-17">import</span><span class="inter-text"> </span><a href="LCS/MeasurementLemmas/#LCS___MeasurementLemmas" title="Module `LCS.MeasurementLemmas`"><span class="module-name token" data-binding="module-name-LCS.MeasurementLemmas">LCS.MeasurementLemmas</span></a><span class="inter-text">
-</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-46">import</span><span class="inter-text"> </span><a href="LCS/WinningCondition/#LCS___WinningCondition" title="Module `LCS.WinningCondition`"><span class="module-name token" data-binding="module-name-LCS.WinningCondition">LCS.WinningCondition</span></a><span class="inter-text">
-</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-74">import</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#LCS___MagicSquare" title="Module `LCS.MagicSquare`"><span class="module-name token" data-binding="module-name-LCS.MagicSquare">LCS.MagicSquare</span></a></code><div class="md-text mod-doc" id="mod-doc-LCS-1-0">
+          <code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-0">import</span><span class="inter-text"> </span><a href="LCS/Strategy/ObservableStrategy/#LCS___Strategy___ObservableStrategy" title="Module `LCS.Strategy.ObservableStrategy`"><span class="module-name token" data-binding="module-name-LCS.Strategy.ObservableStrategy">LCS.Strategy.ObservableStrategy</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-39">import</span><span class="inter-text"> </span><a href="LCS/Strategy/ProjectorStrategy/#LCS___Strategy___ProjectorStrategy" title="Module `LCS.Strategy.ProjectorStrategy`"><span class="module-name token" data-binding="module-name-LCS.Strategy.ProjectorStrategy">LCS.Strategy.ProjectorStrategy</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-77">import</span><span class="inter-text"> </span><a href="LCS/Strategy/Equivalence/#LCS___Strategy___Equivalence" title="Module `LCS.Strategy.Equivalence`"><span class="module-name token" data-binding="module-name-LCS.Strategy.Equivalence">LCS.Strategy.Equivalence</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-109">import</span><span class="inter-text"> </span><a href="LCS/Strategy/ObservableToProjector/#LCS___Strategy___ObservableToProjector" title="Module `LCS.Strategy.ObservableToProjector`"><span class="module-name token" data-binding="module-name-LCS.Strategy.ObservableToProjector">LCS.Strategy.ObservableToProjector</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-151">import</span><span class="inter-text"> </span><a href="LCS/Observable/#LCS___Observable" title="Module `LCS.Observable`"><span class="module-name token" data-binding="module-name-LCS.Observable">LCS.Observable</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-173">import</span><span class="inter-text"> </span><a href="LCS/Measurement/#LCS___Measurement" title="Module `LCS.Measurement`"><span class="module-name token" data-binding="module-name-LCS.Measurement">LCS.Measurement</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-196">import</span><span class="inter-text"> </span><a href="LCS/WinningCondition/#LCS___WinningCondition" title="Module `LCS.WinningCondition`"><span class="module-name token" data-binding="module-name-LCS.WinningCondition">LCS.WinningCondition</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-224">import</span><span class="inter-text"> </span><a href="LCS/Games/MagicSquare/#LCS___Games___MagicSquare" title="Module `LCS.Games.MagicSquare`"><span class="module-name token" data-binding="module-name-LCS.Games.MagicSquare">LCS.Games.MagicSquare</span></a></code><div class="md-text mod-doc" id="mod-doc-LCS-1-0">
             <h2>
               Linear Constraint System (LCS) Games</h2>
             <p>

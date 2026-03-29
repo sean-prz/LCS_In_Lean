@@ -1,0 +1,1 @@
+window.docContents[219].resolve({"/LCS/Strategy/Equivalence/#_private___0___ObservableStrategy___alice_partial_selfAdjoint":{"contents":"The partial Alice measurement over $s$ is self-adjoint.","context":"","header":"_private.0.ObservableStrategy.alice_partial_selfAdjoint","id":"/LCS/Strategy/Equivalence/#_private___0___ObservableStrategy___alice_partial_selfAdjoint"}});

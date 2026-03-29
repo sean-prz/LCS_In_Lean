@@ -1,0 +1,1 @@
+window.docContents[20].resolve({"/LCS/Strategy/ObservableToProjector/#ObservableToProjector":{"contents":"Converts an observable $O$ and an outcome $a \\in {0, 1}$ to a projector $P = (1/2)(I + (-1)^a O)$.","context":"","header":"ObservableToProjector","id":"/LCS/Strategy/ObservableToProjector/#ObservableToProjector"}});

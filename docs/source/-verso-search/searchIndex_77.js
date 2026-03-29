@@ -1,0 +1,1 @@
+window.docContents[77].resolve({"/LCS/Strategy/ObservableToProjector/#star_observableToProjector":{"contents":"If $O$ is an observable, then the projector\n$P_a = (1/2)(1 + (-1)^a O)$ is self-adjoint.","context":"","header":"star_observableToProjector","id":"/LCS/Strategy/ObservableToProjector/#star_observableToProjector"}});

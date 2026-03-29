@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../../../"><title>LCS.Games.MagicSquare</title><link rel="icon" href="data:,">
+    <script src="popper.js"></script>
+    <script src="tippy.js"></script>
+    <script>
+      
+window.onload = () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector("input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    function blockedByTippy(elem) {
+      // Don't show a new hover until the old ones are all closed.
+      // Scoped to the nearest "top-level block" to avoid being O(n) in the size of the document.
+      var block = elem;
+      const topLevel = new Set(["section", "body", "html", "nav", "header"]);
+      while (block.parentNode && !topLevel.has(block.parentNode.nodeName.toLowerCase())) {
+        block = block.parentNode;
+      }
+      for (const child of block.querySelectorAll(".token, .has-info")) {
+        if (child._tippy && child._tippy.state.isVisible) { return true };
+      }
+      return false;
+    }
+
+    for (const c of document.querySelectorAll(".hl.lean .token")) {
+        if (c.dataset.binding != "") {
+            c.addEventListener("mouseover", (event) => {
+                if (blockedByTactic(c)) {return;}
+                const context = c.closest(".hl.lean").dataset.leanContext;
+                for (const example of document.querySelectorAll(".hl.lean")) {
+                    if (example.dataset.leanContext == context) {
+                        for (const tok of example.querySelectorAll(".token")) {
+                            if (c.dataset.binding == tok.dataset.binding) {
+                                tok.classList.add("binding-hl");
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        c.addEventListener("mouseout", (event) => {
+            for (const tok of document.querySelectorAll(".hl.lean .token")) {
+                tok.classList.remove("binding-hl");
+            }
+        });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    let docsJson = "-verso-docs.json";
+    fetch(docsJson).then((resp) => resp.json()).then((versoDocData) => {
+
+      function hideParentTooltips(element) {
+        let parent = element.parentElement;
+        while (parent) {
+          const tippyInstance = parent._tippy;
+          if (tippyInstance) {
+            tippyInstance.hide();
+          }
+          parent = parent.parentElement;
+        }
+      }
+
+
+
+      const defaultTippyProps = {
+        /* DEBUG -- remove the space: * /
+        onHide(any) { return false; },
+        trigger: "click",
+        // */
+        /* theme: "lean", */
+        maxWidth: "none",
+        appendTo: () => document.body,
+        interactive: true,
+        delay: [100, null],
+        /* ignoreAttributes: true, */
+        followCursor: 'initial',
+        onShow(inst) {
+          if (inst.reference.className == 'tactic') {
+
+            const toggle = inst.reference.querySelector("input.tactic-toggle");
+            if (toggle && toggle.checked) {
+              return false;
+            }
+            hideParentTooltips(inst.reference);
+            //if (blockedByTippy(inst.reference)) { return false; }
+
+          } else if (inst.reference.querySelector(".hover-info") || "versoHover" in inst.reference.dataset) {
+            if (blockedByTactic(inst.reference)) { return false };
+            if (blockedByTippy(inst.reference)) { return false; }
+          } else { // Nothing to show here!
+            return false;
+          }
+        },
+        content (tgt) {
+          const content = document.createElement("span");
+          if (tgt.className == 'tactic') {
+            const state = tgt.querySelector(".tactic-state").cloneNode(true);
+            state.style.display = "block";
+            content.appendChild(state);
+            content.style.display = "block";
+            content.className = "hl lean popup";
+          } else {
+            content.className = "hl lean";
+            content.style.display = "block";
+            content.style.maxHeight = "300px";
+            content.style.overflowY = "auto";
+            content.style.overflowX = "hidden";
+            const hoverId = tgt.dataset.versoHover;
+            const hoverInfo = tgt.querySelector(".hover-info");
+            if (hoverId) { // Docstrings from the table
+              // TODO stop doing an implicit conversion from string to number here
+              let data = versoDocData[hoverId];
+              if (data) {
+                const info = document.createElement("span");
+                info.className = "hover-info";
+                info.style.display = "block";
+                info.innerHTML = data;
+                content.appendChild(info);
+                /* Render docstrings - TODO server-side */
+                if ('undefined' !== typeof marked) {
+                    for (const d of content.querySelectorAll("code.docstring, pre.docstring")) {
+                        const str = d.innerText;
+                        const html = marked.parse(str);
+                        const rendered = document.createElement("div");
+                        rendered.classList.add("docstring");
+                        rendered.innerHTML = html;
+                        d.parentNode.replaceChild(rendered, d);
+                    }
+                }
+              } else {
+                content.innerHTML = "Failed to load doc ID: " + hoverId;
+              }
+            } else if (hoverInfo) { // The inline info, still used for compiler messages
+              content.appendChild(hoverInfo.cloneNode(true));
+            }
+            const extraLinks = tgt.parentElement.dataset['versoLinks'];
+            if (extraLinks) {
+              try {
+                const extras = JSON.parse(extraLinks);
+                const links = document.createElement('ul');
+                links.className = 'extra-doc-links';
+                extras.forEach((l) => {
+                  const li = document.createElement('li');
+                  li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                  links.appendChild(li);
+                });
+                content.appendChild(links);
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          }
+          return content;
+        }
+      };
+
+
+      document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'lean');
+      });
+      document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'warning message');
+      });
+      document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'info message');
+      });
+      document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'error message');
+      });
+      document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'tactic');
+      });
+      let insts = tippy('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort', defaultTippyProps);
+  });
+}
+</script>
+    <style>
+
+.hl.lean {
+  white-space: pre;
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+}
+
+.hl.lean .keyword {
+  color: var(--verso-code-keyword-color,);
+  font-weight: var(--verso-code-keyword-weight, bold);
+  font-style: var(--verso-code-keyword-style, normal);
+  font-family: var(--verso-code-keyword-font-family,);
+}
+
+.hl.lean .const {
+  color: var(--verso-code-const-color,);
+  font-weight: var(--verso-code-const-weight, normal);
+  font-style: var(--verso-code-const-style, normal);
+  font-family: var(--verso-code-const-font-family,);
+}
+
+.hl.lean .var {
+  color: var(--verso-code-var-color,);
+  font-weight: var(--verso-code-var-weight, normal);
+  font-style: var(--verso-code-var-style, italic);
+  font-family: var(--verso-code-var-font-family,);
+
+  position: relative;
+}
+
+.hl.lean .literal, .hl.lean .unknown {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+.hover-container {
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline;
+}
+
+.hl.lean a {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+
+.hl.lean a:hover {
+  text-decoration: currentcolor underline solid;
+}
+
+.hl.lean .hover-info {
+  white-space: normal;
+}
+
+.hl.lean .token .hover-info {
+  display: none;
+  position: absolute;
+  background-color: #e5e5e5;
+  border: 1px solid black;
+  padding: 0.5rem;
+  z-index: 300;
+}
+
+.hl.lean .hover-info.messages {
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding: 0 0.5rem 0 0;
+  display: block;
+}
+
+.hl.lean .hover-info code {
+  white-space: pre-wrap;
+  background: none;
+  color: black;
+}
+
+.hl.lean .hover-info.messages > code {
+  padding: 0.5rem;
+  display: block;
+  width: fit-content;
+}
+
+.hl.lean .hover-info.messages > code:only-child {
+  margin: 0;
+}
+
+.hl.lean .hover-info.messages > code {
+  margin: 0.1rem;
+}
+
+.hl.lean .hover-info.messages > code:not(:first-child) {
+  margin-top: 0rem;
+}
+
+.hl.lean {
+}
+
+.hl.lean.block {
+  display: block;
+}
+
+.hl.lean.inline {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.hl.lean * {
+}
+
+.hl.lean .token {
+  transition: all 0.25s; /* Slight fade for highlights */
+}
+
+@media (hover: hover) {
+  .hl.lean .token.binding-hl, .hl.lean .literal.string:hover, .hl.lean .token.typed:hover {
+    background-color: #eee;
+    border-radius: 2px;
+    transition: none;
+  }
+}
+
+
+.hl.lean .has-info .token:not(.tactic-state):not(.tactic-state *), .hl.lean .has-info .inter-text:not(.tactic-state):not(.tactic-state *) {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-thickness: from-font;
+  text-decoration-skip-ink: none;
+}
+
+.hl.lean .has-info .hover-info {
+  display: none;
+  position: absolute;
+  transform: translate(0.25rem, 0.3rem);
+  border: 1px solid black;
+  padding: 0.5rem;
+  z-index: 400;
+  text-align: left;
+}
+
+.hl.lean .has-info.error :not(.tactic-state):not(.tactic-state *){
+  text-decoration-color: red;
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.error:hover {
+    background-color: #ffb3b3;
+  }
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid #ffb3b3;
+}
+
+.tippy-box[data-theme~='error'] .hl.lean .hover-info.messages > code.error {
+  background: none;
+  border: none;
+}
+
+.error .verso-message, .error .verso-message .token, .error .verso-message label {
+  color: var(--verso-error-color);
+}
+
+.error .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-error-color) !important;
+}
+
+.hl.lean .has-info.warning :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso-warning-indicator-color);
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.warning:hover {
+    background-color:var(--verso-warning-color);
+  }
+}
+
+.hl.lean .hover-info.messages > code.warning {
+  background-color: var(--verso-warning-color);
+}
+
+.lean-output {
+  border-left: 0.2em solid transparent;
+  padding: 0 0 0 0.5em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.lean-output.error {
+  border-color: var(--verso-error-indicator-color);
+}
+
+.lean-output.information {
+  border-color: var(--verso-info-indicator-color);
+}
+
+.lean-output.warning {
+  border-color: var(--verso-warning-indicator-color);
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid var(--verso-warning-color);
+}
+
+.tippy-box[data-theme~='warning'] .hl.lean .hover-info.messages > code.warning {
+  background: none;
+  border: none;
+}
+
+
+.hl.lean .has-info.information :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso-info-indicator-color, blue);
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.information:hover {
+    background-color: #4777ff;
+  }
+}
+
+
+.hl.lean .hover-info.messages > code.information {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid #4777ff;
+}
+
+.tippy-box[data-theme~='info'] .hl.lean .hover-info.messages > code.information {
+  background: none;
+  border: none;
+}
+
+.hl.lean div.docstring {
+  font-family: var(--verso-text-font-family, sans-serif);
+  white-space: normal;
+  max-width: calc(min(40rem, 90vw));
+  width: max-content;
+}
+
+.hl.lean div.docstring > :last-child {
+  margin-bottom: 0;
+}
+
+.hl.lean div.docstring > :first-child {
+  margin-top: 0;
+}
+
+.hl.lean .hover-info .sep {
+  display: block;
+  width: auto;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid #ccc;
+}
+
+.hl.lean code {
+  font-family: var(--verso-code-font-family);
+}
+
+.hl.lean .tactic-state {
+  display: none;
+  position: relative;
+  width: fit-content;
+  border: 1px solid #888888;
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: #ffffff;
+}
+
+.hl.lean.popup .tactic-state {
+  position: static;
+  display: block;
+  width: auto;
+  border: none;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: #ffffff;
+}
+
+
+.hl.lean .tactic {
+  position: relative;
+  display: inline;
+  vertical-align: top;
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.hl.lean .tactic:has(.tactic-toggle:checked) {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+}
+
+.hl.lean .tactic-toggle:checked ~ .tactic-state {
+  display: inline-block;
+  vertical-align: top;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.hl.lean .tactic > label {
+  position: relative;
+  grid-row: 1;
+  display: inline;
+}
+
+@media (hover: hover) {
+  .hl.lean .tactic:has(.tactic-toggle:not(:checked)) > label:hover {
+    background-color: #eeeeee;
+  }
+}
+
+.hl.lean .tactic-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .tactic > label::after {
+  content: "";
+  border: 1px solid #bbbbbb;
+  /* These need to be em, not rem, to scale with the font */
+  border-radius: 1em;
+  height: 0.25em;
+  vertical-align: middle;
+  width: 0.6em;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  display: inline-block;
+  transition: all 0.5s;
+}
+
+/*
+@media (hover: hover) {
+  .hl.lean .tactic > label:hover::after {
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    transition: all 0.5s;
+  }
+}
+*/
+
+.hl.lean .tactic > label:has(+ .tactic-toggle:checked)::after {
+  border: 1px solid #999999;
+  background-color: #999999;
+  transition: all 0.5s;
+}
+
+.hl.lean .tactic-state .goal + .goal {
+  margin-top: 1.5em;
+}
+
+/*
+Some CSS frameworks customize details/summary in ways not compatible with Verso's output.
+*/
+
+.hl.lean details {
+  display: block !important;
+  margin: 0;
+}
+
+.hl.lean details summary {
+  display: list-item !important;
+  margin: 0;
+}
+
+.hl.lean details summary:focus {
+  outline: none;
+  outline-offset: none;
+  color: inherit;
+}
+
+.hl.lean ul > li {
+  margin-bottom: 0;
+}
+
+.hl.lean details summary::marker {
+  display: inline !important;
+}
+
+.hl.lean details > summary:first-of-type {
+  list-style-type: disclosure-closed;
+  list-style-position: inside;
+}
+
+.hl.lean details[open] > summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+.hl.lean details summary::before, .hl.lean details summary::after {
+  content: "" !important;
+  background: none;
+  display: none;
+}
+
+.hl.lean .tactic-state summary {
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: -0.5em;
+}
+
+.hl.lean .tactic-state details {
+  /* These need to be em, not rem, to scale with the font */
+  padding-left: 0.5em;
+}
+
+.hl.lean .case-label {
+  display: block;
+  position: relative;
+}
+
+.hl.lean .case-label input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"])::before {
+  display: inline-block;
+  background-color: black;
+  content: ' ';
+  transition: ease 0.2s;
+  margin-right: 0.7em;
+  clip-path: polygon(100% 0, 0 0, 50% 100%);
+  width: 0.6em;
+  height: 0.6em;
+  vertical-align: middle;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:not(:checked))::before {
+  transform: rotate(-90deg);
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]) {
+
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:checked) {
+
+}
+
+
+.hl.lean .labeled-case > :not(:first-child) {
+  max-height: 0px;
+  display: block;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in;
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: 0.5em;
+  margin-top: 0.1em;
+}
+
+.hl.lean .labeled-case:has(.case-label input[type="checkbox"]:checked) > :not(:first-child) {
+  max-height: 100%;
+}
+
+
+.hl.lean .goal-name::before {
+  font-style: normal;
+  content: "case ";
+}
+
+.hl.lean .goal-name {
+  font-style: italic;
+  font-family: var(--verso-code-font-family);
+  color: inherit;
+}
+
+.hl.lean .hypotheses {
+  display: table;
+}
+
+.hl.lean .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypothesis > * {
+  display: table-cell;
+}
+
+
+.hl.lean .hypotheses .colon {
+  text-align: center;
+  /* This needs to be em, not rem, to scale with the font */
+  min-width: 1em;
+}
+
+.hl.lean .hypotheses .name {
+  text-align: right;
+}
+
+.hl.lean .hypotheses .name,
+.hl.lean .hypotheses .type,
+.hl.lean .conclusion .type {
+  font-family: var(--verso-code-font-family);
+}
+
+.tippy-box {
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+}
+
+.tippy-box[data-theme~='lean'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 1px solid black;
+}
+.tippy-box[data-theme~='lean'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #e5e5e5;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #e5e5e5;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::after {
+  bottom: -11px;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::after {
+  top: -11px;
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #e5e5e5;
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::after {
+  right: -11px;
+  border-width: 11px 0 11px 11px;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #e5e5e5;
+  border-width: 11px 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::after {
+  left: -11px;
+  border-width: 11px 11px 11px 0;
+}
+
+
+
+.tippy-box[data-theme~='warning'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid var(--verso-warning-color);
+}
+
+.tippy-box[data-theme~='error'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid #f7a7af;
+}
+
+.tippy-box[data-theme~='info'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid #99b3c2;
+}
+
+.tippy-box[data-theme~='tactic'] {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: white;
+}
+
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+}
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: var(--verso-text-color);
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+</style><link rel="stylesheet" href="tippy-border.css">
+    <link rel="stylesheet" href="code.css">
+    <script src="-verso-search/elasticlunr.min.js"></script>
+    <script src="-verso-search/fuzzysort.min.js"></script>
+    <script src="-verso-search/searchIndex.js"></script>
+    <script type="module" src="-verso-search/search-init.js"></script>
+    <script src="-verso-search/domain-mappers.js" defer="defer"></script>
+    <link rel="stylesheet" href="-verso-search/search-box.css">
+    <link rel="stylesheet" href="-verso-search/search-highlight.css">
+    <link rel="stylesheet" href="-verso-search/domain-display.css">
+    <script src="-verso-search/search-highlight.js" defer="defer"></script>
+    </head>
+  <body>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle"><label for="menu-toggle" class="hamburger"><span></span><span></span><span></span></label><div class="layout">
+      <aside class="sidebar"><div class="sidebar-content">
+          <nav class="module-tree">
+            <details open=""><summary><a href="LCS/" title="LCS">LCS</a></summary><div class="leaf">
+                <a href="LCS/Basic/" title="LCS.Basic">Basic</a></div>
+              <div class="leaf">
+                <a href="LCS/Common/" title="LCS.Common">Common</a></div>
+              <details open=""><summary>Games</summary><div class="leaf current">
+                  <a href="LCS/Games/MagicSquare/" title="LCS.Games.MagicSquare">MagicSquare</a></div>
+                </details><div class="leaf">
+                <a href="LCS/MagicSquare/" title="LCS.MagicSquare">MagicSquare</a></div>
+              <div class="leaf">
+                <a href="LCS/Measurement/" title="LCS.Measurement">Measurement</a></div>
+              <div class="leaf">
+                <a href="LCS/MeasurementLemmas/" title="LCS.MeasurementLemmas">MeasurementLemmas</a></div>
+              <div class="leaf">
+                <a href="LCS/Observable/" title="LCS.Observable">Observable</a></div>
+              <div class="leaf">
+                <a href="LCS/ObservableStrategy/" title="LCS.ObservableStrategy">ObservableStrategy</a></div>
+              <div class="leaf">
+                <a href="LCS/Observables/" title="LCS.Observables">Observables</a></div>
+              <details><summary>Strategy</summary><div class="leaf">
+                  <a href="LCS/Strategy/Equivalence/" title="LCS.Strategy.Equivalence">Equivalence</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ObservableStrategy/" title="LCS.Strategy.ObservableStrategy">ObservableStrategy</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ObservableToProjector/" title="LCS.Strategy.ObservableToProjector">ObservableToProjector</a></div>
+                <div class="leaf">
+                  <a href="LCS/Strategy/ProjectorStrategy/" title="LCS.Strategy.ProjectorStrategy">ProjectorStrategy</a></div>
+                </details><div class="leaf">
+                <a href="LCS/WinningCondition/" title="LCS.WinningCondition">WinningCondition</a></div>
+              </details></nav>
+          </div>
+        </aside><main class="main-area"><header class="title-bar">
+          <ol class="breadcrumbs">
+            <li>
+              <a href="LCS"><code>LCS</code></a></li>
+            <li>
+              <a href="LCS/Games"><code>Games</code></a></li>
+            <li>
+              <span class="current">MagicSquare</span></li>
+            </ol>
+          </header>
+        <section class="code-content" id="LCS___Games___MagicSquare">
+          <code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-0">import</span><span class="inter-text"> </span><a href="LCS/Basic/#LCS___Basic" title="Module `LCS.Basic`"><span class="module-name token" data-binding="module-name-LCS.Basic">LCS.Basic</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-17">import</span><span class="inter-text"> </span><a href="LCS/Observable/#LCS___Observable" title="Module `LCS.Observable`"><span class="module-name token" data-binding="module-name-LCS.Observable">LCS.Observable</span></a><span class="inter-text">
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Module.import-39">import</span><span class="inter-text"> </span><a href="LCS/Strategy/ProjectorStrategy/#LCS___Strategy___ProjectorStrategy" title="Module `LCS.Strategy.ProjectorStrategy`"><span class="module-name token" data-binding="module-name-LCS.Strategy.ProjectorStrategy">LCS.Strategy.ProjectorStrategy</span></a></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+-- define type mat4 as 4x4 matrices over ℂ
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.abbrev-123">abbrev</span><span class="inter-text"> </span><span class="const token" data-binding="const-mat4" data-verso-hover="556" id="mat4">mat4</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">4</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">4</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℂ</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">-- ANCHOR_END: import
+
+
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-189">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558" id="magic_square_layout">magic_square_layout</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><a href="LCS/Basic/#LCSLayout" title="Definition of `LCSLayout`"><span class="const token" data-binding="const-LCSLayout" data-verso-hover="5">LCSLayout</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="inter-text">
+  </span><a href="LCS/Basic/#LCSLayout___r" title="Definition of `LCSLayout.r`"><span class="const token" data-binding="const-LCSLayout.r" data-verso-hover="559">r</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">6</span><span class="inter-text">
+  </span><a href="LCS/Basic/#LCSLayout___s" title="Definition of `LCSLayout.s`"><span class="const token" data-binding="const-LCSLayout.s" data-verso-hover="559">s</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">9</span><span class="inter-text">
+  </span><a href="LCS/Basic/#LCSLayout___V" title="Definition of `LCSLayout.V`"><span class="const token" data-binding="const-LCSLayout.V" data-verso-hover="560">V</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.fun-256">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.38" data-verso-hover="561">i</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.match-267" data-verso-hover="562">match</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.38" data-verso-hover="561">i</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.match-267" data-verso-hover="562">with</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">0</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">1</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">2</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">1</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">3</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">4</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">5</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">6</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">7</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">8</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">3</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">3</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">6</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">4</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">1</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">4</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">7</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="561">5</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="typed token" data-binding="" data-verso-hover="563">2</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">5</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">8</span><span class="unknown token" data-binding="">}</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">}</span></code><code class="hl lean block" data-lean-context="lean"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="text">{3, 4, 5}</span></code></span></span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-398" data-verso-hover="564">#eval</span></span><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="unknown token" data-binding="">.</span><a href="LCS/Basic/#LCSLayout___V" title="Definition of `LCSLayout.V`"><span class="const token" data-binding="const-LCSLayout.V" data-verso-hover="26">V</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="typed token" data-binding="" data-verso-hover="561">1</span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">6</span><span class="unknown token" data-binding="">)</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.open-439" data-verso-hover="0">open</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Matrix</span></code><code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.open-451" data-verso-hover="0">open</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Kronecker</span></code><code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.open-466" data-verso-hover="0">open</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.openScoped-471">scoped</span><span class="inter-text"> </span><span class="unknown token" data-binding="">BigOperators</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+
+-- Base Pauli Matrices
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-516">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-I2" data-verso-hover="565" id="I2">I2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℂ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">!![</span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">]</span></code><code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-570">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-X" data-verso-hover="566" id="X">X</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℂ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">!![</span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">;</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">]</span></code><code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-623">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-Y" data-verso-hover="567" id="Y">Y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℂ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">!![</span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">-</span><span class="const token" data-binding="const-Complex.I" data-verso-hover="568">Complex.I</span><span class="unknown token" data-binding="">;</span><span class="inter-text"> </span><span class="const token" data-binding="const-Complex.I" data-verso-hover="568">Complex.I</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">]</span></code><code class="hl lean block" data-lean-context="lean"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-693">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-Z" data-verso-hover="569" id="Z">Z</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℂ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">!![</span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">;</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="36">0</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">-</span><span class="typed token" data-binding="" data-verso-hover="36">1</span><span class="unknown token" data-binding="">]</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-749">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-toFin4" data-verso-hover="570" id="toFin4">toFin4</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="var token" data-binding="var-_uniq.9483" data-verso-hover="8">R</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="sort token" data-binding="sort-2022587232982003368" data-verso-hover="9">Type*</span><span class="unknown token" data-binding="">}</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="var token" data-binding="var-_uniq.9508" data-verso-hover="571">M</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">×</span><span class="inter-text"> </span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">×</span><span class="inter-text"> </span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">2</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.9483" data-verso-hover="8">R</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Matrix" data-verso-hover="557">Matrix</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">4</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">4</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.9483" data-verso-hover="8">R</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Matrix.reindex" data-verso-hover="572">Matrix.reindex</span><span class="inter-text"> </span><span class="const token" data-binding="const-finProdFinEquiv" data-verso-hover="573">finProdFinEquiv</span><span class="inter-text"> </span><span class="const token" data-binding="const-finProdFinEquiv" data-verso-hover="573">finProdFinEquiv</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.9508" data-verso-hover="571">M</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+-- The Mermin-Peres Grid
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-928">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-MP_observables" data-verso-hover="574" id="MP_observables">MP_observables</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">9</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#mat4" title="Definition of `mat4`"><span class="const token" data-binding="const-mat4" data-verso-hover="556">mat4</span></a><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">0</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#I2" title="Definition of `I2`"><span class="const token" data-binding="const-I2" data-verso-hover="565">I2</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">1</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#I2" title="Definition of `I2`"><span class="const token" data-binding="const-I2" data-verso-hover="565">I2</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">3</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#I2" title="Definition of `I2`"><span class="const token" data-binding="const-I2" data-verso-hover="565">I2</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">4</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#I2" title="Definition of `I2`"><span class="const token" data-binding="const-I2" data-verso-hover="565">I2</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">5</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">6</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">7</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#Y" title="Definition of `Y`"><span class="const token" data-binding="const-Y" data-verso-hover="567">Y</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#X" title="Definition of `X`"><span class="const token" data-binding="const-X" data-verso-hover="566">X</span></a><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="563">8</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#toFin4" title="Definition of `toFin4`"><span class="const token" data-binding="const-toFin4" data-verso-hover="570">toFin4</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#Z" title="Definition of `Z`"><span class="const token" data-binding="const-Z" data-verso-hover="569">Z</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">⊗ₖ</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#Z" title="Definition of `Z`"><span class="const token" data-binding="const-Z" data-verso-hover="569">Z</span></a><span class="unknown token" data-binding="">)</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+
+</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.noncomputable-1238">noncomputable</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-1252">def</span><span class="inter-text"> </span><span class="has-info warning"><span class="hover-container"><span class="hover-info messages"><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code><code class="verso-message warning"><span class="text"></span><span class="text">declaration uses `</span><span class="highlighted"><span class="inter-text"></span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"></span></span><span class="text">`</span></code></span></span><span class="const token" data-binding="const-Strat_merinPeres" data-verso-hover="575" id="Strat_merinPeres">Strat_merinPeres</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy" title="Definition of `LCSStrategy`"><span class="const token" data-binding="const-LCSStrategy" data-verso-hover="15">LCSStrategy</span></a><span class="inter-text">
+   </span><a href="LCS/MagicSquare/#mat4" title="Definition of `mat4`"><span class="const token" data-binding="const-mat4" data-verso-hover="556">mat4</span></a><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">{</span><span class="inter-text">
+  </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy___F" title="Definition of `LCSStrategy.F`"><span class="const token" data-binding="const-LCSStrategy.F" data-verso-hover="576">F</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.fun-1329">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16333" data-verso-hover="577">j</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16336" data-verso-hover="85">outcome</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text"> </span><a href="LCS/Strategy/ObservableToProjector/#ObservableToProjector" title="Definition of `ObservableToProjector`"><span class="const token" data-binding="const-ObservableToProjector" data-verso-hover="231">ObservableToProjector</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><a href="LCS/MagicSquare/#MP_observables" title="Definition of `MP_observables`"><span class="const token" data-binding="const-MP_observables" data-verso-hover="574">MP_observables</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16333" data-verso-hover="577">j</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16336" data-verso-hover="85">outcome</span><span class="inter-text">
+  </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy___E" title="Definition of `LCSStrategy.E`"><span class="const token" data-binding="const-LCSStrategy.E" data-verso-hover="578">E</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.fun-1402">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15820" data-verso-hover="579">i</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15823" data-verso-hover="580">assignement</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.let-1427" data-verso-hover="35">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15834" data-verso-hover="581">V_i</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="const token" data-binding="const-Finset" data-verso-hover="20">Finset</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="typed token" data-binding="" data-verso-hover="27">9</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="unknown token" data-binding="">.</span><a href="LCS/Basic/#LCSLayout___V" title="Definition of `LCSLayout.V`"><span class="const token" data-binding="const-LCSLayout.V" data-verso-hover="26">V</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15820" data-verso-hover="579">i</span><span class="inter-text">
+    </span><span class="var token" data-binding="var-_uniq.15834" data-verso-hover="581">V_i</span><span class="unknown token" data-binding="">.</span><span class="const token" data-binding="const-Finset.attach" data-verso-hover="118">attach</span><span class="unknown token" data-binding="">.</span><span class="const token" data-binding="const-Finset.noncommProd" data-verso-hover="94">noncommProd</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(</span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.fun-1515">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15900" data-verso-hover="582">j_idx</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.let-1538" data-verso-hover="35">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15996" data-verso-hover="583">obs</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#MP_observables" title="Definition of `MP_observables`"><span class="const token" data-binding="const-MP_observables" data-verso-hover="574">MP_observables</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15900" data-verso-hover="582">j_idx</span><span class="inter-text">
+          </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.let-1580" data-verso-hover="35">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16119" data-verso-hover="85">val</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15823" data-verso-hover="580">assignement</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15900" data-verso-hover="582">j_idx</span><span class="inter-text">
+          </span><a href="LCS/Strategy/ObservableToProjector/#ObservableToProjector" title="Definition of `ObservableToProjector`"><span class="const token" data-binding="const-ObservableToProjector" data-verso-hover="231">ObservableToProjector</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15996" data-verso-hover="583">obs</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16119" data-verso-hover="85">val</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">(</span><span class="tactic"><label for="tactic-state-5500477868347758859-1659-1661-1386"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-1659" data-verso-hover="42">by</span></label><input type="checkbox" class="tactic-toggle" id="tactic-state-5500477868347758859-1659-1661-1386"><span class="tactic-state"><span class="goal"><span class="hypotheses"><span class="hypothesis"><span class="name"><span class="var token" data-binding="var-_uniq.15820" data-verso-hover="579">i</span></span><span class="colon">:</span><span class="type"><span class="inter-text"></span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="unknown token" data-binding="">.</span><a href="LCS/Basic/#LCSLayout___r" title="Definition of `LCSLayout.r`"><span class="const token" data-binding="const-LCSLayout.r" data-verso-hover="19">r</span></a></span></span><span class="hypothesis"><span class="name"><span class="var token" data-binding="var-_uniq.15823" data-verso-hover="580">assignement</span></span><span class="colon">:</span><span class="type"><span class="inter-text"></span><a href="LCS/Basic/#Assignment" title="Definition of `Assignment`"><span class="const token" data-binding="const-Assignment" data-verso-hover="21">Assignment</span></a><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15820" data-verso-hover="579">i</span></span></span><span class="hypothesis"><span class="name"><span class="var token" data-binding="var-_uniq.15834" data-verso-hover="581">V_i</span></span><span class="colon">:</span><span class="type"><span class="inter-text"></span><span class="const token" data-binding="const-Finset" data-verso-hover="20">Finset</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Fin" data-verso-hover="18">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">9</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#magic_square_layout" title="Definition of `magic_square_layout`"><span class="const token" data-binding="const-magic_square_layout" data-verso-hover="558">magic_square_layout</span></a><span class="unknown token" data-binding="">.</span><a href="LCS/Basic/#LCSLayout___V" title="Definition of `LCSLayout.V`"><span class="const token" data-binding="const-LCSLayout.V" data-verso-hover="26">V</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15820" data-verso-hover="579">i</span></span></span></span><span class="conclusion"><span class="prefix">⊢ </span><span class="type"><span class="unknown token" data-binding="">(↑</span><span class="var token" data-binding="var-_uniq.15834" data-verso-hover="581">V_i</span><span class="unknown token" data-binding="">.</span><span class="const token" data-binding="const-Finset.attach" data-verso-hover="118">attach</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">.</span><span class="const token" data-binding="const-Set.Pairwise" data-verso-hover="92">Pairwise</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-Function.onFun" data-verso-hover="315">Function.onFun</span><span class="inter-text"> </span><span class="const token" data-binding="const-Commute" data-verso-hover="93">Commute</span><span class="inter-text"> </span><span class="keyword token" data-binding="">fun</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16773" data-verso-hover="582">j_idx</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16776" data-verso-hover="583">obs</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><a href="LCS/MagicSquare/#MP_observables" title="Definition of `MP_observables`"><span class="const token" data-binding="const-MP_observables" data-verso-hover="574">MP_observables</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">↑</span><span class="var token" data-binding="var-_uniq.16773" data-verso-hover="582">j_idx</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16777" data-verso-hover="85">val</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.15823" data-verso-hover="580">assignement</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16773" data-verso-hover="582">j_idx</span><span class="unknown token" data-binding="">;</span><span class="inter-text">
+    </span><a href="LCS/Strategy/ObservableToProjector/#ObservableToProjector" title="Definition of `ObservableToProjector`"><span class="const token" data-binding="const-ObservableToProjector" data-verso-hover="231">ObservableToProjector</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16776" data-verso-hover="583">obs</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.16777" data-verso-hover="85">val</span><span class="unknown token" data-binding="">)</span></span></span></span></span></span><span class="inter-text"> </span><span class="tactic"><label for="tactic-state-7-1662-1667-1388"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.tacticSorry-1662" data-verso-hover="584">sorry</span></label><input type="checkbox" class="tactic-toggle" id="tactic-state-7-1662-1667-1388"><span class="tactic-state">All goals completed! 🐙</span></span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy___alice_ms" title="Definition of `LCSStrategy.alice_ms`"><span class="const token" data-binding="const-LCSStrategy.alice_ms" data-verso-hover="585">alice_ms</span></a><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.sorry-1683" data-verso-hover="540">sorry</span><span class="inter-text">-- To be proven
+  </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy___bob_ms" title="Definition of `LCSStrategy.bob_ms`"><span class="const token" data-binding="const-LCSStrategy.bob_ms" data-verso-hover="586">bob_ms</span></a><span class="inter-text">   </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.sorry-1718" data-verso-hover="540">sorry</span><span class="inter-text"> -- To be proven
+  </span><a href="LCS/Strategy/ProjectorStrategy/#LCSStrategy___commute" title="Definition of `LCSStrategy.commute`"><span class="const token" data-binding="const-LCSStrategy.commute" data-verso-hover="587">commute</span></a><span class="inter-text">  </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.sorry-1754" data-verso-hover="540">sorry</span><span class="inter-text"> -- To be proven
+</span><span class="unknown token" data-binding="">}</span></code><code class="hl lean block" data-lean-context="lean"><span class="inter-text">
+/- #eval Strat_merinPeres.F (0: Fin 9) (0: Fin 2) -/
+</span><span class="unknown token" data-binding=""></span></code></section>
+        </main></div>
+    </body>
+  </html>

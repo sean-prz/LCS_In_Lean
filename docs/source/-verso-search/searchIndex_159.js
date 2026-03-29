@@ -1,0 +1,1 @@
+window.docContents[159].resolve({"/LCS/WinningCondition/#loss_operator":{"contents":"The total Loss Operator 1 - v.","context":"","header":"loss_operator","id":"/LCS/WinningCondition/#loss_operator"}});

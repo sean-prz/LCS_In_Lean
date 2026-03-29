@@ -1,0 +1,1 @@
+window.docContents[188].resolve({"/LCS/Strategy/Equivalence/#ObservableStrategy___JointOn":{"contents":"Partial joint measurement over a finite subset $s \\subseteq V_i$.\nThis is used to prove the normalization of Alice's full measurement by induction on $s$.","context":"","header":"ObservableStrategy.JointOn","id":"/LCS/Strategy/Equivalence/#ObservableStrategy___JointOn"}});

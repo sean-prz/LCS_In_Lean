@@ -35,11 +35,11 @@
         "shortTitle": null,
         "number": "2"}]},
      "address": "/Introduction-to-Linear-Constraint-System-Games/"}],
-   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Defining-the-Layout-of-an-LCS-Game-":
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Defining-the-Layout-of-an-LCS-Game":
    [{"id":
-     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Defining-the-Layout-of-an-LCS-Game-",
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games--Defining-the-Layout-of-an-LCS-Game",
      "data":
-     {"title": "Defining the Layout of an LCS Game ",
+     {"title": "Defining the Layout of an LCS Game",
       "shortTitle": null,
       "sectionNum": "3.1.",
       "context":
@@ -49,7 +49,7 @@
        {"title": "Formalising Linear Constraint System Games",
         "shortTitle": null,
         "number": "3"},
-       {"title": "Defining the Layout of an LCS Game ",
+       {"title": "Defining the Layout of an LCS Game",
         "shortTitle": null,
         "number": "1"}]},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
@@ -195,11 +195,11 @@
         "shortTitle": null,
         "number": "3"}]},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
-   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-CodeBase-":
+   "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-CodeBase":
    [{"id":
-     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-CodeBase-",
+     "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-CodeBase",
      "data":
-     {"title": "The CodeBase ",
+     {"title": "The CodeBase",
       "shortTitle": null,
       "sectionNum": "1.1.",
       "context":
@@ -207,7 +207,7 @@
         "shortTitle": "LCS in Lean4",
         "number": null},
        {"title": "About This Project", "shortTitle": null, "number": "1"},
-       {"title": "The CodeBase ", "shortTitle": null, "number": "1"}]},
+       {"title": "The CodeBase", "shortTitle": null, "number": "1"}]},
      "address": "/About-This-Project/"}],
    "Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project":
    [{"id":
@@ -305,7 +305,7 @@
        "context":
        ["Formalisation of Linear Constraints Systems games in Lean4",
         "Formalising Linear Constraint System Games",
-        "Defining the Layout of an LCS Game "]}},
+        "Defining the Layout of an LCS Game"]}},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "LCSLayout.r":
    [{"id": "LCSLayout___r",
@@ -315,7 +315,7 @@
        "context":
        ["Formalisation of Linear Constraints Systems games in Lean4",
         "Formalising Linear Constraint System Games",
-        "Defining the Layout of an LCS Game "]}},
+        "Defining the Layout of an LCS Game"]}},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "LCSLayout.V":
    [{"id": "LCSLayout___V",
@@ -325,7 +325,7 @@
        "context":
        ["Formalisation of Linear Constraints Systems games in Lean4",
         "Formalising Linear Constraint System Games",
-        "Defining the Layout of an LCS Game "]}},
+        "Defining the Layout of an LCS Game"]}},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "LCSLayout":
    [{"id": "LCSLayout",
@@ -335,7 +335,7 @@
        "context":
        ["Formalisation of Linear Constraints Systems games in Lean4",
         "Formalising Linear Constraint System Games",
-        "Defining the Layout of an LCS Game "]}},
+        "Defining the Layout of an LCS Game"]}},
      "address": "/Formalising-Linear-Constraint-System-Games/"}],
    "LCSGame.b":
    [{"id": "LCSGame___b",

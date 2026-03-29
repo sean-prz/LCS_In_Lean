@@ -1,0 +1,1 @@
+window.docContents[161].resolve({"/LCS/Strategy/Equivalence/#_private___0___ObservableStrategy___alice_partial_idempotent":{"contents":"The partial Alice measurement over $s$ is idempotent.","context":"","header":"_private.0.ObservableStrategy.alice_partial_idempotent","id":"/LCS/Strategy/Equivalence/#_private___0___ObservableStrategy___alice_partial_idempotent"}});

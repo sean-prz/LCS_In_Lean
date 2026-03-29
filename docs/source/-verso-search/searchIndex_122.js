@@ -1,0 +1,1 @@
+window.docContents[122].resolve({"/LCS/Strategy/ObservableToProjector/#isMeasurementSystem_observableToProjector":{"contents":"Given an observable $O$, the mapping ObservableToProjector O is a measurement system.","context":"","header":"isMeasurementSystem_observableToProjector","id":"/LCS/Strategy/ObservableToProjector/#isMeasurementSystem_observableToProjector"}});

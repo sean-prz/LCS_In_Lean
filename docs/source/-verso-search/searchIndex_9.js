@@ -1,0 +1,1 @@
+window.docContents[9].resolve({"/LCS/WinningCondition/#local_loss_operator":{"contents":"The local loss operator for a single edge (i, j).","context":"","header":"local_loss_operator","id":"/LCS/WinningCondition/#local_loss_operator"}});

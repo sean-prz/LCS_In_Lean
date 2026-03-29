@@ -1,0 +1,1 @@
+window.docContents[49].resolve({"/LCS/Strategy/Equivalence/#ObservableStrategy___jointOn_sum_one":{"contents":"Summing the partial joint projectors over all assignments on $s = V_i$ gives $1$.","context":"","header":"ObservableStrategy.jointOn_sum_one","id":"/LCS/Strategy/Equivalence/#ObservableStrategy___jointOn_sum_one"}});

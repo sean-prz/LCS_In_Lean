@@ -1,0 +1,1 @@
+window.docContents[141].resolve({"/LCS/Strategy/ObservableToProjector/#commute_observableToProjector":{"contents":"If observables $O₁$ and $O₂$ commute, then all corresponding projectors\n$P_a(O₁)$ and $P_b(O₂)$ commute as well.","context":"","header":"commute_observableToProjector","id":"/LCS/Strategy/ObservableToProjector/#commute_observableToProjector"}});
