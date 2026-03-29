@@ -1,12 +1,13 @@
 import LCS.Basic
-import LCS.Observables
+import LCS.Observable
+import LCS.Strategy.ProjectorStrategy
 
 -- define type mat4 as 4x4 matrices over ℂ
 abbrev mat4 := Matrix (Fin 4) (Fin 4) ℂ
 -- ANCHOR_END: import
 
 
-def magic_square_layout : LCSLayout  := { 
+def magic_square_layout : LCSLayout  := {
   r := 6
   s := 9
   V := fun i =>
@@ -37,7 +38,7 @@ def toFin4 {R : Type*} (M : Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) R) : Matrix
   Matrix.reindex finProdFinEquiv finProdFinEquiv M
 
 -- The Mermin-Peres Grid
-def MP_observables : Fin 9 → mat4 
+def MP_observables : Fin 9 → mat4
   | 0 => toFin4 (X  ⊗ₖ I2)
   | 1 => toFin4 (I2 ⊗ₖ X)
   | 2 => toFin4 (X  ⊗ₖ X)
@@ -49,14 +50,14 @@ def MP_observables : Fin 9 → mat4
   | 8 => toFin4 (Z  ⊗ₖ Z)
 
 
-noncomputable def Strat_merinPeres : LCSStrategy 
-   mat4 magic_square_layout := 
+noncomputable def Strat_merinPeres : LCSStrategy
+   mat4 magic_square_layout :=
   {
   F := fun j outcome => ObservableToProjector (MP_observables j) outcome
   E := fun i assignement =>
     let V_i : Finset (Fin 9) := magic_square_layout.V i
-    V_i.attach.noncommProd 
-        (fun j_idx => 
+    V_i.attach.noncommProd
+        (fun j_idx =>
           let obs := MP_observables j_idx
           let val := assignement j_idx
           ObservableToProjector obs val)
@@ -64,8 +65,6 @@ noncomputable def Strat_merinPeres : LCSStrategy
   alice_ms := sorry-- To be proven
   bob_ms   := sorry -- To be proven
   commute  := sorry -- To be proven
-} 
+}
 
 /- #eval Strat_merinPeres.F (0: Fin 9) (0: Fin 2) -/
-
-
