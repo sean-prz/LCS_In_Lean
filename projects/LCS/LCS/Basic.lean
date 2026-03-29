@@ -11,6 +11,19 @@ import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.Algebra.Star.Module
 import Mathlib.LinearAlgebra.Matrix.ConjTranspose
 
+/-!
+# Linear Constraint System (LCS) Game Layout
+
+This module defines the basic geometric structure of a Linear Constraint System (LCS) game.
+An LCS game is defined by a set of binary variables and a set of linear equations
+over $\mathbb{F}_2$.
+
+## Key Definitions
+- `LCSLayout`: The structure describing the relationship between equations and variables.
+- `Assignment`: A local mapping of values to variables in a specific equation.
+- `LCSGame`: The specification of the right-hand sides of the linear equations.
+-/
+
 open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]

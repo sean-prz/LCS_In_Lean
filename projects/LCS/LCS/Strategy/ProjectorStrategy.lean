@@ -4,6 +4,22 @@ import LCS.Measurement
 import LCS.Observable
 import LCS.Strategy.ObservableToProjector
 
+/-!
+# Projector-based Strategy for LCS Games
+
+This module defines the standard formalism for LCS game strategies using
+projector measurement systems. In this formalism, players' strategies are
+represented by families of projectors $\{E_{i,x}\}$ and $\{F_{j,y}\}$.
+
+## Key Definitions
+- `LCSStrategy`: The core structure representing a projector-based strategy.
+- `Alice_A`, `Bob_B`: Derived observables extracted from the projector measurements.
+
+## Key Lemmas
+- `alice_is_observable`, `bob_is_observable`: Proves that the derived operators are observables.
+- `alice_observables_commute`, `alice_bob_commute`: Verification of commutation relations.
+-/
+
 open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]

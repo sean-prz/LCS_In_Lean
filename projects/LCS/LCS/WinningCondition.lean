@@ -5,6 +5,24 @@ import LCS.Strategy.ProjectorStrategy
 import Mathlib.Order.Fin.Basic
 import Mathlib.Tactic.Abel
 
+/-!
+# Winning Condition and Loss Operators
+
+This module formalizes the concepts of winning and loss operators for an LCS game.
+Specifically, it defines the probability of a strategy winning the game
+and decomposes it into local contributions from each equation.
+
+## Key Definitions
+- `winning_assignments`: The set of local assignments that satisfy the $i$-th linear equation.
+- `local_winning_operator`: The operator representing the success probability for a single variable in an equation.
+- `winning_operator`: The average success probability across all variables and equations.
+- `loss_operator`: The complement of the winning operator ($1 - v$).
+
+## Key Theorems
+- `lemma_4_7_1`: Relates the sum of Alice's winning projectors to the product of her observables.
+- `lemma_4_7_2`: Connects Alice's marginal projectors to her observables.
+-/
+
 open scoped BigOperators
 
 set_option linter.unusedSectionVars false

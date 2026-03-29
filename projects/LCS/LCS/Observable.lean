@@ -4,6 +4,23 @@ import Mathlib.Algebra.Star.Module
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Ring
 
+/-!
+# Observables in LCS Games
+
+This module defines the algebraic properties of quantum observables
+in the context of Linear Constraint System (LCS) games. An observable
+is represented as a self-adjoint, involutive operator.
+
+## Key Definitions
+- `IsObservable`: A property of an element $O$ in a star-ring if $O^2=1$ and $O^\dagger=O$.
+- `ObservableOfMeasurementSystem`: Constructs an observable from a binary projector measurement $P$
+  as $O = P_0 - P_1$.
+
+## Key Lemmas
+- `is_observable_of_measurement_system`: Verifies that the difference of projectors
+  in a binary measurement forms a valid observable.
+-/
+
 set_option linter.unusedSectionVars false
 
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]

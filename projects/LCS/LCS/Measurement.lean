@@ -1,5 +1,24 @@
 import LCS.Basic
 
+/-!
+# Projector Measurement Systems
+
+This module defines the concept of a projector-valued measurement (PVM) in a general star-ring.
+A measurement system is a family of self-adjoint, idempotent, and mutually orthogonal elements
+that sum to the identity.
+
+## Key Definitions
+- `IsMeasurementSystem`: A property of a family of elements $\{E_i\}_{i \in I}$ indicating
+  they form a valid measurement system.
+- `InducedMeasurementSystem`: A construction to build a measurement over a smaller outcome space
+  given a function $g : I \to J$.
+
+## Key Lemmas
+- `measurement_commute`: Projectors in a measurement system always commute with each other.
+- `measurement_intersection`: The product of two sums of projectors corresponds to the sum
+  over the intersection of the outcome sets.
+-/
+
 open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]
