@@ -83,126 +83,74 @@ noncomputable def AliceMeasurementFromObservables
 This is used to prove the normalization of Alice's full measurement by induction on $s$. -/
 noncomputable def JointOn
   (S : ObservableStrategyData R G) (i : Fin G.r)
-  (s : Finset (G.V i)) (assignment : ↥s → Fin 2) : R :=
+  (s : Finset (G.V i)) (assignment : ∀ j ∈ s, Fin 2) : R :=
   s.noncommProd
     (fun j =>
       if hj : j ∈ s then
-        ObservableToProjector (S.alice_obs j.1) (assignment ⟨j, hj⟩)
+        ObservableToProjector (S.alice_obs j.1) (assignment j hj)
       else 1)
     (by
       intro j hj j' hj' hne
       have hjs : j ∈ s := hj
       have hj's : j' ∈ s := hj'
       simpa [Function.onFun, hjs, hj's] using
-        (projector_commute_in_equation S i j j' (assignment ⟨j, hj⟩) (assignment ⟨j', hj'⟩)))
+        (projector_commute_in_equation S i j j' (assignment j hjs) (assignment j' hj's)))
 
 /-- Summing the partial joint projectors over all assignments on $s = V_i$ gives $1$. -/
 lemma jointOn_sum_one
   (S : ObservableStrategyData R G) :
-  ∀ i, (∑ assignment : ↥((Finset.univ : Finset (G.V i))) → Fin 2,
+  ∀ i, (∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
       JointOn S i (Finset.univ : Finset (G.V i)) assignment) = 1 := by
   classical
   intro i
   let sumJointOn :
-      ∀ s : Finset (G.V i), (∑ assignment : ↥s → Fin 2, JointOn S i s assignment) = 1 := by
+      ∀ s : Finset (G.V i), (∑ assignment : ∀ j ∈ s, Fin 2, JointOn S i s assignment) = 1 := by
     intro s
     induction s using Finset.induction with
     | empty =>
         simp [JointOn]
     | @insert a s ha ih =>
-        let a0 : ↥(insert a s) := ⟨a, Finset.mem_insert_self a s⟩
-        let assignEquiv : (↥(insert a s) → Fin 2) ≃ Fin 2 × (↥s → Fin 2) :=
-          { toFun := fun assignment =>
-              (assignment a0, fun j => assignment ⟨j.1, Finset.mem_insert_of_mem j.2⟩)
-            invFun := fun p j =>
-              if hja : j.1 = a then
-                p.1
-              else
-                p.2 ⟨j.1, by
-                  rcases Finset.mem_insert.mp j.2 with hj | hj
-                  · exact (hja hj).elim
-                  · exact hj⟩
-            left_inv := by
-              intro assignment
-              funext j
-              by_cases hja : j.1 = a
-              · have hj : j = a0 := by
-                  apply Subtype.ext
-                  simpa [a0] using hja
-                simpa [hj]
-              · have hjs : j.1 ∈ s := by
-                  rcases Finset.mem_insert.mp j.2 with hj | hj
-                  · exact (hja hj).elim
-                  · exact hj
-                have hsub :
-                    (⟨j.1, Finset.mem_insert_of_mem hjs⟩ : ↥(insert a s)) = j := by
-                  exact Subtype.ext (by rfl)
-                simp [hja, hsub]
-            right_inv := by
-              intro p
-              rcases p with ⟨b, β⟩
-              apply Prod.ext
-              · simp [a0]
-              · funext j
-                have hne : (j : G.V i) ≠ a := by
-                  intro h
-                  apply ha
-                  simpa [h] using j.2
-                simp [hne] }
+        let assignEquiv :=
+          Finset.insertPiProdEquiv (fun _ : G.V i => Fin 2) (s := s) (a := a) ha
         calc
-          (∑ assignment : ↥(insert a s) → Fin 2, JointOn S i (insert a s) assignment)
-              = ∑ p : Fin 2 × (↥s → Fin 2),
+          (∑ assignment : ∀ j ∈ insert a s, Fin 2, JointOn S i (insert a s) assignment)
+              = ∑ p : Fin 2 × (∀ j ∈ s, Fin 2),
                   JointOn S i (insert a s) (assignEquiv.symm p) := by
                     refine Fintype.sum_equiv assignEquiv _ _ ?_
-                    intro x
+                    intro assignment
                     simpa using congrArg (fun y => JointOn S i (insert a s) y)
-                      (assignEquiv.left_inv x).symm
-          _ = ∑ p : Fin 2 × (↥s → Fin 2),
+                      (assignEquiv.left_inv assignment).symm
+          _ = ∑ p : Fin 2 × (∀ j ∈ s, Fin 2),
                 ObservableToProjector (S.alice_obs a.1) p.1 * JointOn S i s p.2 := by
                 refine Finset.sum_congr rfl ?_
-                intro p hp
+                intro p
+                simp only [Finset.mem_univ, true_implies]
                 rcases p with ⟨b, β⟩
                 unfold JointOn
                 rw [Finset.noncommProd_insert_of_notMem _ _ _ _ ha]
-                simp [assignEquiv, a0]
+                have ha_eval : assignEquiv.symm (b, β) a (Finset.mem_insert_self a s) = b := by
+                  change Finset.prodPiInsert (fun _ : G.V i => Fin 2) (b, β) a
+                    (Finset.mem_insert_self a s) = b
+                  simp [Finset.prodPiInsert]
+                simp [ha_eval]
                 apply congrArg (fun z => ObservableToProjector (S.alice_obs a.1) b * z)
-                refine Finset.noncommProd_congr rfl ?_ (by
-                  intro x hx y hy hxy
-                  have hxa : x ≠ a := by
-                    intro h
-                    apply ha
-                    simpa [h] using hx
-                  have hya : y ≠ a := by
-                    intro h
-                    apply ha
-                    simpa [h] using hy
-                  have hxv :
-                      (if h : x = a ∨ x ∈ s then
-                        ObservableToProjector (S.alice_obs x.1) (if h : x = a then b else β ⟨x, hx⟩)
-                      else 1) =
-                        ObservableToProjector (S.alice_obs x.1) (β ⟨x, hx⟩) := by
-                    have hx' : x ∈ s := hx
-                    simp [hx', hxa]
-                  have hyv :
-                      (if h : y = a ∨ y ∈ s then
-                        ObservableToProjector (S.alice_obs y.1) (if h : y = a then b else β ⟨y, hy⟩)
-                      else 1) =
-                        ObservableToProjector (S.alice_obs y.1) (β ⟨y, hy⟩) := by
-                    have hy' : y ∈ s := hy
-                    simp [hy', hya]
-                  simpa [Function.onFun, hxv, hyv] using
-                    projector_commute_in_equation S i x y (β ⟨x, hx⟩) (β ⟨y, hy⟩))
+                refine Finset.noncommProd_congr rfl ?_ ?_
                 · intro x hx
                   have hxa : x ≠ a := by
                     intro h
                     apply ha
                     simpa [h] using hx
-                  simp [assignEquiv, hx, hxa]
-          _ = ∑ β : ↥s → Fin 2,
+                  have hx_eval :
+                      assignEquiv.symm (b, β) x (Finset.mem_insert_of_mem hx) = β x hx := by
+                    change Finset.prodPiInsert (fun _ : G.V i => Fin 2) (b, β) x
+                      (Finset.mem_insert_of_mem hx) = β x hx
+                    simp [Finset.prodPiInsert, hxa]
+                  simp [hx, hx_eval]
+          _ = ∑ β : ∀ j ∈ s, Fin 2,
                 (∑ b : Fin 2, ObservableToProjector (S.alice_obs a.1) b) * JointOn S i s β := by
                 rw [Fintype.sum_prod_type]
                 simp [Fin.sum_univ_two, add_mul, Finset.sum_add_distrib]
-          _ = ∑ β : ↥s → Fin 2, JointOn S i s β := by
+          _ = ∑ β : ∀ j ∈ s, Fin 2, JointOn S i s β := by
                 have hsum : (∑ b : Fin 2, ObservableToProjector (S.alice_obs a.1) b) = 1 := by
                   rw [Fin.sum_univ_two]
                   exact sum_one_observableToProjector (S.alice_obs a.1)
@@ -215,27 +163,26 @@ lemma aliceMeasurementFromObservables_sum_one
   (S : ObservableStrategyData R G) (i : Fin G.r) :
   (∑ assignment : Assignment G i, AliceMeasurementFromObservables S i assignment) = 1 := by
   classical
-  let e : Assignment G i ≃ (↥((Finset.univ : Finset (G.V i))) → Fin 2) := {
-    toFun := fun assignment j => assignment j.1
-    invFun := fun assignment j => assignment ⟨j, Finset.mem_univ j⟩
+  let e : Assignment G i ≃ (∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2) := {
+    toFun := fun assignment j _ => assignment j
+    invFun := fun assignment j => assignment j (by simp)
     left_inv := by
       intro assignment
       funext j
       rfl
     right_inv := by
       intro assignment
-      funext j
-      cases j
-      rfl
+      funext j hj
+      simp
   }
   calc
     (∑ assignment : Assignment G i, AliceMeasurementFromObservables S i assignment)
-        = ∑ assignment : ↥((Finset.univ : Finset (G.V i))) → Fin 2,
+        = ∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
             AliceMeasurementFromObservables S i (e.symm assignment) := by
               refine Fintype.sum_equiv e _ _ ?_
               intro assignment
               rfl
-    _ = ∑ assignment : ↥((Finset.univ : Finset (G.V i))) → Fin 2,
+    _ = ∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
           JointOn S i (Finset.univ : Finset (G.V i)) assignment := by
             refine Finset.sum_congr rfl ?_
             intro assignment h
