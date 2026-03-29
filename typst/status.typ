@@ -2,7 +2,7 @@
 #set page("a4", margin: 1.75cm, numbering: "1.")
 #show: checklist
 
-= Formalization of the Mermin-Peres game in Lean
+= Project Status Report on "Formalising the SOS Decomposition of LCS Games in Lean"
 #v(2em)
 
 
