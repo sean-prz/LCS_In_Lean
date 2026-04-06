@@ -17,6 +17,12 @@ lemma I2_eq_one : I2 = (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
   · fin_cases j <;> simp [I2]
   · fin_cases j <;> simp [I2]
 
+lemma I2_comm_left (P : Matrix (Fin 2) (Fin 2) ℂ) : Commute I2 P := by
+  rw [I2_eq_one]; exact Commute.one_left P
+
+lemma I2_comm_right (P : Matrix (Fin 2) (Fin 2) ℂ) : Commute P I2 := by
+  rw [I2_eq_one]; exact Commute.one_right P
+
 lemma I2_sq : I2 * I2 = 1 := by
   ext i j
   fin_cases i
