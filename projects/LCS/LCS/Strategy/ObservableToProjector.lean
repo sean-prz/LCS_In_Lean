@@ -56,6 +56,7 @@ lemma idempotent_observableToProjector (O : R) (hO : IsObservable O) (a : Fin 2)
             rw [add_mul, one_mul, mul_add, mul_one, hO.involutive]
             rw [two_smul]
             abel
+
       _ = (1 / 2 : ℂ) • (1 + O) := by
             rw [smul_smul]
             norm_num

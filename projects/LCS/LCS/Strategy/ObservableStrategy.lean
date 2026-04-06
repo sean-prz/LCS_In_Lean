@@ -18,7 +18,6 @@ game using the observable formalism. In this formalism, players choose observabl
 
 open scoped BigOperators
 
-namespace ObservableStrategy
 
 structure ObservableStrategyData
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
@@ -32,5 +31,59 @@ structure ObservableStrategyData
   alice_bob_commute :
     ∀ j k, Commute (alice_obs j) (bob_obs k)
 
+open Matrix
+open Kronecker
 
-end ObservableStrategy
+def bipartiteAliceLift {n : Type*} [Fintype n] [DecidableEq n] (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
+  M ⊗ₖ (1 : Matrix n n ℂ)
+
+def bipartiteBobLift {n : Type*} [Fintype n] [DecidableEq n] (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
+  (1 : Matrix n n ℂ) ⊗ₖ M
+
+lemma bipartiteAliceLift_observable {n : Type*} [Fintype n] [DecidableEq n]
+    {M : Matrix n n ℂ} (h : IsObservable M) : IsObservable (bipartiteAliceLift M) where
+  involutive := by
+    change (M ⊗ₖ (1 : Matrix n n ℂ)) * (M ⊗ₖ (1 : Matrix n n ℂ)) = 1
+    rw [← mul_kronecker_mul, h.involutive, mul_one, one_kronecker_one]
+  self_adjoint := by
+    change (M ⊗ₖ (1 : Matrix n n ℂ))ᴴ = M ⊗ₖ 1
+    have h1 : (1 : Matrix n n ℂ)ᴴ = 1 := by exact Matrix.conjTranspose_one
+    have hM_ct : Mᴴ = M := by simpa [star_eq_conjTranspose] using h.self_adjoint
+    rw [conjTranspose_kronecker, hM_ct, h1]
+
+lemma bipartiteBobLift_observable {n : Type*} [Fintype n] [DecidableEq n]
+    {M : Matrix n n ℂ} (h : IsObservable M) : IsObservable (bipartiteBobLift M) where
+  involutive := by
+    change ((1 : Matrix n n ℂ) ⊗ₖ M) * ((1 : Matrix n n ℂ) ⊗ₖ M) = 1
+    rw [← mul_kronecker_mul, h.involutive, mul_one, one_kronecker_one]
+  self_adjoint := by
+    change ((1 : Matrix n n ℂ) ⊗ₖ M)ᴴ = 1 ⊗ₖ M
+    have h1 : (1 : Matrix n n ℂ)ᴴ = 1 := by exact Matrix.conjTranspose_one
+    have hM_ct : Mᴴ = M := by simpa [star_eq_conjTranspose] using h.self_adjoint
+    rw [conjTranspose_kronecker, hM_ct, h1]
+
+lemma bipartite_alice_bob_commute {n : Type*} [Fintype n] [DecidableEq n]
+    (M N : Matrix n n ℂ) : Commute (bipartiteAliceLift M) (bipartiteBobLift N) := by
+  change (M ⊗ₖ (1 : Matrix n n ℂ)) * ((1 : Matrix n n ℂ) ⊗ₖ N) = ((1 : Matrix n n ℂ) ⊗ₖ N) * (M ⊗ₖ (1 : Matrix n n ℂ))
+  rw [← mul_kronecker_mul, ← mul_kronecker_mul, mul_one, one_mul, mul_one, one_mul]
+
+lemma bipartiteAliceLift_commute {n : Type*} [Fintype n] [DecidableEq n]
+    {M N : Matrix n n ℂ} (h : Commute M N) : Commute (bipartiteAliceLift M) (bipartiteAliceLift N) := by
+  change (M ⊗ₖ (1 : Matrix n n ℂ)) * (N ⊗ₖ (1 : Matrix n n ℂ)) = (N ⊗ₖ (1 : Matrix n n ℂ)) * (M ⊗ₖ (1 : Matrix n n ℂ))
+  rw [← mul_kronecker_mul, ← mul_kronecker_mul, h]
+
+noncomputable def BipartiteObservableStrategy
+    {n : Type*} [Fintype n] [DecidableEq n]
+    {G : LCSLayout}
+    (obs : Fin G.s → Matrix n n ℂ)
+    (obs_is_observable : ∀ j, IsObservable (obs j))
+    (sameEquation_comm : ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))) :
+    ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G where
+  alice_obs := fun j => bipartiteAliceLift (obs j)
+  bob_obs := fun j => bipartiteBobLift (obs j)
+  alice_observable := fun j => bipartiteAliceLift_observable (obs_is_observable j)
+  bob_observable := fun j => bipartiteBobLift_observable (obs_is_observable j)
+  sameEquation_comm := fun i => by
+    intro a b hab
+    exact bipartiteAliceLift_commute (sameEquation_comm i hab)
+  alice_bob_commute := fun j k => bipartite_alice_bob_commute (obs j) (obs k)

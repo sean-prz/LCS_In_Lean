@@ -17,12 +17,10 @@ which converts an `ObservableStrategyData` into an `LCSStrategy`. It proves that
 - Alice and Bob's measurements commute as required by the LCS game structure.
 -/
 
-open ObservableStrategy
 open scoped BigOperators
 
 set_option linter.unusedSectionVars false
 
-namespace ObservableStrategy
 
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
 variable {G : LCSLayout}
@@ -177,7 +175,7 @@ lemma aliceMeasurementFromObservables_sum_one
   }
   calc
     (∑ assignment : Assignment G i, AliceMeasurementFromObservables S i assignment)
-        = ∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
+      = ∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
             AliceMeasurementFromObservables S i (e.symm assignment) := by
               refine Fintype.sum_equiv e _ _ ?_
               intro assignment
@@ -360,9 +358,6 @@ lemma aliceMeasurement_bobMeasurement_commute
     Finset.noncommProd_commute (Finset.univ : Finset (G.V i)) f comm _ hBob
   simpa [AliceMeasurementFromObservables, BobMeasurementFromObservables] using hcomm_prod.eq.symm
 
-end ObservableStrategy
-
-open ObservableStrategy
 
 /-- The observable strategy data induces a projector-valued LCS strategy by taking, for each
 observable, its associated two-outcome spectral projectors. -/
