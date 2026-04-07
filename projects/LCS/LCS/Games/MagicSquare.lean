@@ -39,7 +39,7 @@ open scoped BigOperators
 -- The Mermin-Peres Grid
 /-- The 9 observables for the Mermin-Peres magic square, defined as Kronecker products of
 Pauli matrices (X, Y, Z) and the identity (I2). -/
-def MP_observables : Fin 9 → mat4
+def magic_square_grid : Fin 9 → mat4
   | 0 => X  ⊗ₖ I2
   | 1 => I2 ⊗ₖ X
   | 2 => X  ⊗ₖ X
@@ -50,21 +50,26 @@ def MP_observables : Fin 9 → mat4
   | 7 => Y  ⊗ₖ X
   | 8 => Z  ⊗ₖ Z
 
-lemma MP_observable (j : Fin 9) : IsObservable (MP_observables j) := by
-  fin_cases j
-  · simpa [MP_observables] using kronecker_observable X_observable I2_observable
-  · simpa [MP_observables] using kronecker_observable I2_observable X_observable
-  · simpa [MP_observables] using kronecker_observable X_observable X_observable
-  · simpa [MP_observables] using kronecker_observable I2_observable Y_observable
-  · simpa [MP_observables] using kronecker_observable Y_observable I2_observable
-  · simpa [MP_observables] using kronecker_observable Y_observable Y_observable
-  · simpa [MP_observables] using kronecker_observable X_observable Y_observable
-  · simpa [MP_observables] using kronecker_observable Y_observable X_observable
-  · simpa [MP_observables] using kronecker_observable Z_observable Z_observable
+/-- A tactic to automatically prove that a matrix is an observable,
+assuming it is a Kronecker product of Pauli matrices. -/
+macro "crush_observable" : tactic => `(tactic| {
+  dsimp [magic_square_grid]
+  repeat (
+    first
+    | apply kronecker_observable
+    | exact I2_observable
+    | exact X_observable
+    | exact Y_observable
+    | exact Z_observable
+  )
+})
+
+lemma magic_square_is_observable (j : Fin 9) : IsObservable (magic_square_grid j) := by
+  fin_cases j <;> crush_observable
 
 
 macro "crush_comm" : tactic => `(tactic| {
-  dsimp [MP_observables]
+  dsimp [magic_square_grid]
   first
   | (apply kronecker_comm_of_comm; all_goals {
       first
@@ -91,26 +96,26 @@ macro "solve_line_comm" : tactic => `(tactic| {
   <;> crush_comm
 })
 
-lemma row1_comm : Pairwise (fun j k : magic_square_layout.V (0 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma row1_comm : Pairwise (fun j k : magic_square_layout.V (0 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma row2_comm : Pairwise (fun j k : magic_square_layout.V (1 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma row2_comm : Pairwise (fun j k : magic_square_layout.V (1 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma row3_comm : Pairwise (fun j k : magic_square_layout.V (2 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma row3_comm : Pairwise (fun j k : magic_square_layout.V (2 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col1_comm : Pairwise (fun j k : magic_square_layout.V (3 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma col1_comm : Pairwise (fun j k : magic_square_layout.V (3 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col2_comm : Pairwise (fun j k : magic_square_layout.V (4 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma col2_comm : Pairwise (fun j k : magic_square_layout.V (4 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col3_comm : Pairwise (fun j k : magic_square_layout.V (5 : Fin 6) => Commute (MP_observables j.1) (MP_observables k.1)) := by
+lemma col3_comm : Pairwise (fun j k : magic_square_layout.V (5 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
 lemma MP_sameEquation_comm (i : Fin 6) :
-    Pairwise (fun j k : magic_square_layout.V i => Commute (MP_observables j.1) (MP_observables k.1)) := by
+    Pairwise (fun j k : magic_square_layout.V i => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   fin_cases i
   · exact row1_comm
   · exact row2_comm
@@ -124,4 +129,4 @@ This strategy uses `BipartiteObservableStrategy` to lift the 9 `MP_observables` 
 valid `ObservableStrategyData` on a 16x16 bipartite space. It relies on
 `MP_sameEquation_comm` to satisfy the commutativity constraints for each equation. -/
 noncomputable def Strat_merminPeres : ObservableStrategyData mat16 magic_square_layout :=
-  BipartiteObservableStrategy MP_observables MP_observable MP_sameEquation_comm
+  BipartiteObservableStrategy magic_square_grid magic_square_is_observable MP_sameEquation_comm
