@@ -2,13 +2,22 @@ import LCS.Basic
 import LCS.Observable
 import LCS.Strategy.ObservableStrategy
 import LCS.Pauli
+/-!
+# Mermin-Peres Magic Square Game
 
--- Single-party and bipartite matrix types for the Mermin-Peres strategy.
+This module defines the layout for the Mermin-Peres magic square Linear Constraint System (LCS) game
+and provides a valid quantum strategy for it using observables.
+
+It verifies the commutativity requirements (both local within equations and global bipartite commutativity)
+necessary to define a valid `ObservableStrategyData`.
+-/
+
 abbrev mat4 := Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) ℂ
 abbrev mat16 := Matrix ((Fin 2 × Fin 2) × (Fin 2 × Fin 2)) ((Fin 2 × Fin 2) × (Fin 2 × Fin 2)) ℂ
--- ANCHOR_END: import
 
 
+/-- The layout of the Mermin-Peres magic square game.
+It consists of 6 equations (3 rows and 3 columns) over 9 variables (the cells of the 3x3 grid). -/
 def magic_square_layout : LCSLayout  := {
   r := 6
   s := 9
@@ -21,8 +30,6 @@ def magic_square_layout : LCSLayout  := {
   | 4 => {1, 4, 7}
   | 5 => {2, 5, 8}
   }
-#eval magic_square_layout.V (1: Fin 6)
-
 
 open Matrix
 open Kronecker
@@ -30,6 +37,8 @@ open scoped BigOperators
 
 
 -- The Mermin-Peres Grid
+/-- The 9 observables for the Mermin-Peres magic square, defined as Kronecker products of
+Pauli matrices (X, Y, Z) and the identity (I2). -/
 def MP_observables : Fin 9 → mat4
   | 0 => X  ⊗ₖ I2
   | 1 => I2 ⊗ₖ X
@@ -110,5 +119,9 @@ lemma MP_sameEquation_comm (i : Fin 6) :
   · exact col2_comm
   · exact col3_comm
 
+/-- The Mermin-Peres strategy for the magic square game.
+This strategy uses `BipartiteObservableStrategy` to lift the 9 `MP_observables` to a
+valid `ObservableStrategyData` on a 16x16 bipartite space. It relies on
+`MP_sameEquation_comm` to satisfy the commutativity constraints for each equation. -/
 noncomputable def Strat_merminPeres : ObservableStrategyData mat16 magic_square_layout :=
   BipartiteObservableStrategy MP_observables MP_observable MP_sameEquation_comm
