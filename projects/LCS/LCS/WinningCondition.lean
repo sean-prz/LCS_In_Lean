@@ -200,3 +200,85 @@ lemma bob_observable_sq (j : Fin G.s) :
 lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
   A[i, j] * A[i, j] = 1 :=
   (alice_is_observable strat i j).involutive
+
+/-- The product of Alice's observables for all variables in equation `i`. -/
+noncomputable def Alice_Row_Prod (i : Fin G.r) : R :=
+  (G.V i).attach.noncommProd (fun j => A[i, j]) (fun j _ j' _ _ => alice_observables_commute strat i j j')
+
+/-- The Sum of Squares decomposition of the local loss operator. -/
+theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
+  local_loss_operator game strat i j =
+    (1/8 : ℂ) • (
+      (1 - B[j] * A[i, j])^2 +
+      (1 - (-1)^(b[i]).val • Alice_Row_Prod strat i)^2 +
+      (1 - (-1)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
+    ) := by
+
+  sorry
+
+-- Below we build each individual step of local_loss_sos
+private lemma local_loss_sos_step1 (i : Fin G.r) (j : G.V i) :
+  local_loss_operator game strat i j =
+    1 - ∑ y : Fin 2, F[j, y] * (∑ x ∈ S[i].filter (fun x => x j = y), E[i, x]) := by
+  unfold local_loss_operator local_winning_operator
+  congr 1
+  rw [show (∑ y : Fin 2, F[j, y] * (∑ x ∈ S[i].filter (fun x => x j = y), E[i, x]))
+      = ∑ y : Fin 2, ∑ x ∈ S[i].filter (fun x => x j = y), E[i, x] * F[j, y] by
+    congr 1; ext y
+    rw [Finset.mul_sum]
+    congr 1; ext x
+    exact (strat.commute i ↑j x y).symm]
+  rw [← Finset.sum_fiberwise S[i] (fun x => x j) (fun x => E[i, x] * F[j, x j])]
+  congr 1; ext y
+  apply Finset.sum_congr rfl
+  intro x hx
+  simp only [Finset.mem_filter] at hx
+  rw [hx.2]
+
+private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
+    1 - ∑ y : Fin 2, F[j, y] * (∑ x ∈ S[i].filter (fun x => x j = y), E[i, x]) =
+    1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
+      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i) *
+                 (1 + (-1 : ℂ) ^ y.val • A[i, j])) := by
+  classical
+  congr 1
+  -- Pull (1/4) scalar inside the RHS sum
+  rw [Finset.smul_sum]
+  -- Now both sides are ∑ y, ...; prove pointwise
+  apply Finset.sum_congr rfl
+  intro y _
+  -- Rewrite the filtered sum as intersection via measurement_intersection
+  -- S[i].filter (x j = y) = S[i] ∩ univ.filter (x j = y)
+  have hfilt : S[i].filter (fun x => x j = y) =
+      S[i] ∩ Finset.univ.filter (fun x => x j = y) := by
+    ext x; simp [winning_assignments, Finset.mem_filter, Finset.mem_inter]
+  rw [hfilt, ← measurement_intersection (strat.alice_ms i)]
+  -- Apply lemma_4_7_1 and lemma_4_7_2
+  rw [lemma_4_7_2 strat i j y]
+  have h471 := lemma_4_7_1 game strat i
+  rw [show ∑ x ∈ S[i], E[i, x] = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i)
+      from h471]
+  -- Simplify: F * ((1/2 • P) * (1/2 • Q)) = (1/4) • (F * (P * Q))
+  simp only [smul_mul_assoc, mul_smul_comm, ← smul_assoc]
+  norm_num [mul_assoc]
+
+private lemma local_loss_sos_step3 (i : Fin G.r) (j : G.V i) :
+    1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
+      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i) *
+                 (1 + (-1 : ℂ) ^ y.val • A[i, j])) =
+    1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
+      F[j, y] * (1 + (-1 : ℂ) ^ y.val • A[i, j] +
+                 (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
+                 ((-1 : ℂ) ^ y.val * (-1 : ℂ) ^ (b[i]).val) •
+                   (Alice_Row_Prod strat i * A[i, j])) := by
+  congr 1
+  -- Strip (1/4) • scalar from both sides
+  congr 1
+  apply Finset.sum_congr rfl
+  intro y _
+  congr 1
+  -- Expand (1 + c_b • P) * (1 + c_y • A) by bilinearity,
+  -- then reorder the four additive summands with abel.
+  simp only [add_mul, mul_add, one_mul, mul_one,
+             smul_mul_assoc, mul_smul_comm, smul_smul, smul_add]
+  abel
