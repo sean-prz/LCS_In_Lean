@@ -12,12 +12,6 @@ This module formalizes the concepts of winning and loss operators for an LCS gam
 Specifically, it defines the probability of a strategy winning the game
 and decomposes it into local contributions from each equation.
 
-## Key Definitions
-- `winning_assignments`: The set of local assignments that satisfy the $i$-th linear equation.
-- `local_winning_operator`: The operator representing the success probability for a single variable in an equation.
-- `winning_operator`: The average success probability across all variables and equations.
-- `loss_operator`: The complement of the winning operator ($1 - v$).
-
 ## Key Theorems
 - `lemma_4_7_1`: Relates the sum of Alice's winning projectors to the product of her observables.
 - `lemma_4_7_2`: Connects Alice's marginal projectors to her observables.
@@ -205,18 +199,70 @@ lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
 noncomputable def Alice_Row_Prod (i : Fin G.r) : R :=
   (G.V i).attach.noncommProd (fun j => A[i, j]) (fun j _ j' _ _ => alice_observables_commute strat i j j')
 
-/-- The Sum of Squares decomposition of the local loss operator. -/
-theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
-  local_loss_operator game strat i j =
-    (1/8 : ℂ) • (
-      (1 - B[j] * A[i, j])^2 +
-      (1 - (-1)^(b[i]).val • Alice_Row_Prod strat i)^2 +
-      (1 - (-1)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
-    ) := by
+-- Helper: Alice and Bob observables always commute (generalized)
+private lemma alice_bob_commute_gen (i : Fin G.r) (k : G.V i)
+    (j_var : Fin G.s) :
+    Commute (Alice_A strat i k) (Bob_B strat j_var) := by
+  unfold Alice_A Bob_B ObservableOfMeasurementSystem
+    InducedMeasurementSystem
+  apply Commute.sub_left <;> apply Commute.sub_right
+  all_goals {
+    apply Commute.sum_left; intro x _; apply strat.commute }
 
-  sorry
+-- Helper: Bob observable commutes with Alice row product
+private lemma bob_commute_row_prod (i : Fin G.r) (j : G.V i) :
+    Commute B[j] (Alice_Row_Prod strat i) := by
+  unfold Alice_Row_Prod
+  apply Finset.noncommProd_commute
+  intro k _
+  exact (alice_bob_commute_gen strat i k j).symm
 
--- Below we build each individual step of local_loss_sos
+-- Helper: Alice observable commutes with Alice row product
+private lemma alice_commute_row_prod (i : Fin G.r)
+    (j : G.V i) :
+    Commute (Alice_A strat i j)
+      (Alice_Row_Prod strat i) := by
+  unfold Alice_Row_Prod
+  apply Finset.noncommProd_commute
+  intro k _
+  exact alice_observables_commute strat i j k
+
+-- Helper: Alice row product is involutive (RP² = 1)
+private lemma row_prod_sq (i : Fin G.r) :
+    Alice_Row_Prod strat i *
+      Alice_Row_Prod strat i = 1 := by
+  have hsum := (strat.alice_ms i).sum_one
+  have hcomm :
+      (((G.V i).attach : Set (G.V i)).Pairwise
+        (fun j j' =>
+          Commute (Alice_A strat i j)
+            (Alice_A strat i j'))) :=
+    fun j _ j' _ _ =>
+      alice_observables_commute strat i j j'
+  suffices h : ∀ x : Assignment G i,
+      Alice_Row_Prod strat i *
+        Alice_Row_Prod strat i *
+          strat.E i x = strat.E i x by
+    calc Alice_Row_Prod strat i *
+          Alice_Row_Prod strat i
+        = _ * 1 := (mul_one _).symm
+      _ = _ * ∑ x, strat.E i x := by rw [hsum]
+      _ = ∑ x, _ * strat.E i x :=
+          Finset.mul_sum _ _ _
+      _ = ∑ x, strat.E i x := by
+          apply Finset.sum_congr rfl
+          intro x _; exact h x
+      _ = 1 := hsum
+  intro x
+  unfold Alice_Row_Prod
+  rw [mul_assoc,
+      alice_partial_prod_mul_projector strat i _ x hcomm,
+      Algebra.mul_smul_comm,
+      alice_partial_prod_mul_projector strat i _ x hcomm,
+      smul_smul]
+  simp only [← Finset.prod_mul_distrib, ← pow_add, ← two_mul, pow_mul,
+             neg_one_sq, one_pow, Finset.prod_const_one, one_smul]
+
 private lemma local_loss_sos_step1 (i : Fin G.r) (j : G.V i) :
   local_loss_operator game strat i j =
     1 - ∑ y : Fin 2, F[j, y] * (∑ x ∈ S[i].filter (fun x => x j = y), E[i, x]) := by
@@ -282,3 +328,95 @@ private lemma local_loss_sos_step3 (i : Fin G.r) (j : G.V i) :
   simp only [add_mul, mul_add, one_mul, mul_one,
              smul_mul_assoc, mul_smul_comm, smul_smul, smul_add]
   abel
+
+private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
+    1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
+      F[j, y] * (1 + (-1 : ℂ) ^ y.val • A[i, j] +
+                 (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
+                 ((-1 : ℂ) ^ y.val * (-1 : ℂ) ^ (b[i]).val) •
+                   (Alice_Row_Prod strat i * A[i, j])) =
+    1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] +
+                         (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
+                         B[j] * ((-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j]))) := by
+  congr 1; congr 1
+  -- Split ∑ y : Fin 2 into y = 0 and y = 1
+  rw [Fin.sum_univ_two]
+  -- (-1)^0 = 1, (-1)^1 = -1
+  simp only [Fin.val_zero, pow_zero, one_smul, one_mul,
+             Fin.val_one, pow_one, neg_smul, neg_mul]
+  -- B[j] = F[j, 0] - F[j, 1]  (by definition)
+  have hbob : B[j] = strat.F (↑j) 0 - strat.F (↑j) 1 :=
+    show ObservableOfMeasurementSystem (strat.F (↑j)) = _ by
+      simp [ObservableOfMeasurementSystem]
+  -- F[j, 0] + F[j, 1] = 1
+  have hone : strat.F (↑j) 0 + strat.F (↑j) 1 = 1 := by
+    have h := (strat.bob_ms (↑j)).sum_one
+    rw [Fin.sum_univ_two] at h; exact h
+  -- Abbreviate for readability
+  set F0 := strat.F (↑j) 0
+  set F1 := strat.F (↑j) 1
+  set Aj := A[i, j]
+  set RP := Alice_Row_Prod strat i
+  set c := (-1 : ℂ) ^ (b[i]).val
+  -- Distribute F * (four-term sum) and normalize negations
+  simp only [mul_add, mul_neg, mul_smul_comm]
+  -- Collect the 4 pairs using auxiliary identities
+  have h1 : F0 * (1 : R) + F1 * 1 = 1 := by rw [mul_one, mul_one, hone]
+  have h2 : F0 * Aj + -(F1 * Aj) = B[↑j] * Aj := by
+    rw [← sub_eq_add_neg, ← sub_mul, ← hbob]
+  have h3 : c • (F0 * RP) + c • (F1 * RP) = c • RP := by
+    rw [← smul_add, ← add_mul, hone, one_mul]
+  have h4 : c • (F0 * (RP * Aj)) + -(c • (F1 * (RP * Aj))) =
+      c • (B[↑j] * (RP * Aj)) := by
+    rw [← sub_eq_add_neg, ← smul_sub, ← sub_mul, ← hbob]
+  -- Rearrange the 8 terms into the 4 pairs and apply the identities
+  calc F0 * 1 + F0 * Aj + c • (F0 * RP) + c • (F0 * (RP * Aj)) +
+       (F1 * 1 + -(F1 * Aj) + c • (F1 * RP) + -(c • (F1 * (RP * Aj))))
+      = (F0 * 1 + F1 * 1) + (F0 * Aj + -(F1 * Aj)) +
+        (c • (F0 * RP) + c • (F1 * RP)) +
+        (c • (F0 * (RP * Aj)) + -(c • (F1 * (RP * Aj)))) := by abel
+    _ = 1 + B[↑j] * Aj + c • RP + c • (B[↑j] * (RP * Aj)) := by
+        rw [h1, h2, h3, h4]
+
+-- Step 5: final algebraic simplification to SOS form
+private lemma local_loss_sos_step5 (i : Fin G.r)
+    (j : G.V i) :
+    1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] +
+      (-1 : ℂ) ^ (b[i]).val •
+        Alice_Row_Prod strat i +
+      B[j] * ((-1 : ℂ) ^ (b[i]).val •
+        (Alice_Row_Prod strat i * A[i, j]))) =
+    (1/8 : ℂ) • (
+      (1 - B[j] * A[i, j])^2 +
+      (1 - (-1)^(b[i]).val •
+        Alice_Row_Prod strat i)^2 +
+      (1 - (-1)^(b[i]).val •
+        (Alice_Row_Prod strat i *
+          A[i, j] * B[j]))^2) := by
+  let O1 := B[j] * A[i, j]
+  let O2 := (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i
+  let O3 := (-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j])
+  rw [mul_smul_comm]
+  rw [← mul_assoc]
+  rw [(bob_commute_row_prod strat i j).eq]
+  rw [mul_assoc]
+  nth_rw 2  [(alice_bob_commute_gen strat i j j).symm.eq]
+  rw [← mul_assoc]
+  change 1 - (1 / 4 : ℂ) • (1 + O1 + O2 + O3) = _
+  change
+
+  sorry
+
+/-- The Sum of Squares decomposition of the local loss operator. -/
+theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
+  local_loss_operator game strat i j =
+    (1/8 : ℂ) • (
+      (1 - B[j] * A[i, j])^2 +
+      (1 - (-1)^(b[i]).val • Alice_Row_Prod strat i)^2 +
+      (1 - (-1)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
+    ) := by
+  rw [local_loss_sos_step1 game strat i j,
+      local_loss_sos_step2 game strat i j,
+      local_loss_sos_step3 game strat i j,
+      local_loss_sos_step4 game strat i j,
+      local_loss_sos_step5 game strat i j]
