@@ -5,6 +5,7 @@ import LCS.Strategy.ProjectorStrategy
 import Mathlib.Order.Fin.Basic
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.NoncommRing
+import Mathlib.Tactic.Module
 
 /-!
 # Winning Condition and Loss Operators
@@ -108,6 +109,9 @@ private lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignmen
   ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
     (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
   prod_sign_eq_sum_sign_aux x _
+
+lemma sign_fin2_sq (x : Fin 2) : (-1 : ℂ) ^ x.val * (-1 : ℂ) ^ x.val = 1 := by
+  rcases fin2_eq_zero_or_one x with rfl | rfl <;> norm_num
 
 
 lemma lemma_4_7_1 (i : Fin G.r) :
@@ -398,7 +402,6 @@ private lemma local_loss_sos_step5 (i : Fin G.r)
   let O1 := B[j] * A[i, j]
   let O2 := (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i
   let O3 := (-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j])
-
   -- Rearange to be able to rewrite in terms of O1, O2, O3
   rw [mul_smul_comm]
   rw [← mul_assoc]
@@ -406,33 +409,49 @@ private lemma local_loss_sos_step5 (i : Fin G.r)
   rw [mul_assoc]
   nth_rw 2  [(alice_bob_commute_gen strat i j j).symm.eq]
   rw [← mul_assoc]
-
   -- Perform the rewriting in terms of O1, O2, O3
   change 1 - (1 / 4 : ℂ) • (1 + O1 + O2 + O3) = (1/8 : ℂ) • ((1 - O1)^2 + (1 - O2)^2 + (1 - O3)^2)
-
   -- Lemmas about O1, O2, O3
-  have hO1 : O1 * O1 = 1 := by sorry
-  have hO2 : O2 * O2 = 1 := by sorry
-  have hO3 : O3 * O3 = 1 := by sorry
+  have hO1 : O1 * O1 = 1 := by
+    unfold O1
+    nth_rw 1 [(alice_bob_commute_gen strat i j j).symm.eq] -- B A = A B
+    simp only [mul_assoc, ← mul_assoc B[↑j] B[↑j], bob_observable_sq, one_mul, alice_observable_sq]
+  have hO2 : O2 * O2 = 1 := by
+    unfold O2
+    rw [smul_mul_assoc, mul_smul_comm, smul_smul]
+    rw [row_prod_sq strat i]
+    rw [sign_fin2_sq (b[i])]
+    norm_num
+  have hO3 : O3 * O3 = 1 := by
+    unfold O3
+    rw [smul_mul_assoc, mul_smul_comm, smul_smul]
+    rw [sign_fin2_sq (b[i])]
+    norm_num
+    simp only [← mul_assoc]
+    rw [← alice_commute_row_prod strat i j]
+    rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i) B[↑j] (Alice_Row_Prod strat i)]
+    rw [(bob_commute_row_prod strat i j).eq]
+    rw [← mul_assoc ]
+    rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i * Alice_Row_Prod strat i * B[↑j]) A[i,j] B[↑j]]
+    rw [alice_bob_commute_gen strat i j j]
+    rw [← mul_assoc]
+    simp only [row_prod_sq, alice_observable_sq, bob_observable_sq, mul_one, mul_assoc]
 
   -- expand the square on RHS
   simp only [sq, sub_mul, mul_sub, one_mul, mul_one]
   rw [hO1, hO2, hO3]
-  noncomm_ring
+  module
 
 
 
-
-
-  sorry
 
 /-- The Sum of Squares decomposition of the local loss operator. -/
 theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
   local_loss_operator game strat i j =
     (1/8 : ℂ) • (
       (1 - B[j] * A[i, j])^2 +
-      (1 - (-1)^(b[i]).val • Alice_Row_Prod strat i)^2 +
-      (1 - (-1)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
+      (1 - (-1 : ℂ)^(b[i]).val • Alice_Row_Prod strat i)^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
     ) := by
   rw [local_loss_sos_step1 game strat i j,
       local_loss_sos_step2 game strat i j,
