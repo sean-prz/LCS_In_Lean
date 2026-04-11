@@ -4,6 +4,7 @@ import LCS.Common
 import LCS.Strategy.ProjectorStrategy
 import Mathlib.Order.Fin.Basic
 import Mathlib.Tactic.Abel
+import Mathlib.Tactic.NoncommRing
 
 /-!
 # Winning Condition and Loss Operators
@@ -388,22 +389,40 @@ private lemma local_loss_sos_step5 (i : Fin G.r)
         (Alice_Row_Prod strat i * A[i, j]))) =
     (1/8 : ℂ) • (
       (1 - B[j] * A[i, j])^2 +
-      (1 - (-1)^(b[i]).val •
+      (1 - (-1 : ℂ )^(b[i]).val •
         Alice_Row_Prod strat i)^2 +
-      (1 - (-1)^(b[i]).val •
+      (1 - (-1 : ℂ)^(b[i]).val •
         (Alice_Row_Prod strat i *
           A[i, j] * B[j]))^2) := by
+  -- Define O1, O2, O3 to make the expression more readable
   let O1 := B[j] * A[i, j]
   let O2 := (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i
   let O3 := (-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j])
+
+  -- Rearange to be able to rewrite in terms of O1, O2, O3
   rw [mul_smul_comm]
   rw [← mul_assoc]
   rw [(bob_commute_row_prod strat i j).eq]
   rw [mul_assoc]
   nth_rw 2  [(alice_bob_commute_gen strat i j j).symm.eq]
   rw [← mul_assoc]
-  change 1 - (1 / 4 : ℂ) • (1 + O1 + O2 + O3) = _
-  change
+
+  -- Perform the rewriting in terms of O1, O2, O3
+  change 1 - (1 / 4 : ℂ) • (1 + O1 + O2 + O3) = (1/8 : ℂ) • ((1 - O1)^2 + (1 - O2)^2 + (1 - O3)^2)
+
+  -- Lemmas about O1, O2, O3
+  have hO1 : O1 * O1 = 1 := by sorry
+  have hO2 : O2 * O2 = 1 := by sorry
+  have hO3 : O3 * O3 = 1 := by sorry
+
+  -- expand the square on RHS
+  simp only [sq, sub_mul, mul_sub, one_mul, mul_one]
+  rw [hO1, hO2, hO3]
+  noncomm_ring
+
+
+
+
 
   sorry
 
