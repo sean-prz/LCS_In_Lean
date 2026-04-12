@@ -204,6 +204,9 @@ lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
 noncomputable def Alice_Row_Prod (i : Fin G.r) : R :=
   (G.V i).attach.noncommProd (fun j => A[i, j]) (fun j _ j' _ _ => alice_observables_commute strat i j j')
 
+/-- Paper-style notation for `Alice_Row_Prod strat i`. -/
+local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
+
 -- Helper: Alice and Bob observables always commute (generalized)
 private lemma alice_bob_commute_gen (i : Fin G.r) (k : G.V i)
     (j_var : Fin G.s) :
@@ -216,7 +219,7 @@ private lemma alice_bob_commute_gen (i : Fin G.r) (k : G.V i)
 
 -- Helper: Bob observable commutes with Alice row product
 private lemma bob_commute_row_prod (i : Fin G.r) (j : G.V i) :
-    Commute B[j] (Alice_Row_Prod strat i) := by
+    Commute B[j] (∏ₐ[i]) := by
   unfold Alice_Row_Prod
   apply Finset.noncommProd_commute
   intro k _
@@ -226,7 +229,7 @@ private lemma bob_commute_row_prod (i : Fin G.r) (j : G.V i) :
 private lemma alice_commute_row_prod (i : Fin G.r)
     (j : G.V i) :
     Commute (Alice_A strat i j)
-      (Alice_Row_Prod strat i) := by
+      (∏ₐ[i]) := by
   unfold Alice_Row_Prod
   apply Finset.noncommProd_commute
   intro k _
@@ -234,8 +237,7 @@ private lemma alice_commute_row_prod (i : Fin G.r)
 
 -- Helper: Alice row product is involutive (RP² = 1)
 private lemma row_prod_sq (i : Fin G.r) :
-    Alice_Row_Prod strat i *
-      Alice_Row_Prod strat i = 1 := by
+    ∏ₐ[i] * ∏ₐ[i] = 1 := by
   have hsum := (strat.alice_ms i).sum_one
   have hcomm :
       (((G.V i).attach : Set (G.V i)).Pairwise
@@ -245,11 +247,11 @@ private lemma row_prod_sq (i : Fin G.r) :
     fun j _ j' _ _ =>
       alice_observables_commute strat i j j'
   suffices h : ∀ x : Assignment G i,
-      Alice_Row_Prod strat i *
-        Alice_Row_Prod strat i *
+      ∏ₐ[i] *
+        ∏ₐ[i] *
           strat.E i x = strat.E i x by
-    calc Alice_Row_Prod strat i *
-          Alice_Row_Prod strat i
+    calc ∏ₐ[i] *
+          ∏ₐ[i]
         = _ * 1 := (mul_one _).symm
       _ = _ * ∑ x, strat.E i x := by rw [hsum]
       _ = ∑ x, _ * strat.E i x :=
@@ -289,7 +291,7 @@ private lemma local_loss_sos_step1 (i : Fin G.r) (j : G.V i) :
 private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
     1 - ∑ y : Fin 2, F[j, y] * (∑ x ∈ S[i].filter (fun x => x j = y), E[i, x]) =
     1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
-      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i) *
+      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i]) *
                  (1 + (-1 : ℂ) ^ y.val • A[i, j])) := by
   classical
   congr 1
@@ -307,7 +309,7 @@ private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
   -- Apply lemma_4_7_1 and lemma_4_7_2
   rw [lemma_4_7_2 strat i j y]
   have h471 := lemma_4_7_1 game strat i
-  rw [show ∑ x ∈ S[i], E[i, x] = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i)
+  rw [show ∑ x ∈ S[i], E[i, x] = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i])
       from h471]
   -- Simplify: F * ((1/2 • P) * (1/2 • Q)) = (1/4) • (F * (P * Q))
   simp only [smul_mul_assoc, mul_smul_comm, ← smul_assoc]
@@ -315,13 +317,13 @@ private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
 
 private lemma local_loss_sos_step3 (i : Fin G.r) (j : G.V i) :
     1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
-      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i) *
+      F[j, y] * ((1 + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i]) *
                  (1 + (-1 : ℂ) ^ y.val • A[i, j])) =
     1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
       F[j, y] * (1 + (-1 : ℂ) ^ y.val • A[i, j] +
-                 (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
+                 (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i] +
                  ((-1 : ℂ) ^ y.val * (-1 : ℂ) ^ (b[i]).val) •
-                   (Alice_Row_Prod strat i * A[i, j])) := by
+                   (∏ₐ[i] * A[i, j])) := by
   congr 1
   -- Strip (1/4) • scalar from both sides
   congr 1
@@ -337,12 +339,12 @@ private lemma local_loss_sos_step3 (i : Fin G.r) (j : G.V i) :
 private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
     1 - (1 / 4 : ℂ) • ∑ y : Fin 2,
       F[j, y] * (1 + (-1 : ℂ) ^ y.val • A[i, j] +
-                 (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
+                 (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i] +
                  ((-1 : ℂ) ^ y.val * (-1 : ℂ) ^ (b[i]).val) •
-                   (Alice_Row_Prod strat i * A[i, j])) =
+                   (∏ₐ[i] * A[i, j])) =
     1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] +
-                         (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i +
-                         B[j] * ((-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j]))) := by
+                         (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i] +
+                         B[j] * ((-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j]))) := by
   congr 1; congr 1
   -- Split ∑ y : Fin 2 into y = 0 and y = 1
   rw [Fin.sum_univ_two]
@@ -358,10 +360,10 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
     have h := (strat.bob_ms (↑j)).sum_one
     rw [Fin.sum_univ_two] at h; exact h
   -- Abbreviate for readability
-  set F0 := strat.F (↑j) 0
-  set F1 := strat.F (↑j) 1
+  set F0 := F[j, 0]
+  set F1 := F[j, 1]
   set Aj := A[i, j]
-  set RP := Alice_Row_Prod strat i
+  set RP := ∏ₐ[i]
   set c := (-1 : ℂ) ^ (b[i]).val
   -- Distribute F * (four-term sum) and normalize negations
   simp only [mul_add, mul_neg, mul_smul_comm]
@@ -388,20 +390,20 @@ private lemma local_loss_sos_step5 (i : Fin G.r)
     (j : G.V i) :
     1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] +
       (-1 : ℂ) ^ (b[i]).val •
-        Alice_Row_Prod strat i +
+        ∏ₐ[i] +
       B[j] * ((-1 : ℂ) ^ (b[i]).val •
-        (Alice_Row_Prod strat i * A[i, j]))) =
+        (∏ₐ[i] * A[i, j]))) =
     (1/8 : ℂ) • (
       (1 - B[j] * A[i, j])^2 +
       (1 - (-1 : ℂ )^(b[i]).val •
-        Alice_Row_Prod strat i)^2 +
+        ∏ₐ[i])^2 +
       (1 - (-1 : ℂ)^(b[i]).val •
-        (Alice_Row_Prod strat i *
+        (∏ₐ[i] *
           A[i, j] * B[j]))^2) := by
   -- Define O1, O2, O3 to make the expression more readable
   let O1 := B[j] * A[i, j]
-  let O2 := (-1 : ℂ) ^ (b[i]).val • Alice_Row_Prod strat i
-  let O3 := (-1 : ℂ) ^ (b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j])
+  let O2 := (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i]
+  let O3 := (-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j] * B[j])
   -- Rearange to be able to rewrite in terms of O1, O2, O3
   rw [mul_smul_comm]
   rw [← mul_assoc]
@@ -450,8 +452,8 @@ theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
   local_loss_operator game strat i j =
     (1/8 : ℂ) • (
       (1 - B[j] * A[i, j])^2 +
-      (1 - (-1 : ℂ)^(b[i]).val • Alice_Row_Prod strat i)^2 +
-      (1 - (-1 : ℂ)^(b[i]).val • (Alice_Row_Prod strat i * A[i, j] * B[j]))^2
+      (1 - (-1 : ℂ)^(b[i]).val • ∏ₐ[i])^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • (∏ₐ[i] * A[i, j] * B[j]))^2
     ) := by
   rw [local_loss_sos_step1 game strat i j,
       local_loss_sos_step2 game strat i j,
