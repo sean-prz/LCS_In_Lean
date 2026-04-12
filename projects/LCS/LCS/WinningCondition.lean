@@ -9,13 +9,11 @@ import Mathlib.Tactic.Module
 /-!
 # Winning Condition and Loss Operators
 
-This module formalizes the concepts of winning and loss operators for an LCS game.
-Specifically, it defines the probability of a strategy winning the game
-and decomposes it into local contributions from each equation.
+This module defines the operator-valued winning and loss expressions attached to an LCS game
+and a projector strategy.
 
-## Key Theorems
-- `sum_winning_projectors_eq_row_observable`: (4.7.1) Relates the sum of Alice's winning projectors to the product of her observables.
-- `sum_marginal_projectors_eq_half_one_add_A`: (4.7.2) Connects Alice's marginal projectors to her observables.
+Its main result is a sum-of-squares decomposition of the local loss operator, following the
+paper's algebraic winning-condition identities.
 -/
 
 open scoped BigOperators
@@ -32,6 +30,13 @@ local notation "E[" i ", " x "]" => strat.E i x
 local notation "F[" j ", " y "]" => strat.F j y
 local notation "b[" i "]" => game.b i
 
+section LocalOperators
+/-! ## Local Operators
+This section defines the winning assignments for a constraint and the associated local winning
+and loss operators.
+-/
+
+/-- The assignments satisfying equation `i` in the game `game`. -/
 -- ANCHOR: winning_assignments
 def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = b[i])
@@ -47,8 +52,17 @@ noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=
 noncomputable def local_loss_operator (i : Fin G.r) (j : G.V i) : R :=
   1 - local_winning_operator game strat i j
 
+end LocalOperators
 
--- 4.7.1
+local notation "S[" i "]" => winning_assignments game i
+
+section WinningProjectorIdentities
+/-!
+## Winning Projector Identities
+Two local projector identities used in the sum-of-squares derivation.
+-/
+
+/-- Lemma 4.7.1 From the paper -/
 lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
   (∑ x ∈ S[i], E[i, x]) =
   (1/2 : ℂ) • (1 + (-1 : ℂ)^(b[i]).val •
@@ -98,7 +112,7 @@ lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
   rw [hsign2]
   simp [winning_assignments, Finset.mem_filter]
 
--- 4.7.2
+/-- Lemma 4.7.2 From the paper -/
 lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : Fin 2) :
   (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = y), E[i, x]) =
     (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • A[i, j]) := by
@@ -128,19 +142,12 @@ lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : F
     rw [hform, smul_add, ← add_smul]
     norm_num
 
-lemma bob_observable_sq (j : Fin G.s) :
-  B[j] * B[j] = 1 :=
-  (bob_is_observable strat j).involutive
-
-lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
-  A[i, j] * A[i, j] = 1 :=
-  (alice_is_observable strat i j).involutive
 
 
+end WinningProjectorIdentities
 
 /-- Paper-style notation for `Alice_Row_Prod strat i`. -/
 local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
-
 
 
 -- Helper: Alice row product is involutive (RP² = 1)
@@ -176,7 +183,14 @@ private lemma row_prod_sq (i : Fin G.r) :
       alice_partial_prod_mul_projector strat i _ x hcomm,
       smul_smul]
   simp only [← Finset.prod_mul_distrib, ← pow_add, ← two_mul, pow_mul,
-             neg_one_sq, one_pow, Finset.prod_const_one, one_smul]
+    neg_one_sq, one_pow, Finset.prod_const_one, one_smul]
+
+section LocalLossSOS
+/-!
+## Local Loss SOS
+This section derives the sum-of-squares decomposition of the local loss operator by a sequence
+of private rewriting lemmas.
+-/
 
 private lemma local_loss_sos_step1 (i : Fin G.r) (j : G.V i) :
   local_loss_operator game strat i j =
@@ -309,7 +323,8 @@ private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
   have hO1 : O1 * O1 = 1 := by
     unfold O1
     nth_rw 1 [(alice_bob_commute_gen strat i j j).symm.eq] -- B A = A B
-    simp only [mul_assoc, ← mul_assoc B[↑j] B[↑j], bob_observable_sq, one_mul, alice_observable_sq]
+    simp only [mul_assoc, ← mul_assoc B[↑j] B[↑j], one_mul,
+      (bob_is_observable strat j).involutive, (alice_is_observable strat i j).involutive]
   have hO2 : O2 * O2 = 1 := by
     unfold O2
     rw [smul_mul_assoc, mul_smul_comm, smul_smul]
@@ -329,8 +344,8 @@ private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
     rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i * Alice_Row_Prod strat i * B[↑j]) A[i,j] B[↑j]]
     rw [alice_bob_commute_gen strat i j j]
     rw [← mul_assoc]
-    simp only [row_prod_sq, alice_observable_sq, bob_observable_sq, mul_one, mul_assoc]
-
+    simp only [row_prod_sq, mul_one, mul_assoc,
+      (alice_is_observable strat i j).involutive, (bob_is_observable strat j).involutive]
   -- expand the square on RHS
   simp only [sq, sub_mul, mul_sub, one_mul, mul_one]
   rw [hO1, hO2, hO3]
@@ -353,6 +368,14 @@ theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
       local_loss_sos_step4 game strat i j,
       local_loss_sos_step5 game strat i j]
 
+end LocalLossSOS
+
+section GlobalOperators
+/-! ## Global Operators
+The overall winning and loss operators are obtained by averaging the local quantities over the
+question graph of the game.
+-/
+
 /-- The total Winning Operator `v` is the average of local winning probabilities. -/
 noncomputable def winning_operator : R :=
   ∑ i : Fin G.r, ∑ j : G.V i,
@@ -362,3 +385,5 @@ noncomputable def winning_operator : R :=
 /-- The total Loss Operator `1 - v`. -/
 noncomputable def loss_operator : R :=
   1 - winning_operator game strat
+
+end GlobalOperators

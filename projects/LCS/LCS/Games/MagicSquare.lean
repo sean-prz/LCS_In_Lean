@@ -8,14 +8,25 @@ import LCS.Pauli
 This module defines the layout for the Mermin-Peres magic square Linear Constraint System (LCS) game
 and provides a valid quantum strategy for it using observables.
 
-It verifies the commutativity requirements (both local within equations and global bipartite commutativity)
+It verifies the commutativity requirements
+(both local within equations and global bipartite commutativity)
 necessary to define a valid `ObservableStrategyData`.
 -/
 
+section Types
+/-! ## Types  -/
+
+/-- The 4×4 matrix type used for two-qubit observables in the magic square construction. -/
 abbrev mat4 := Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) ℂ
+/-- The 16×16 matrix type used for the bipartite lift of the two-qubit strategy. -/
 abbrev mat16 := Matrix ((Fin 2 × Fin 2) × (Fin 2 × Fin 2)) ((Fin 2 × Fin 2) × (Fin 2 × Fin 2)) ℂ
 
+end Types
 
+section Layout
+/-! ## Layout
+This section defines the layout/geometry of the Mermin-Peres magic square game.
+  -/
 /-- The layout of the Mermin-Peres magic square game.
 It consists of 6 equations (3 rows and 3 columns) over 9 variables (the cells of the 3x3 grid). -/
 def magic_square_layout : LCSLayout  := {
@@ -31,12 +42,17 @@ def magic_square_layout : LCSLayout  := {
   | 5 => {2, 5, 8}
   }
 
+end Layout
+
 open Matrix
 open Kronecker
 open scoped BigOperators
 
+section Grid
+/-! ## Grid
+This Section defines a strategy for the game defined in the previous section, given as a grid of observables.
+-/
 
--- The Mermin-Peres Grid
 /-- The 9 observables for the Mermin-Peres magic square, defined as Kronecker products of
 Pauli matrices (X, Y, Z) and the identity (I2). -/
 def magic_square_grid : Fin 9 → mat4
@@ -50,72 +66,95 @@ def magic_square_grid : Fin 9 → mat4
   | 7 => Y  ⊗ₖ X
   | 8 => Z  ⊗ₖ Z
 
-/-- A tactic to automatically prove that a matrix is an observable,
-assuming it is a Kronecker product of Pauli matrices. -/
-macro "crush_observable" : tactic => `(tactic| {
-  dsimp [magic_square_grid]
-  repeat (
-    first
-    | apply kronecker_observable
-    | exact I2_observable
-    | exact X_observable
-    | exact Y_observable
-    | exact Z_observable
-  )
-})
-
+/-- Each observable in the Mermin-Peres grid is a self-adjoint involution. -/
 lemma magic_square_is_observable (j : Fin 9) : IsObservable (magic_square_grid j) := by
-  fin_cases j <;> crush_observable
-
-
-macro "crush_comm" : tactic => `(tactic| {
-  dsimp [magic_square_grid]
-  first
-  | (apply kronecker_comm_of_comm; all_goals {
+  fin_cases j <;>
+    dsimp [magic_square_grid] <;>
+    repeat
       first
-      | exact Commute.refl _
-      | { rw [I2_eq_one]; exact Commute.one_left _ }
-      | { rw [I2_eq_one]; exact Commute.one_right _ }
-    })
-  | (apply kronecker_comm_of_anticomm; all_goals {
-      first
-      | exact XY_anticomm
-      | exact XZ_anticomm
-      | exact YZ_anticomm
-      | { rw [XY_anticomm]; simp }
-      | { rw [ZX_mul, XZ_mul]; simp }
-      | { rw [ZY_mul, YZ_mul]; simp }
-    })
-})
+      | apply kronecker_observable
+      | exact I2_observable
+      | exact X_observable
+      | exact Y_observable
+      | exact Z_observable
 
+end Grid
+
+section Commutativity
+/-!
+## Commutativity
+This section proves the commutativity properties of the magic square grid.
+
+These properties are required for the strategy to be valid.
+-/
+
+/-- A tactic for proving pairwise commutativity within one row or column of the square. -/
 macro "solve_line_comm" : tactic => `(tactic| {
   intro j k hjk
   rcases j with ⟨j, hj⟩
   rcases k with ⟨k, hk⟩
   fin_cases j <;> fin_cases k <;> simp [magic_square_layout] at hj hk hjk ⊢
-  <;> crush_comm
+  <;> dsimp [magic_square_grid]
+  <;> first
+    | (apply kronecker_comm_of_comm; all_goals {
+        first
+        | exact Commute.refl _
+        | { rw [I2_eq_one]; exact Commute.one_left _ }
+        | { rw [I2_eq_one]; exact Commute.one_right _ }
+      })
+    | (apply kronecker_comm_of_anticomm; all_goals {
+        first
+        | exact XY_anticomm
+        | exact XZ_anticomm
+        | exact YZ_anticomm
+        | { rw [XY_anticomm]; simp }
+        | { rw [ZX_mul, XZ_mul]; simp }
+        | { rw [ZY_mul, YZ_mul]; simp }
+      })
 })
 
-lemma row1_comm : Pairwise (fun j k : magic_square_layout.V (0 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+/-- Helper lemmas establishing pairwise commutativity for each row and column. -/
+private lemma row1_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (0 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma row2_comm : Pairwise (fun j k : magic_square_layout.V (1 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+private lemma row2_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (1 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma row3_comm : Pairwise (fun j k : magic_square_layout.V (2 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+private lemma row3_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (2 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col1_comm : Pairwise (fun j k : magic_square_layout.V (3 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+private lemma col1_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (3 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col2_comm : Pairwise (fun j k : magic_square_layout.V (4 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+private lemma col2_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (4 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
-lemma col3_comm : Pairwise (fun j k : magic_square_layout.V (5 : Fin 6) => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+private lemma col3_comm :
+    Pairwise
+      (fun j k : magic_square_layout.V (5 : Fin 6) =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   solve_line_comm
 
+/-- For every equation of the layout, the associated grid observables commute pairwise. -/
 lemma MP_sameEquation_comm (i : Fin 6) :
-    Pairwise (fun j k : magic_square_layout.V i => Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
+    Pairwise
+      (fun j k : magic_square_layout.V i =>
+        Commute (magic_square_grid j.1) (magic_square_grid k.1)) := by
   fin_cases i
   · exact row1_comm
   · exact row2_comm
@@ -124,9 +163,20 @@ lemma MP_sameEquation_comm (i : Fin 6) :
   · exact col2_comm
   · exact col3_comm
 
+end Commutativity
+
+section Strategy
+/-!
+## Strategy
+This section shows that the grid strategy is a valid strategy for the magic square game.
+-/
+
+
 /-- The Mermin-Peres strategy for the magic square game.
 This strategy uses `BipartiteObservableStrategy` to lift the 9 `MP_observables` to a
 valid `ObservableStrategyData` on a 16x16 bipartite space. It relies on
 `MP_sameEquation_comm` to satisfy the commutativity constraints for each equation. -/
 noncomputable def Strat_merminPeres : ObservableStrategyData mat16 magic_square_layout :=
   BipartiteObservableStrategy magic_square_grid magic_square_is_observable MP_sameEquation_comm
+
+end Strategy

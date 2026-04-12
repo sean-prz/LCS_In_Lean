@@ -34,10 +34,12 @@ structure ObservableStrategyData
 open Matrix
 open Kronecker
 
-def bipartiteAliceLift {n : Type*} [Fintype n] [DecidableEq n] (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
+def bipartiteAliceLift {n : Type*} [Fintype n] [DecidableEq n]
+    (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
   M ⊗ₖ (1 : Matrix n n ℂ)
 
-def bipartiteBobLift {n : Type*} [Fintype n] [DecidableEq n] (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
+def bipartiteBobLift {n : Type*} [Fintype n] [DecidableEq n]
+    (M : Matrix n n ℂ) : Matrix (n × n) (n × n) ℂ :=
   (1 : Matrix n n ℂ) ⊗ₖ M
 
 lemma bipartiteAliceLift_observable {n : Type*} [Fintype n] [DecidableEq n]
@@ -64,12 +66,17 @@ lemma bipartiteBobLift_observable {n : Type*} [Fintype n] [DecidableEq n]
 
 lemma bipartite_alice_bob_commute {n : Type*} [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) : Commute (bipartiteAliceLift M) (bipartiteBobLift N) := by
-  change (M ⊗ₖ (1 : Matrix n n ℂ)) * ((1 : Matrix n n ℂ) ⊗ₖ N) = ((1 : Matrix n n ℂ) ⊗ₖ N) * (M ⊗ₖ (1 : Matrix n n ℂ))
+  change
+    (M ⊗ₖ (1 : Matrix n n ℂ)) * ((1 : Matrix n n ℂ) ⊗ₖ N) =
+      ((1 : Matrix n n ℂ) ⊗ₖ N) * (M ⊗ₖ (1 : Matrix n n ℂ))
   rw [← mul_kronecker_mul, ← mul_kronecker_mul, mul_one, one_mul, mul_one, one_mul]
 
 lemma bipartiteAliceLift_commute {n : Type*} [Fintype n] [DecidableEq n]
-    {M N : Matrix n n ℂ} (h : Commute M N) : Commute (bipartiteAliceLift M) (bipartiteAliceLift N) := by
-  change (M ⊗ₖ (1 : Matrix n n ℂ)) * (N ⊗ₖ (1 : Matrix n n ℂ)) = (N ⊗ₖ (1 : Matrix n n ℂ)) * (M ⊗ₖ (1 : Matrix n n ℂ))
+    {M N : Matrix n n ℂ} (h : Commute M N) :
+    Commute (bipartiteAliceLift M) (bipartiteAliceLift N) := by
+  change
+    (M ⊗ₖ (1 : Matrix n n ℂ)) * (N ⊗ₖ (1 : Matrix n n ℂ)) =
+      (N ⊗ₖ (1 : Matrix n n ℂ)) * (M ⊗ₖ (1 : Matrix n n ℂ))
   rw [← mul_kronecker_mul, ← mul_kronecker_mul, h]
 
 noncomputable def BipartiteObservableStrategy
