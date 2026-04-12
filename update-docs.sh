@@ -35,7 +35,7 @@ then
 	cp -r .lake/build/doc "$BASE_DIR/postprocess_docs/source"
 	cd "$BASE_DIR/postprocess_docs"
 	.venv/bin/python3 main.py
-	cp -r source/doc "$BASE_DIR/docs/doc4"
+	cp -r source/doc/. "$BASE_DIR/docs/doc4"
 fi
 
 
