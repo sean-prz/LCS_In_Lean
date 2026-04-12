@@ -4,7 +4,6 @@ import LCS.Common
 import LCS.Strategy.ProjectorStrategy
 import Mathlib.Order.Fin.Basic
 import Mathlib.Tactic.Abel
-import Mathlib.Tactic.NoncommRing
 import Mathlib.Tactic.Module
 
 /-!
@@ -15,8 +14,8 @@ Specifically, it defines the probability of a strategy winning the game
 and decomposes it into local contributions from each equation.
 
 ## Key Theorems
-- `lemma_4_7_1`: Relates the sum of Alice's winning projectors to the product of her observables.
-- `lemma_4_7_2`: Connects Alice's marginal projectors to her observables.
+- `sum_winning_projectors_eq_row_observable`: (4.7.1) Relates the sum of Alice's winning projectors to the product of her observables.
+- `sum_marginal_projectors_eq_half_one_add_A`: (4.7.2) Connects Alice's marginal projectors to her observables.
 -/
 
 open scoped BigOperators
@@ -48,73 +47,9 @@ noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=
 noncomputable def local_loss_operator (i : Fin G.r) (j : G.V i) : R :=
   1 - local_winning_operator game strat i j
 
-/-- The total Winning Operator `v` is the average of local winning probabilities. -/
-noncomputable def winning_operator : R :=
-  ∑ i : Fin G.r, ∑ j : G.V i,
-  let normalization : ℂ := (G.r * (G.V i).card : ℕ)
-  (1 / normalization) • local_winning_operator game strat i j
 
-/-- The total Loss Operator `1 - v`. -/
-noncomputable def loss_operator : R :=
-  1 - winning_operator game strat
-
-
-private lemma measurement_sum_mul_projector (i : Fin G.r)
-  (S : Finset (Assignment G i)) (x : Assignment G i) :
-  (∑ y ∈ S, E[i, y]) * E[i, x] = if x ∈ S then E[i, x] else 0 := by
-  classical
-  split_ifs with hx
-  · rw [Finset.sum_mul, Finset.sum_eq_single_of_mem x hx]
-    · exact (strat.alice_ms i).idempotent x
-    · intro y _ hyx; exact (strat.alice_ms i).orthogonal y x hyx
-  · rw [Finset.sum_mul, Finset.sum_eq_zero]
-    intro y hy
-    exact (strat.alice_ms i).orthogonal y x (by rintro rfl; exact hx hy)
-
-private lemma alice_A_mul_projector (i : Fin G.r)
-  (j : G.V i) (x : Assignment G i) :
-  A[i, j] * E[i, x] = ((-1 : ℂ) ^ (x j).val) • E[i, x] := by
-  classical
-  unfold Alice_A ObservableOfMeasurementSystem InducedMeasurementSystem
-  rw [sub_mul, measurement_sum_mul_projector, measurement_sum_mul_projector]
-  match h : x j with
-  | 0 => simp [h]
-  | 1 => simp [h]
-
-private lemma alice_partial_prod_mul_projector (i : Fin G.r)
-  (s : Finset (G.V i)) (x : Assignment G i)
-  (comm :
-    (s : Set (G.V i)).Pairwise (fun j j' => Commute A[i, j] A[i, j'])) :
-  s.noncommProd (fun j => A[i, j]) comm * E[i, x] =
-    (s.prod fun j => (-1 : ℂ) ^ (x j).val) • E[i, x] := by
-  classical
-  induction s using Finset.cons_induction_on with
-  | empty =>
-      simp
-  | cons a s ha ih =>
-      rw [Finset.noncommProd_cons, Finset.prod_cons, mul_assoc, ih]
-      · rw [Algebra.mul_smul_comm, alice_A_mul_projector]
-        simp [smul_smul, mul_comm]
-
-
-private lemma prod_sign_eq_sum_sign_aux {G : LCSLayout} {i : Fin G.r}
-  (x : Assignment G i) (s : Finset (G.V i)) :
-  (s.prod fun j => (-1 : ℂ) ^ (x j).val) =
-    (-1 : ℂ) ^ ((s.sum fun j => (x j : Fin 2)).val) := by
-  induction s using Finset.cons_induction_on with
-  | empty => simp
-  | cons a s ha ih => rw [Finset.prod_cons, Finset.sum_cons, ih, sign_mul]
-
-private lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignment G i) :
-  ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
-    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
-  prod_sign_eq_sum_sign_aux x _
-
-lemma sign_fin2_sq (x : Fin 2) : (-1 : ℂ) ^ x.val * (-1 : ℂ) ^ x.val = 1 := by
-  rcases fin2_eq_zero_or_one x with rfl | rfl <;> norm_num
-
-
-lemma lemma_4_7_1 (i : Fin G.r) :
+-- 4.7.1
+lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
   (∑ x ∈ S[i], E[i, x]) =
   (1/2 : ℂ) • (1 + (-1 : ℂ)^(b[i]).val •
   ((G.V i).attach.noncommProd
@@ -141,7 +76,7 @@ lemma lemma_4_7_1 (i : Fin G.r) :
       _ = rhs := by rw [hsum_one, mul_one]
   intro x
   -- LHS
-  rw [measurement_sum_mul_projector strat i S[i] x]
+  rw [measurement_sum_mul_projector (strat.alice_ms i) S[i] x]
   -- RHS: expand
   have hprod : prodA * E[i, x] =
       ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) • E[i, x] :=
@@ -163,7 +98,8 @@ lemma lemma_4_7_1 (i : Fin G.r) :
   rw [hsign2]
   simp [winning_assignments, Finset.mem_filter]
 
-lemma lemma_4_7_2 (i : Fin G.r) (j : G.V i) (y : Fin 2) :
+-- 4.7.2
+lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : Fin 2) :
   (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = y), E[i, x]) =
     (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • A[i, j]) := by
   classical
@@ -200,40 +136,12 @@ lemma alice_observable_sq (i : Fin G.r) (j : G.V i) :
   A[i, j] * A[i, j] = 1 :=
   (alice_is_observable strat i j).involutive
 
-/-- The product of Alice's observables for all variables in equation `i`. -/
-noncomputable def Alice_Row_Prod (i : Fin G.r) : R :=
-  (G.V i).attach.noncommProd (fun j => A[i, j]) (fun j _ j' _ _ => alice_observables_commute strat i j j')
+
 
 /-- Paper-style notation for `Alice_Row_Prod strat i`. -/
 local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
 
--- Helper: Alice and Bob observables always commute (generalized)
-private lemma alice_bob_commute_gen (i : Fin G.r) (k : G.V i)
-    (j_var : Fin G.s) :
-    Commute (Alice_A strat i k) (Bob_B strat j_var) := by
-  unfold Alice_A Bob_B ObservableOfMeasurementSystem
-    InducedMeasurementSystem
-  apply Commute.sub_left <;> apply Commute.sub_right
-  all_goals {
-    apply Commute.sum_left; intro x _; apply strat.commute }
 
--- Helper: Bob observable commutes with Alice row product
-private lemma bob_commute_row_prod (i : Fin G.r) (j : G.V i) :
-    Commute B[j] (∏ₐ[i]) := by
-  unfold Alice_Row_Prod
-  apply Finset.noncommProd_commute
-  intro k _
-  exact (alice_bob_commute_gen strat i k j).symm
-
--- Helper: Alice observable commutes with Alice row product
-private lemma alice_commute_row_prod (i : Fin G.r)
-    (j : G.V i) :
-    Commute (Alice_A strat i j)
-      (∏ₐ[i]) := by
-  unfold Alice_Row_Prod
-  apply Finset.noncommProd_commute
-  intro k _
-  exact alice_observables_commute strat i j k
 
 -- Helper: Alice row product is involutive (RP² = 1)
 private lemma row_prod_sq (i : Fin G.r) :
@@ -301,14 +209,10 @@ private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
   apply Finset.sum_congr rfl
   intro y _
   -- Rewrite the filtered sum as intersection via measurement_intersection
-  -- S[i].filter (x j = y) = S[i] ∩ univ.filter (x j = y)
-  have hfilt : S[i].filter (fun x => x j = y) =
-      S[i] ∩ Finset.univ.filter (fun x => x j = y) := by
-    ext x; simp [winning_assignments, Finset.mem_filter, Finset.mem_inter]
-  rw [hfilt, ← measurement_intersection (strat.alice_ms i)]
-  -- Apply lemma_4_7_1 and lemma_4_7_2
-  rw [lemma_4_7_2 strat i j y]
-  have h471 := lemma_4_7_1 game strat i
+  rw [finset_filter_eq_inter_univ_filter, ← measurement_intersection (strat.alice_ms i)]
+  -- Apply sum_winning_projectors_eq_row_observable and sum_marginal_projectors_eq_half_one_add_A
+  rw [sum_marginal_projectors_eq_half_one_add_A strat i j y]
+  have h471 := sum_winning_projectors_eq_row_observable game strat i
   rw [show ∑ x ∈ S[i], E[i, x] = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i])
       from h471]
   -- Simplify: F * ((1/2 • P) * (1/2 • Q)) = (1/4) • (F * (P * Q))
@@ -351,14 +255,9 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
   -- (-1)^0 = 1, (-1)^1 = -1
   simp only [Fin.val_zero, pow_zero, one_smul, one_mul,
              Fin.val_one, pow_one, neg_smul, neg_mul]
-  -- B[j] = F[j, 0] - F[j, 1]  (by definition)
-  have hbob : B[j] = strat.F (↑j) 0 - strat.F (↑j) 1 :=
-    show ObservableOfMeasurementSystem (strat.F (↑j)) = _ by
-      simp [ObservableOfMeasurementSystem]
-  -- F[j, 0] + F[j, 1] = 1
-  have hone : strat.F (↑j) 0 + strat.F (↑j) 1 = 1 := by
-    have h := (strat.bob_ms (↑j)).sum_one
-    rw [Fin.sum_univ_two] at h; exact h
+  -- B[j] = F[j, 0] - F[j, 1]  and F[j, 0] + F[j, 1] = 1
+  have ⟨hbob_inv, hone⟩ := bob_measurement_recover strat ↑j
+  have hbob : B[j] = strat.F (↑j) 0 - strat.F (↑j) 1 := hbob_inv.symm
   -- Abbreviate for readability
   set F0 := F[j, 0]
   set F1 := F[j, 1]
@@ -386,20 +285,13 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
         rw [h1, h2, h3, h4]
 
 -- Step 5: final algebraic simplification to SOS form
-private lemma local_loss_sos_step5 (i : Fin G.r)
-    (j : G.V i) :
-    1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] +
-      (-1 : ℂ) ^ (b[i]).val •
-        ∏ₐ[i] +
-      B[j] * ((-1 : ℂ) ^ (b[i]).val •
-        (∏ₐ[i] * A[i, j]))) =
-    (1/8 : ℂ) • (
+private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
+    1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i] +
+      B[j] * ((-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j]))) =
+    (1 / 8 : ℂ) • (
       (1 - B[j] * A[i, j])^2 +
-      (1 - (-1 : ℂ )^(b[i]).val •
-        ∏ₐ[i])^2 +
-      (1 - (-1 : ℂ)^(b[i]).val •
-        (∏ₐ[i] *
-          A[i, j] * B[j]))^2) := by
+      (1 - (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i])^2 +
+      (1 - (-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j] * B[j]))^2) := by
   -- Define O1, O2, O3 to make the expression more readable
   let O1 := B[j] * A[i, j]
   let O2 := (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i]
@@ -460,3 +352,13 @@ theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
       local_loss_sos_step3 game strat i j,
       local_loss_sos_step4 game strat i j,
       local_loss_sos_step5 game strat i j]
+
+/-- The total Winning Operator `v` is the average of local winning probabilities. -/
+noncomputable def winning_operator : R :=
+  ∑ i : Fin G.r, ∑ j : G.V i,
+  let normalization : ℂ := (G.r * (G.V i).card : ℕ)
+  (1 / normalization) • local_winning_operator game strat i j
+
+/-- The total Loss Operator `1 - v`. -/
+noncomputable def loss_operator : R :=
+  1 - winning_operator game strat

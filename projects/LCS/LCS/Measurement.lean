@@ -103,3 +103,25 @@ lemma measurement_intersection {I} [Fintype I] [DecidableEq I] {f : I → R}
       intro h_eq; subst h_eq; contradiction
   rw [Finset.sum_congr rfl (fun x _ => h_mul x)]
   rw [Finset.sum_ite, Finset.sum_const_zero, add_zero, Finset.filter_mem_eq_inter]
+
+lemma eq_of_mul_projectors_eq {I} [Fintype I] {f : I → R} (h : IsMeasurementSystem f)
+    {T U : R} (heq : ∀ x, T * f x = U * f x) : T = U := by
+  calc T = T * 1 := (mul_one T).symm
+       _ = T * ∑ x, f x := by rw [h.sum_one]
+       _ = ∑ x, T * f x := by rw [Finset.mul_sum]
+       _ = ∑ x, U * f x := Finset.sum_congr rfl (fun x _ => heq x)
+       _ = U * ∑ x, f x := by rw [← Finset.mul_sum]
+       _ = U * 1 := by rw [h.sum_one]
+       _ = U := mul_one U
+
+lemma measurement_sum_mul_projector {I} [Fintype I] [DecidableEq I] {f : I → R}
+    (h : IsMeasurementSystem f) (S : Finset I) (x : I) :
+    (∑ y ∈ S, f y) * f x = if x ∈ S then f x else 0 := by
+  classical
+  split_ifs with hx
+  · rw [Finset.sum_mul, Finset.sum_eq_single_of_mem x hx]
+    · exact h.idempotent x
+    · intro y _ hyx; exact h.orthogonal y x hyx
+  · rw [Finset.sum_mul, Finset.sum_eq_zero]
+    intro y hy
+    exact h.orthogonal y x (by rintro rfl; exact hx hy)

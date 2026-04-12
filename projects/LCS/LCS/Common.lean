@@ -41,3 +41,24 @@ lemma sign_indicator (b s : Fin 2) :
 
 def observableSign (a : Fin 2) : ℂ :=
   if a = 0 then 1 else -1
+
+lemma sign_fin2_sq (x : Fin 2) : (-1 : ℂ) ^ x.val * (-1 : ℂ) ^ x.val = 1 := by
+  rcases fin2_eq_zero_or_one x with rfl | rfl <;> norm_num
+
+lemma prod_sign_eq_sum_sign_aux {G : LCSLayout} {i : Fin G.r}
+  (x : Assignment G i) (s : Finset (G.V i)) :
+  (s.prod fun j => (-1 : ℂ) ^ (x j).val) =
+    (-1 : ℂ) ^ ((s.sum fun j => (x j : Fin 2)).val) := by
+  induction s using Finset.cons_induction_on with
+  | empty => simp
+  | cons a s ha ih => rw [Finset.prod_cons, Finset.sum_cons, ih, sign_mul]
+
+lemma prod_sign_eq_sum_sign {G : LCSLayout} (i : Fin G.r) (x : Assignment G i) :
+  ((G.V i).attach.prod fun j => (-1 : ℂ) ^ (x j).val) =
+    (-1 : ℂ) ^ ((∑ j : G.V i, (x j : Fin 2)).val) :=
+  prod_sign_eq_sum_sign_aux x _
+
+lemma finset_filter_eq_inter_univ_filter {α : Type*} [Fintype α] [DecidableEq α]
+    (S : Finset α) (p : α → Prop) [DecidablePred p] :
+    S.filter p = S ∩ Finset.univ.filter p := by
+  ext x; simp

@@ -46,3 +46,22 @@ lemma is_observable_of_measurement_system
   self_adjoint := by
     dsimp [ObservableOfMeasurementSystem]
     rw [star_sub, h.self_adjoint 0, h.self_adjoint 1]
+
+lemma binary_measurement_eq_projector (f : Fin 2 → R) (h : IsMeasurementSystem f) (y : Fin 2) :
+    f y = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • ObservableOfMeasurementSystem f) := by
+  have hsum := h.sum_one
+  rw [Fin.sum_univ_two] at hsum
+  unfold ObservableOfMeasurementSystem
+  have hy : y = 0 ∨ y = 1 := by omega
+  rcases hy with rfl | rfl
+  · simp only [Fin.val_zero, pow_zero, one_smul, ← hsum]
+    have h1 : f 0 + f 1 + (f 0 - f 1) = f 0 + f 0 := by abel
+    rw [h1, ← one_smul ℂ (f 0), ← add_smul]
+    have h2 : (1 / 2 : ℂ) * (1 + 1 : ℂ) = 1 := by norm_num
+    rw [smul_smul, h2, one_smul]
+  · simp only [Fin.val_one, pow_one]
+    have h1 : (1 : R) + (-1 : ℂ) • (f 0 - f 1) = f 1 + f 1 := by
+      rw [← hsum, neg_smul, one_smul]; abel
+    rw [h1, ← one_smul ℂ (f 1), ← add_smul]
+    have h2 : (1 / 2 : ℂ) * (1 + 1 : ℂ) = 1 := by norm_num
+    rw [smul_smul, h2, one_smul]
