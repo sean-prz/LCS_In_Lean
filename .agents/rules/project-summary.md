@@ -10,6 +10,14 @@ The goal of this project is
 1. To prove that the Mermin-Peres well known strategy given in terms of 9 observables is equivalent to a valid strategy given in terms of projector for each pair of question, answer for each player. 
 2. By a sum of square decomposition of a local loss operator prove a condition on the existence of a perfect strategy for a given LCS.
 
+## Build Instructions
+
+- The Lean project root is `projects/LCS`.
+- The toolchain is pinned in `projects/LCS/lean-toolchain` to `leanprover/lean4:v4.28.0`.
+- To build the whole project, run `cd projects/LCS && lake build`.
+- To build a single module, run `cd projects/LCS && lake build LCS.WinningCondition`.
+- Agents should run build commands from `projects/LCS`, not from the repository root.
+
 ## Module Structure
 
 1.  **Core Geometry & Game Definition**
