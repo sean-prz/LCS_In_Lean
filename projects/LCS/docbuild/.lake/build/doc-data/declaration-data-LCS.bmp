@@ -1,0 +1,1 @@
+{"declarations":[],"imports":["Init","LCS.Strategy.ObservableStrategy","LCS.Strategy.ProjectorStrategy","LCS.Strategy.Equivalence","LCS.Strategy.ObservableToProjector","LCS.Observable","LCS.Measurement","LCS.WinningCondition","LCS.Games.MagicSquare"],"instances":[],"name":"LCS"}

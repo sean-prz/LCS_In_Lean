@@ -1,0 +1,15 @@
+[{"userName": "solve_line_comm",
+  "tags": [],
+  "internalName": "tacticSolve_line_comm",
+  "docString":
+  {"element":
+   ["p",
+    true,
+    [],
+    [{"element":
+      ["p",
+       true,
+       [],
+       [{"text":
+         "A tactic for proving pairwise commutativity within one row or column of the square."}]]}]]},
+  "definingModule": "LCS.Games.MagicSquare"}]

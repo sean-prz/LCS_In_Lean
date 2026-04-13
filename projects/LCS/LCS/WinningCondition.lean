@@ -225,10 +225,10 @@ private lemma local_loss_sos_step2 (i : Fin G.r) (j : G.V i) :
   -- Rewrite the filtered sum as intersection via measurement_intersection
   rw [finset_filter_eq_inter_univ_filter, ← measurement_intersection (strat.alice_ms i)]
   -- Apply sum_winning_projectors_eq_row_observable and sum_marginal_projectors_eq_half_one_add_A
-  rw [sum_marginal_projectors_eq_half_one_add_A strat i j y]
+  rw [sum_marginal_projectors_eq_half_one_add_A strat i j y] -- 4.7.2
   have h471 := sum_winning_projectors_eq_row_observable game strat i
   rw [show ∑ x ∈ S[i], E[i, x] = (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i])
-      from h471]
+      from h471] -- 4.7.1
   -- Simplify: F * ((1/2 • P) * (1/2 • Q)) = (1/4) • (F * (P * Q))
   simp only [smul_mul_assoc, mul_smul_comm, ← smul_assoc]
   norm_num [mul_assoc]

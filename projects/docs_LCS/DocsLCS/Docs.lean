@@ -27,7 +27,7 @@ shortTitle := "LCS in Lean4"
 %%%
 
 *New W07* :
-  - Verified Magic Square grid is a valid strategy for the Magic Squre game available [here](./doc4/LCS/games/MagicSquare.html) 
+  - Verified Magic Square grid is a valid strategy for the Magic Squre game available [here](./doc4/LCS/Games/MagicSquare.html) 
   - SOS Decomposition of the local loss operator of a LCS game available [here](./doc4/LCS/WinningCondition.html)
 
 
