@@ -26,7 +26,14 @@ authors := ["Sean Perazzolo, Spring 2026"]
 shortTitle := "LCS in Lean4"
 %%%
 
-New : Documentation by Docs4 following standard mathlib format available [here](./doc4/)
+*New W07* :
+  - Verified Magic Square grid is a valid strategy for the Magic Squre game available [here](./doc4/LCS/games/MagicSquare.html) 
+  - SOS Decomposition of the local loss operator of a LCS game available [here](./doc4/LCS/WinningCondition.html)
+
+
+Week by week status of the project available [here](./status.pdf)
+
+
 
 {include 1 DocsLCS.Section1}
 
