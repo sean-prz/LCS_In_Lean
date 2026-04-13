@@ -165,6 +165,26 @@
 #line()
 *Monday 11.15am in BC110* to debrief previous week and plan the next one.
 
+
+== Week 7 & Easter Break
+
+_Finished Milestone 1 & 2_
+
+*Lean general discovery*
+- Cauchy Sequence for Real number, Complex over rationnal possibly.
+- LLM being very verbose, two solutions
+  + Introduce custom notation (example for SOS equivalence)
+  + Intrdouce macro / custom notation (example in pauli & comm for MagicSquare)
+- `Module` tactic to simplify trivial steps.
+- Section and docstring as well as private lemmas to simplify. (doc4-gen)
+*Implementation specific*
+
+- Pauli algebras instead of importing them.
+- Bipartite Observable Strategy that lifts into two seperate distince spaces for alice and bob.
+
+*Where to go next*
+- Write report of this milestone in manual style, simplify implementation?
+
 == Week 6
 
 

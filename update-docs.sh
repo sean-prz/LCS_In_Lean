@@ -25,7 +25,7 @@ fi
 
 echo "Done! Docs are updated."
 
-
+# 3. Build doc4
 read -p "Do you want to build doc4  [y/N]: " doc_response
 if [[ "$doc_response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
@@ -38,7 +38,14 @@ then
 	cp -r source/doc/. "$BASE_DIR/docs/doc4"
 fi
 
+# 4. Compile status.typ
+echo "Compiling status report"
+cd "$BASE_DIR/typst"
+typst compile status.typ
+mv status.pdf "$BASE_DIR/docs/status.pdf"
 
+
+# 5. Serve the docs
 read -p "Do you want to serve the docs at http://localhost:8004? [y/N]: " serve_response
 if [[ "$serve_response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
