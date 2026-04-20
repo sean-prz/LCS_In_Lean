@@ -903,7 +903,7 @@ window.onload = () => {
             <div class="split-toc book">
               <div class="title">
                 <label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot" checked="checked"></label><span class="">Table of Contents</span></div>
-              <table><tr class="numbered"><td class="num">1.</td><td><a href="About-This-Project/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project">About This Project</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="Introduction-to-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games">Introduction to Linear Constraint System Games</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Formalising-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games">Formalising Linear Constraint System Games</a></td></tr></table></div>
+              <table><tr class="numbered"><td class="num">1.</td><td><a href="About-This-Project/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project">About This Project</a></td></tr><tr class="numbered"><td class="num">2.</td><td><a href="Introduction-to-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games">Introduction to Linear Constraint System Games</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="Formalising-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games">Formalising Linear Constraint System Games</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="Strategy-Formalisms-and-Equivalence/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Strategy-Formalisms-and-Equivalence">Strategy Formalisms and Equivalence</a></td></tr></table></div>
             </div>
           </div>
         <div class="last"></div>
@@ -919,19 +919,35 @@ window.onload = () => {
               <div class="authors">
                 <span class="author">Sean Perazzolo, Spring 2026</span></div>
               <p>
-                <strong>New W07</strong> :</p>
+                This manual acts as a research companion to the Lean 4 formalisation of Linear Constraint System (LCS) games. Its purpose is to explain the mathematical objects formalised in the library. Exhaustive declarations and theorem statements are left to the generated API documentation.</p>
+              <p>
+                <strong>Main Verified Results</strong></p>
               <ul>
                 <li>
                   <p>
-                    Verified Magic Square grid is a valid strategy for the Magic Squre game available <a href="./doc4/LCS/Games/MagicSquare.html">here</a> </p>
+                    The Mermin-Peres Magic Square observables are formalised and assembled into a valid strategy in the library. See the <a href="./doc4/LCS/Games/MagicSquare.html">Magic Square API page</a>.</p>
                   </li>
                 <li>
                   <p>
-                    SOS Decomposition of the local loss operator of a LCS game available <a href="./doc4/LCS/WinningCondition.html">here</a></p>
+                    The local winning and local loss operators are formalised for a general LCS game, together with the sum-of-squares decomposition theorem for the local loss operator. See the <a href="./doc4/LCS/WinningCondition.html">Winning condition API page</a>.</p>
+                  </li>
+                <li>
+                  <p>
+                    The bridge from observable strategies to projector strategies is implemented explicitly, so the two strategy formalisms can be compared inside one framework. See the <a href="./doc4/LCS/Strategy/Equivalence.html">Strategy equivalence API page</a>.</p>
                   </li>
                 </ul>
               <p>
-                Week by week status of the project available <a href="./status.pdf">here</a></p>
+                <strong>Reference Links</strong></p>
+              <ul>
+                <li>
+                  <p>
+                    A snapshot of the project's current written status is available in the <a href="./status.pdf">status report PDF</a>.</p>
+                  </li>
+                <li>
+                  <p>
+                    The generated API documentation for the Lean library is available in <a href="./doc4/LCS.html">the API docs</a>.</p>
+                  </li>
+                </ul>
               </div>
             <section>
               <h2>
@@ -943,6 +959,8 @@ window.onload = () => {
                   <a href="Introduction-to-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Introduction-to-Linear-Constraint-System-Games"><span class="number">2.</span> Introduction to Linear Constraint System Games</a></li>
                 <li>
                   <a href="Formalising-Linear-Constraint-System-Games/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Formalising-Linear-Constraint-System-Games"><span class="number">3.</span> Formalising Linear Constraint System Games</a></li>
+                <li>
+                  <a href="Strategy-Formalisms-and-Equivalence/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--Strategy-Formalisms-and-Equivalence"><span class="number">4.</span> Strategy Formalisms and Equivalence</a></li>
                 </ol>
               </section>
             </section>

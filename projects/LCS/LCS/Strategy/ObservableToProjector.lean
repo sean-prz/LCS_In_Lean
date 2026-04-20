@@ -26,9 +26,11 @@ variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
 
 
 /-- Converts an observable $O$ and an outcome $a \in \{0, 1\}$ to a projector $P = (1/2)(I + (-1)^a O)$. -/
+-- ANCHOR: ObservableToProjector
 noncomputable def ObservableToProjector
   (O : R) (a : Fin 2) : R :=
   (1 / 2 : ℂ) • (1 + observableSign a • O)
+-- ANCHOR_END: ObservableToProjector
 
 /-- If $O$ is an observable, then the projector
 $P_a = (1/2)(1 + (-1)^a O)$ is self-adjoint. -/

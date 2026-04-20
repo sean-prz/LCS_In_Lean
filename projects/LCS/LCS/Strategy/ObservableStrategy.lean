@@ -19,6 +19,7 @@ game using the observable formalism. In this formalism, players choose observabl
 open scoped BigOperators
 
 
+-- ANCHOR: ObservableStrategyData
 structure ObservableStrategyData
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   (G : LCSLayout) where
@@ -30,6 +31,7 @@ structure ObservableStrategyData
     ∀ i, Pairwise (fun j k : G.V i => Commute (alice_obs j.1) (alice_obs k.1))
   alice_bob_commute :
     ∀ j k, Commute (alice_obs j) (bob_obs k)
+-- ANCHOR_END: ObservableStrategyData
 
 open Matrix
 open Kronecker

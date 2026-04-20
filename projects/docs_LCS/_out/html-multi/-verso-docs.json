@@ -1,9 +1,57 @@
 {"9": "<code>Fin G.r</code>",
  "8": "<code>LCSLayout</code>",
+ "73":
+ "<code>aliceMeasurement_bobMeasurement_commute.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (S : ObservableStrategyData R G) (i : Fin G.r) (j : Fin G.s) (α : Assignment G i) (β : Fin 2) :\n  AliceMeasurementFromObservables S i α * BobMeasurementFromObservables S j β =\n    BobMeasurementFromObservables S j β * AliceMeasurementFromObservables S i α</code><span class=\"sep\"></span><code class=\"docstring\">Every Alice projector commutes with every Bob projector, because each Alice observable\ncommutes with each Bob observable and commutation is preserved by the projector construction. </code>",
+ "72":
+ "<code>∀ (i : Fin G.r) (j : Fin G.s) (α : Assignment G i) (β : Fin 2),\n  AliceMeasurementFromObservables S i α * BobMeasurementFromObservables S j β =\n    BobMeasurementFromObservables S j β * AliceMeasurementFromObservables S i α</code>",
+ "71":
+ "<code>bobMeasurementFromObservables_isMeasurementSystem.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R]\n  [StarModule ℂ R] {G : LCSLayout} (S : ObservableStrategyData R G) (j : Fin G.s) :\n  IsMeasurementSystem (BobMeasurementFromObservables S j)</code><span class=\"sep\"></span><code class=\"docstring\">For each question $j$, Bob's observable-induced projectors form a measurement system. </code>",
+ "70":
+ "<code>∀ (j : Fin G.s), IsMeasurementSystem (BobMeasurementFromObservables S j)</code>",
  "7": "<code>Assignment (G : LCSLayout) (i : Fin G.r) : Type</code>",
+ "69":
+ "<code>aliceMeasurementFromObservables_isMeasurementSystem.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R]\n  [StarModule ℂ R] {G : LCSLayout} (S : ObservableStrategyData R G) (i : Fin G.r) :\n  IsMeasurementSystem (AliceMeasurementFromObservables S i)</code><span class=\"sep\"></span><code class=\"docstring\">For each equation $i$, the assignment-indexed family of Alice projectors is a measurement system. </code>",
+ "68":
+ "<code>∀ (i : Fin G.r), IsMeasurementSystem (AliceMeasurementFromObservables S i)</code>",
+ "67":
+ "<code>BobMeasurementFromObservables.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R] {G : LCSLayout}\n  (S : ObservableStrategyData R G) : Fin G.s → Fin 2 → R</code><span class=\"sep\"></span><code class=\"docstring\">Bob's two-outcome measurement obtained from his observable via\n$P_y = (1/2)(1 + (-1)^y B_j)$. </code>",
+ "66": "<code>Fin G.s → Fin 2 → R</code>",
+ "65":
+ "<code>AliceMeasurementFromObservables.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (S : ObservableStrategyData R G) (i : Fin G.r) : Assignment G i → R</code><span class=\"sep\"></span><code class=\"docstring\">Alice's projector for an assignment $x$ is the product\n$E_{i,x} = \\prod_{j \\in V_i} (1/2)(1 + (-1)^{x_j} A_j)$. </code>",
+ "64": "<code>(i : Fin G.r) → Assignment G i → R</code>",
+ "63": "<code>ObservableStrategyData R G</code>",
+ "62":
+ "<code>ObservableStrategy_To_ProjectorStrategy.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (S : ObservableStrategyData R G) : LCSStrategy R G</code><span class=\"sep\"></span><code class=\"docstring\">The observable strategy data induces a projector-valued LCS strategy by taking, for each\nobservable, its associated two-outcome spectral projectors. </code>",
+ "61": "<code>observableSign (a : Fin 2) : ℂ</code>",
+ "60": "<code>ℂ</code>",
  "6":
  "<code>Finset.{u_4} (α : Type u_4) : Type u_4</code><span class=\"sep\"></span><code class=\"docstring\">`Finset α` is the type of finite sets of elements of `α`. It is implemented\nas a multiset (a list up to permutation) which has no duplicate elements. </code>",
+ "59":
+ "<code>ObservableToProjector.{u_1} {R : Type u_1} [Ring R] [Algebra ℂ R] (O : R) (a : Fin 2) : R</code><span class=\"sep\"></span><code class=\"docstring\">Converts an observable $O$ and an outcome $a \\in \\{0, 1\\}$ to a projector $P = (1/2)(I + (-1)^a O)$. </code>",
+ "58":
+ "<code>ObservableStrategyData.alice_bob_commute.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (self : ObservableStrategyData R G) (j k : Fin G.s) : Commute (self.alice_obs j) (self.bob_obs k)</code>",
+ "57":
+ "<code>Commute.{u_3} {S : Type u_3} [Mul S] (a b : S) : Prop</code><span class=\"sep\"></span><code class=\"docstring\">Two elements commute if `a * b = b * a`. </code>",
+ "56":
+ "<code>Pairwise.{u_1} {α : Type u_1} (r : α → α → Prop) : Prop</code><span class=\"sep\"></span><code class=\"docstring\">A relation `r` holds pairwise if `r i j` for all `i ≠ j`. </code>",
+ "55":
+ "<code>ObservableStrategyData.sameEquation_comm.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (self : ObservableStrategyData R G) (i : Fin G.r) :\n  Pairwise fun j k =&gt; Commute (self.alice_obs ↑j) (self.alice_obs ↑k)</code>",
+ "54":
+ "<code>ObservableStrategyData.bob_observable.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (self : ObservableStrategyData R G) (j : Fin G.s) : IsObservable (self.bob_obs j)</code>",
+ "53": "<code>Fin G.s → R</code>",
+ "52":
+ "<code>IsObservable.{u_1} {R : Type u_1} [Ring R] [StarRing R] (O : R) : Prop</code>",
+ "51":
+ "<code>ObservableStrategyData.alice_observable.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (self : ObservableStrategyData R G) (j : Fin G.s) : IsObservable (self.alice_obs j)</code>",
+ "50":
+ "<code>ObservableStrategyData.bob_obs.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R] {G : LCSLayout}\n  (self : ObservableStrategyData R G) : Fin G.s → R</code>",
  "5": "<code>ℕ</code>",
+ "49":
+ "<code>ObservableStrategyData.alice_obs.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]\n  {G : LCSLayout} (self : ObservableStrategyData R G) : Fin G.s → R</code>",
+ "48":
+ "<code>StarModule.{u, v} (R : Type u) (A : Type v) [Star R] [Star A] [SMul R A] : Prop</code><span class=\"sep\"></span><code class=\"docstring\">A star module `A` over a star ring `R` is a module which is a star additive monoid,\nand the two star structures are compatible in the sense\n`star (r • a) = star r • star a`.\n\nNote that it is up to the user of this typeclass to enforce\n`[Semiring R] [StarRing R] [AddCommMonoid A] [StarAddMonoid A] [Module R A]`, and that\nthe statement only requires `[Star R] [Star A] [SMul R A]`.\n\nIf used as `[CommRing R] [StarRing R] [Semiring A] [StarRing A] [Algebra R A]`, this represents a\nstar algebra.\n</code>",
+ "47":
+ "<code>ObservableStrategyData.{u_1} (R : Type u_1) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R] (G : LCSLayout) :\n  Type u_1</code>",
  "46":
  "<code>Bob_B.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (strat : LCSStrategy R G) (j : Fin G.s) :\n  R</code>",
  "45":
@@ -14,57 +62,57 @@
  "42": "<code>LCSStrategy R G</code>",
  "41":
  "<code>Alice_A.{u_1} {R : Type u_1} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (strat : LCSStrategy R G) (i : Fin G.r)\n  (j : ↥(G.V i)) : R</code>",
- "40":
- "<code>Star.star.{u} {R : Type u} [self : Star R] : R → R</code><span class=\"sep\"></span><code class=\"docstring\">A star operation (e.g. complex conjugate).\n</code>",
+ "40": "<code>Fin 2</code>",
  "4":
  "<code>Fin (n : ℕ) : Type</code><span class=\"sep\"></span><code class=\"docstring\">Natural numbers less than some upper bound.\n\nIn particular, a `Fin n` is a natural number `i` with the constraint that `i &lt; n`. It is the\ncanonical type with `n` elements.\n</code>",
- "39":
- "<code>IsMeasurementSystem.self_adjoint.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x : I) : star (f x) = f x</code>",
+ "39": "<code>Assignment G i</code>",
  "38":
- "<code>IsMeasurementSystem.orthogonal.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x y : I) : x ≠ y → f x * f y = 0</code>",
- "37":
- "<code>IsMeasurementSystem.idempotent.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x : I) : f x * f x = f x</code>",
- "36": "<code>R</code>",
- "35": "<code>I</code>",
- "34":
- "<code>IsMeasurementSystem.sum_one.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) : ∑ x, f x = 1</code>",
+ "<code>LCSStrategy.commute.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) (j : Fin G.s) (α : Assignment G i) (β : Fin 2) : self.E i α * self.F j β = self.F j β * self.E i α</code>",
+ "37": "<code>Fin G.s → Fin 2 → R</code>",
+ "36": "<code>Fin G.s</code>",
+ "35":
+ "<code>LCSStrategy.bob_ms.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (j : Fin G.s) : IsMeasurementSystem (self.F j)</code>",
+ "34": "<code>(i : Fin G.r) → Assignment G i → R</code>",
  "33":
- "<code class=\"docstring\">The universe of propositions. `Prop ≡ Sort 0`.\n\nEvery proposition is propositionally equal to either `True` or `False`. </code>",
- "32": "<code>Type u_1</code>",
- "31": "<code>I → R</code>",
+ "<code>LCSStrategy.alice_ms.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) : IsMeasurementSystem (self.E i)</code>",
+ "32":
+ "<code>LCSStrategy.F.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G) :\n  Fin G.s → Fin 2 → R</code>",
+ "31":
+ "<code>LCSStrategy.E.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) : Assignment G i → R</code>",
  "30":
- "<code>Fintype.{u_4} (α : Type u_4) : Type u_4</code><span class=\"sep\"></span><code class=\"docstring\">`Fintype α` means that `α` is finite, i.e. there are only\nfinitely many distinct elements of type `α`. The evidence of this\nis a finset `elems` (a list up to permutation without duplicates),\ntogether with a proof that everything of type `α` is in the list. </code>",
+ "<code>Algebra.{u, v} (R : Type u) (A : Type v) [CommSemiring R] [Semiring A] : Type (max u v)</code><span class=\"sep\"></span><code class=\"docstring\">An associative unital `R`-algebra is a semiring `A` equipped with a map into its center `R → A`.\n\nSee the implementation notes in this file for discussion of the details of this definition.\n</code>",
  "3":
  "<code>LCSLayout.V (self : LCSLayout) : Fin self.r → Finset (Fin self.s)</code>",
- "29": "<code>Fin 2</code>",
- "28": "<code>Assignment G i</code>",
+ "29":
+ "<code>StarRing.{u} (R : Type u) [NonUnitalNonAssocSemiring R] : Type u</code><span class=\"sep\"></span><code class=\"docstring\">A `*`-ring `R` is a non-unital, non-associative (semi)ring with an involutive `star` operation\nwhich is additive which makes `R` with its multiplicative structure into a `*`-multiplication\n(i.e. `star (r * s) = star s * star r`). </code>",
+ "28":
+ "<code>Ring.{u} (R : Type u) : Type u</code><span class=\"sep\"></span><code class=\"docstring\">A `Ring` is a `Semiring` with negation making it an additive group. </code>",
  "27":
- "<code>LCSStrategy.commute.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) (j : Fin G.s) (α : Assignment G i) (β : Fin 2) : self.E i α * self.F j β = self.F j β * self.E i α</code>",
- "26": "<code>Fin G.s → Fin 2 → R</code>",
- "25": "<code>Fin G.s</code>",
+ "<code>LCSStrategy.{u_2} (R : Type u_2) [Ring R] [StarRing R] [Algebra ℂ R] (G : LCSLayout) : Type u_2</code>",
+ "26":
+ "<code>Star.star.{u} {R : Type u} [self : Star R] : R → R</code><span class=\"sep\"></span><code class=\"docstring\">A star operation (e.g. complex conjugate).\n</code>",
+ "25":
+ "<code>IsMeasurementSystem.self_adjoint.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x : I) : star (f x) = f x</code>",
  "24":
- "<code>LCSStrategy.bob_ms.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (j : Fin G.s) : IsMeasurementSystem (self.F j)</code>",
- "23": "<code>(i : Fin G.r) → Assignment G i → R</code>",
- "22":
- "<code>IsMeasurementSystem.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] (f : I → R) : Prop</code>",
- "21":
- "<code>LCSStrategy.alice_ms.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) : IsMeasurementSystem (self.E i)</code>",
+ "<code>IsMeasurementSystem.orthogonal.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x y : I) : x ≠ y → f x * f y = 0</code>",
+ "23":
+ "<code>IsMeasurementSystem.idempotent.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) (x : I) : f x * f x = f x</code>",
+ "22": "<code>R</code>",
+ "21": "<code>I</code>",
  "20":
- "<code>LCSStrategy.F.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G) :\n  Fin G.s → Fin 2 → R</code>",
+ "<code>IsMeasurementSystem.sum_one.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] {f : I → R}\n  (self : IsMeasurementSystem f) : ∑ x, f x = 1</code>",
  "2": "<code>LCSLayout.s (self : LCSLayout) : ℕ</code>",
  "19":
- "<code>LCSStrategy.E.{u_2} {R : Type u_2} [Ring R] [StarRing R] [Algebra ℂ R] {G : LCSLayout} (self : LCSStrategy R G)\n  (i : Fin G.r) : Assignment G i → R</code>",
- "18":
- "<code>Algebra.{u, v} (R : Type u) (A : Type v) [CommSemiring R] [Semiring A] : Type (max u v)</code><span class=\"sep\"></span><code class=\"docstring\">An associative unital `R`-algebra is a semiring `A` equipped with a map into its center `R → A`.\n\nSee the implementation notes in this file for discussion of the details of this definition.\n</code>",
- "17":
- "<code>StarRing.{u} (R : Type u) [NonUnitalNonAssocSemiring R] : Type u</code><span class=\"sep\"></span><code class=\"docstring\">A `*`-ring `R` is a non-unital, non-associative (semi)ring with an involutive `star` operation\nwhich is additive which makes `R` with its multiplicative structure into a `*`-multiplication\n(i.e. `star (r * s) = star s * star r`). </code>",
+ "<code class=\"docstring\">The universe of propositions. `Prop ≡ Sort 0`.\n\nEvery proposition is propositionally equal to either `True` or `False`. </code>",
+ "18": "<code>Type u_1</code>",
+ "17": "<code>I → R</code>",
  "16":
- "<code>Ring.{u} (R : Type u) : Type u</code><span class=\"sep\"></span><code class=\"docstring\">A `Ring` is a `Semiring` with negation making it an additive group. </code>",
+ "<code>Fintype.{u_4} (α : Type u_4) : Type u_4</code><span class=\"sep\"></span><code class=\"docstring\">`Fintype α` means that `α` is finite, i.e. there are only\nfinitely many distinct elements of type `α`. The evidence of this\nis a finset `elems` (a list up to permutation without duplicates),\ntogether with a proof that everything of type `α` is in the list. </code>",
  "15":
  "<code class=\"docstring\">The syntax `variable (X Y ... Z : Type*)` creates a new distinct implicit universe variable\n`&gt; 0` for each variable in the sequence. </code>",
  "14": "<code>Type u_2</code>",
  "13":
- "<code>LCSStrategy.{u_2} (R : Type u_2) [Ring R] [StarRing R] [Algebra ℂ R] (G : LCSLayout) : Type u_2</code>",
+ "<code>IsMeasurementSystem.{u_1, u_2} {R : Type u_1} [Ring R] [StarRing R] {I : Type u_2} [Fintype I] (f : I → R) : Prop</code>",
  "12":
  "<code>LCSGame.b {G : LCSLayout} (self : LCSGame G) : Fin G.r → Fin 2</code>",
  "11": "<code>LCSGame (G : LCSLayout) : Type</code>",

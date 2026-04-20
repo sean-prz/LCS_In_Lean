@@ -23,26 +23,57 @@ set_option verso.exampleModule "LCS"
 set_option verso.exampleModule "LCS.Basic"
 #doc (Manual) "About This Project" =>
 
+This project formalises part of the theory of Linear Constraint System (LCS) games in Lean 4. The emphasis is on two linked themes: representing LCS games and their quantum strategies in a clean Lean interface, and proving structural results about perfect strategies using operator identities. The formal development is based on the framework used in Section 4.7 of Arthur Mehta's thesis [Entanglement and Non-locality in Games and Graphs](https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3c06-4808-a685-deeda43f8fd3/content).
 
-This semester research project is about formalising Linear Constraint System (LCS) games in Lean4.
-Specifically the current end goal as of \[W06\] is to formalise the sum of square argument in LCS that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
+# Scope
 
-The exact statements this project is verifying are taken from section 4.7 of Arthur Mehta Thesis  [entanglement and non-locality in games and graphs](https://utoronto.scholaris.ca/server/api/core/bitstreams/3a3c8f11-3c06-4808-a685-deeda43f8fd3/content)
+The library is not intended to be a full survey of nonlocal games. It focuses on a specific slice of the theory that is mathematically coherent and already substantial enough to support both a general theorem and a concrete worked example.
 
-# The CodeBase
+On the abstract side, the project defines LCS layouts, LCS games, projector-valued strategies, observable-valued strategies, and the operators used to express local winning conditions. On the concrete side, it formalises the Mermin-Peres Magic Square game as the main case study.
 
-- The Interactive source view for this project is available [here](./source/LCS/)
+# Verified Milestones
 
-- The raw source files are available on the public github repository for this project [here](https://github.com/sean-prz/LCS_In_Lean/tree/main/projects/LCS/LCS)
+*Milestone 1.* The project formalises the Mermin-Peres Magic Square observables and proves that they determine a valid strategy in the observable formalism. This provides a concrete example showing that the abstract interfaces are strong enough to express a standard perfect quantum strategy.
 
-*Structure*
+*Milestone 2.* The project formalises the local winning and local loss operators for a general LCS game and projector strategy, and proves the sum-of-squares decomposition of the local loss operator. This is the main general structural result currently verified in the library.
 
-The codebase is structured in the following way:
+# The Codebase
 
-    - *LCS.Basic* : contains the basic definitions of LCS games, including the definition of a measurement system, and the definition of a LCS game.
-    - *LCS.MagicSquare* : contains the formalisation of the Mermin Peres Magic Square game, and the proof that it has a perfect quantum strategy.
-    - *LCS.MeasurementLemmas* : contains some lemmas about measurement systems that are used in the proofs of the other modules.
-    - *LCS.WinningCondition* : contains the formalisation of the sum of squares argument that gives a condition for the existence of a perfect quantum strategy for an LCS Game.
+## Where to look
 
+- The generated source and declaration browser for the library is available in [the API docs](./doc4/LCS.html).
+- The Lean sources live in the `LCS` library under `projects/LCS/LCS`.
 
-Section 3 of this manual documents the content of the module *LCS.Basic*.
+## Modules
+
+*Core modules*
+- **`LCS.Basic`**: core combinatorial data, including `LCSLayout`, `Assignment`, and `LCSGame`.
+- **`LCS.Measurement`**: projector-valued measurement systems and the algebraic lemmas attached to them.
+- **`LCS.Observable`**: observables and their basic interface.
+
+*Core modules*
+
+- **`LCS.Strategy.ProjectorStrategy`**: projector-based strategies for LCS games and the derived observables attached to Alice and Bob.
+- **`LCS.Strategy.ObservableStrategy`**: observable-based strategy data.
+- **`LCS.Strategy.ObservableToProjector`**: the construction turning observable strategy data into projector data.
+- **`LCS.Strategy.Equivalence`**: results comparing the observable and projector viewpoints.
+
+*Main results and examples*
+
+- **`LCS.WinningCondition`**: winning assignments, local winning operators, local loss operators, and the sum-of-squares theorem.
+- **`LCS.Games.MagicSquare`**: the Magic Square layout, observables, and strategy construction.
+
+*Support modules*
+
+- **`LCS.Common`**: shared arithmetic and sign conventions.
+- **`LCS.Pauli`**: Pauli-matrix calculations used by the Magic Square example.
+
+# Manual Overview
+
+The rest of the manual is organised as a guided tour of the formalisation:
+
+- *Introduction to Linear Constraint System Games* introduces the core game data and the role of strategies.
+- *Formalising Linear Constraint System Games* presents the main Lean interfaces used throughout the library.
+- *Strategy Formalisms and Equivalence* compares projector strategies and observable strategies, and explains the observable-to-projector construction.
+- *Winning Condition and SOS Decomposition* presents the local loss operator and its sum-of-squares theorem.
+- *Magic Square Case Study* shows how the abstract framework is instantiated on the Mermin-Peres game.

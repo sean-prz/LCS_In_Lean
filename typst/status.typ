@@ -111,6 +111,17 @@
   - Sectionned codebase for docs.
 ]
 
+#let week8_1 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Update manual with the work done for the first two milestones.
+]
+
+#let week8_2 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Compare project with other lean quantum information library. 
+]
 
 #table(
   columns: (0.5fr, 1fr, 1fr),
@@ -146,7 +157,10 @@
   [*Show that the Magic Square Grid is \ a valid strategy*], [*Formalize The SOS Decomposition of an LCS game*],
   [ ], [#week7_1], [#week7_2],
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
-
+  
+  [*Week 8*], [Update Manual&Docs], [Compare with other libraries],
+  [ ], [#week8_1], [#week8_2],
+  table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
   [], [.], [],
   [], [.], [],
   [], [.], [],

@@ -1,0 +1,1 @@
+window.docContents[25].resolve({"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-Codebase":{"contents":"\n\n\n\n","context":"Formalisation of Linear Constraints Systems games in Lean4\u0009About This Project","header":"1.3. The Codebase","id":"/#Formalisation-of-Linear-Constraints-Systems-games-in-Lean4--About-This-Project--The-Codebase"}});
