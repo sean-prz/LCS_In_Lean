@@ -3,6 +3,26 @@ from bs4 import BeautifulSoup
 
 # Configuration
 DOCS_DIR = os.path.join(os.path.dirname(__file__), "source/doc")
+LANDING_TEXT_PATH = os.path.join(os.path.dirname(__file__), "landing_text.html")
+
+
+def append_landing_text(soup):
+    main = soup.find("main")
+    if not main or soup.find(id="landing-text-fragment"):
+        return
+
+    if not os.path.exists(LANDING_TEXT_PATH):
+        print(f"Warning: Landing text file {LANDING_TEXT_PATH} not found.")
+        return
+
+    with open(LANDING_TEXT_PATH, 'r', encoding='utf-8') as f:
+        fragment_soup = BeautifulSoup(f, 'lxml')
+
+    container = soup.new_tag("div", id="landing-text-fragment")
+    fragment_root = fragment_soup.body or fragment_soup
+    for child in list(fragment_root.contents):
+        container.append(child)
+    main.append(container)
 
 def modify_html(file_path):
     """
@@ -15,12 +35,11 @@ def modify_html(file_path):
 
     # --- START CUSTOMIZATIONS ---
 
-    foundational_link = soup.find("a", string="foundational types")
-    if foundational_link: 
-        foundational_link.decompose()
-    tactics = soup.find("a", string="tactics")
-    if tactics:
-        tactics.decompose()
+    for link_text in ["foundational types", "tactics"]:
+        for link in soup.find_all("a"):
+            if link.get_text(strip=True) == link_text:
+                link.decompose()
+                break
 
     # Use recursive=False or filter for top-level modules to avoid 
     # decomposing children that are already gone.
@@ -32,7 +51,10 @@ def modify_html(file_path):
         for ml in module_list.find_all("details", class_="nav_sect", recursive=False):
             if ml.get("data-path") not in keep_paths:
                 ml.decompose()
-    # dleete all 
+
+    if os.path.basename(file_path) == "index.html":
+        append_landing_text(soup)
+
     # --- END CUSTOMIZATIONS ---
 
 

@@ -9,17 +9,32 @@ import LCS.Games.MagicSquare
 
 /-!
 # Linear Constraint System (LCS) Games
-This library formalizes the theory of LCS games, quantum strategies,
-and the winning condition derivation for perfect strategies.
+This is the umbrella entry point for the Lean 4 formalisation of Linear Constraint
+System (LCS) games.
+
+The library is organised around four pieces of mathematics:
+
+- the core combinatorial definitions of LCS layouts and games,
+- two quantum strategy formalisms, one projector-based and one observable-based,
+- the bridge from observable data to projector strategies,
+- the local winning and local loss operators together with the sum-of-squares
+  decomposition used to study perfect strategies.
+
+The main concrete case study is the Mermin-Peres Magic Square game, formalised in
+`LCS.Games.MagicSquare`.
 -/
 
 
 /-!
 ## Usage
 To use this library, simply `import LCS`.
+
 This provides access to:
-- `LCSLayout`, `LCSGame`, and `LCSStrategy`
-- Measurement system properties and Alice/Bob observables
-- The Winning Operator and the derivation of identities 4.7.3 and 4.7.4
-- The concrete Magic Square instance using Pauli matrices
+
+- core game definitions from `LCS.Basic`
+- measurement and observable interfaces from `LCS.Measurement` and `LCS.Observable`
+- projector and observable strategy formalisms from the `LCS.Strategy` modules
+- equivalence and conversion results between the two strategy viewpoints
+- winning-condition constructions and the local loss SOS theorem from `LCS.WinningCondition`
+- the concrete Magic Square example from `LCS.Games.MagicSquare`
 -/
