@@ -1,5 +1,6 @@
 import LCS.Basic
 import LCS.Observable
+import LCS.SolutionGroup
 import LCS.Strategy.ObservableStrategy
 import LCS.Pauli
 /-!
@@ -44,13 +45,26 @@ def magic_square_layout : LCSLayout  := {
 
 end Layout
 
+/-- The support-style magic square game, with the final column equation having odd parity. -/
+def magic_square_game : LCSGame magic_square_layout := {
+  b := fun i => if i = ⟨5, by decide⟩ then 1 else 0
+}
+
+/-- The explicit binary linear system underlying the Mermin-Peres magic square game. -/
+def magic_square_system : LinearSystem :=
+  magic_square_game.toLinearSystem
+
+/-- The generic solution group of the Mermin-Peres magic square system. -/
+abbrev MPSolutionGroup := SolutionGroup magic_square_system
+
 open Matrix
 open Kronecker
 open scoped BigOperators
 
 section Grid
 /-! ## Grid
-This Section defines a strategy for the game defined in the previous section, given as a grid of observables.
+This section defines a strategy for the game from the previous section,
+given as a grid of observables.
 -/
 
 /-- The 9 observables for the Mermin-Peres magic square, defined as Kronecker products of

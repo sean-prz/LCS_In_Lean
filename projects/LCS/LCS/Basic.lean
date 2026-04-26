@@ -46,3 +46,19 @@ abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
 structure LCSGame (G : LCSLayout) where
   b : Fin G.r → Fin 2
 -- ANCHOR_END: LCSGame
+
+/-- A full binary linear system with explicit coefficient matrix and right-hand side. -/
+structure LinearSystem where
+  layout : LCSLayout
+  A : Fin layout.r → Fin layout.s → Fin 2
+  b : Fin layout.r → Fin 2
+
+namespace LCSGame
+
+/-- Recover the explicit binary linear system encoded by a support-only LCS game. -/
+def toLinearSystem {G : LCSLayout} (game : LCSGame G) : LinearSystem where
+  layout := G
+  A i j := if j ∈ G.V i then 1 else 0
+  b := game.b
+
+end LCSGame
