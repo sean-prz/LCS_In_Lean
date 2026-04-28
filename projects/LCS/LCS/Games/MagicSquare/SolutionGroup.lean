@@ -55,16 +55,16 @@ def equationPresentation : List (List Nat × Nat) :=
   (List.finRange linearSystem.layout.r).map fun i =>
     (equationSupportIndices i, (linearSystem.b i).val)
 
+/-- The full solution-group relator list rendered with one-indexed generators. -/
+def formattedRelators : List String :=
+  (solutionRelatorsList magic_square_system).map (formatRelator (S := magic_square_system))
+
 #eval coefficientMatrix
 #eval rhsVector
 #eval equationSupports
 #eval equationPresentation
+#eval formattedRelators.forM IO.println
 
-#check solutionGroup
-#check SolutionGroup.var (S := linearSystem)
-#check SolutionGroup.J (S := linearSystem)
-#check SolutionGroup.equation_holds (S := linearSystem)
-#print solutionGroup
-#print solutionRelators
+
 
 end MagicSquareSolutionGroup
