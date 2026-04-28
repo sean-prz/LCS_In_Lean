@@ -45,10 +45,16 @@ def sameEquation (S : LinearSystem) (j k : Fin S.layout.s) : Prop :=
 /-- The defining relators of the solution group of `S`. -/
 def solutionRelators (S : LinearSystem) : Set (FreeGroup (SolutionGen S)) :=
   fun w =>
+    -- Membership test: `w` is in this set iff it is one of the following relator words.
+    -- Relation 1 for variables: `g_j^2 = 1`.
     (∃ j, w = involutionRel (genVar (S := S) j)) ∨
+    -- Relation 1 for the distinguished generator: `J^2 = 1`.
     w = involutionRel (genJ (S := S)) ∨
+    -- Relation 2: each variable generator commutes with `J`.
     (∃ j, w = commuteRel (genVar (S := S) j) (genJ (S := S))) ∨
+    -- Relation 3: variables appearing together in some equation commute.
     (∃ j k, sameEquation S j k ∧ w = commuteRel (genVar (S := S) j) (genVar (S := S) k)) ∨
+    -- Relation 4: the product for equation `i` equals `J^(b_i)`.
     (∃ i, w = equationRelator S i)
 
 /-- The presented solution group attached to `S`. -/
@@ -107,12 +113,20 @@ lemma var_comm_of_sameEquation {S : LinearSystem} {j k : Fin S.layout.s}
 lemma equation_holds {S : LinearSystem} (i : Fin S.layout.r) :
     PresentedGroup.mk (solutionRelators S) (equationWord S i) = J (S := S) ^ (S.b i).val := by
   have h :
-      PresentedGroup.mk (solutionRelators S) (equationWord S i * (genJ (S := S) ^ (S.b i).val)⁻¹) = 1 := by
-    exact PresentedGroup.one_of_mem
-      (rels := solutionRelators S)
-      (x := equationRelator S i)
-      (Or.inr (Or.inr (Or.inr (Or.inr ⟨i, rfl⟩))))
-  have h' := congrArg (fun z => z * J (S := S) ^ (S.b i).val) h
-  simpa [equationRelator, J, genJ, mul_assoc] using h'
+      PresentedGroup.mk (solutionRelators S) (equationWord S i) *
+          (J (S := S) ^ (S.b i).val)⁻¹ = 1 := by
+    simpa [equationRelator, J, genJ] using
+      (PresentedGroup.one_of_mem
+        (rels := solutionRelators S)
+        (x := equationRelator S i)
+        (Or.inr (Or.inr (Or.inr (Or.inr ⟨i, rfl⟩)))))
+  calc
+    PresentedGroup.mk (solutionRelators S) (equationWord S i)
+        = PresentedGroup.mk (solutionRelators S) (equationWord S i) *
+            (J (S := S) ^ (S.b i).val)⁻¹ * (J (S := S) ^ (S.b i).val) := by
+          simp [mul_assoc]
+    _ = J (S := S) ^ (S.b i).val := by
+          rw [h]
+          simp
 
 end SolutionGroup

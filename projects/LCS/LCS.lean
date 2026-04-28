@@ -7,6 +7,8 @@ import LCS.Observable
 import LCS.Measurement
 import LCS.WinningCondition
 import LCS.Games.MagicSquare
+import LCS.Games.MagicSquare.Strategy
+import LCS.Games.MagicSquare.SolutionGroup
 
 /-!
 # Linear Constraint System (LCS) Games
@@ -22,7 +24,8 @@ The library is organised around four pieces of mathematics:
   decomposition used to study perfect strategies.
 
 The main concrete case study is the Mermin-Peres Magic Square game, formalised in
-`LCS.Games.MagicSquare`.
+`LCS.Games.MagicSquare.Strategy`; its solution-group presentation can be inspected in
+`LCS.Games.MagicSquare.SolutionGroup`.
 -/
 
 
@@ -37,5 +40,6 @@ This provides access to:
 - projector and observable strategy formalisms from the `LCS.Strategy` modules
 - equivalence and conversion results between the two strategy viewpoints
 - winning-condition constructions and the local loss SOS theorem from `LCS.WinningCondition`
-- the concrete Magic Square example from `LCS.Games.MagicSquare`
+- the concrete Magic Square strategy from `LCS.Games.MagicSquare.Strategy`
+- the Magic Square solution-group inspection module from `LCS.Games.MagicSquare.SolutionGroup`
 -/
