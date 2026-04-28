@@ -121,6 +121,21 @@
   #set text(8pt)
   #set align(left + top)
   - Compare project with other lean quantum information library. 
+  - Plan following weeks and define the next milestone.
+]
+
+
+#let week9_1 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Explore mathlib PresentedGroup and FreeGroup.
+]
+
+#let week9_2 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Define a Linear System Object in Lean from the Layout and Game definition.
+  - Implement a mapping from an LCS game to a group presentation of the solution group.
 ]
 
 #table(
@@ -161,6 +176,11 @@
   [*Week 8*], [Update Manual&Docs], [Compare with other libraries],
   [ ], [#week8_1], [#week8_2],
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
+
+  [*Week 9*], table.cell(colspan: 2)[Group Theory],
+  [ ], [#week9_1], [#week9_2],
+  table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
+
   [], [.], [],
   [], [.], [],
   [], [.], [],
@@ -178,6 +198,34 @@
 = Meetings
 #line()
 *Monday 11.15am in BC110* to debrief previous week and plan the next one.
+
+
+== Week 10
+
+*Summary of the week*
+0. refactor project structure.
+1. Add a linear system layer, to follow notation of the paper more closely.
+2. Define the alphabet of the solution group as the set of variables of the linear system and a special generator J.
+3. Define first a freeGroup from the alphabet.
+4. add helper definitions to define the relations of the group presentation, mostly the last constraint that required extra work.
+5. pack all the relations into a single set of relations (define by a membership predicate to test if a word is in the relation)
+6. Pass this relations to the mathlib PresentedGroup construction to get the solution group.
+7. Uses this definition with Magic Square game and check the relations generated.
+
+Next step if we want to prove homomorphism, we need a function f to map each generator to an operator and
+we need a proof for each relation that the image still satisfies.
+
+
+
+*Lean specific details*
+_Empty_
+Private section for the representation, make sure it does not appear in the API.
+
+*Question*
+
+- How is the solution group presentation and the concrete homomorphism to a group of pauli matrices related to the SOS decomposition of the game ? 
+- What would be a good 3rd milestone for the project ?  
+
 
 
 == Week 7 & Easter Break
