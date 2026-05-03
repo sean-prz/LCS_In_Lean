@@ -2,33 +2,64 @@
 trigger: always_on
 ---
 
-# LCS Project Summary: Architecture & Status
+# LCS Project Summary: Current Structure
 
-A formalization of **Linear Constraint System Games (LCS)** in Lean 4.
+Formalization of Linear Constraint System (LCS) games in Lean 4.
 
-The goal of this project is 
-1. To prove that the Mermin-Peres well known strategy given in terms of 9 observables is equivalent to a valid strategy given in terms of projector for each pair of question, answer for each player. 
-2. By a sum of square decomposition of a local loss operator prove a condition on the existence of a perfect strategy for a given LCS.
+Main goals:
+1. Show equivalence between the observable strategy formalism and the projector strategy formalism.
+2. Develop the local-loss sum-of-squares framework used to analyze perfect strategies.
+3. Construct the solution group for binary 
 
-## Build Instructions
+## Project Roots
 
-- The Lean project root is `projects/LCS`.
-- The toolchain is pinned in `projects/LCS/lean-toolchain` to `leanprover/lean4:v4.28.0`.
-- To build the whole project, run `cd projects/LCS && lake build`.
-- To build a single module, run `cd projects/LCS && lake build LCS.WinningCondition`.
-- Agents should run build commands from `projects/LCS`, not from the repository root.
+- Main Lean library: `projects/LCS`.
+- Manual docs project (Verso): `projects/docs_LCS`.
+- API docs project (`doc-gen4` wrapper): `projects/LCS/docbuild`.
+- Toolchain is pinned to `leanprover/lean4:v4.28.0` in all three projects.
 
-## Module Structure
+## Verified Commands
 
-1.  **Core Geometry & Game Definition**
-    *   [`Basic.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Basic.lean): Includes `LCSLayout`, `Assignment`, and `LCSGame`.
-2.  **Algebraic Foundations**
-    *   [`Measurement.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Measurement.lean): Theory of **Projector Measurement Systems** (`IsMeasurementSystem`).
-    *   [`Observable.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Observable.lean): Definitions of **Observables** (`IsObservable`).
-    *   [`Common.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Common.lean): Utilities for signs (`observableSign`) and arithmetic lemmas.
-3.  **Strategy Implementations**
-    *   [`Strategy/ProjectorStrategy.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Strategy/ProjectorStrategy.lean): The **Projector-based Strategy** (`LCSStrategy`). Defines derived observables **`Alice_A`** and **`Bob_B`**.
-    *   [`Strategy/ObservableStrategy.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Strategy/ObservableStrategy.lean): The **Observable-based Strategy** (`ObservableStrategyData`).
-    *   [`Strategy/Equivalence.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/Strategy/Equivalence.lean): Bridge construction `ObservableStrategy_To_ProjectorStrategy`.
-4.  **Results**
-    *   [`WinningCondition.lean`](file:///Users/sean/Documents/MA2/lean/projects/LCS/LCS/WinningCondition.lean): Formal verification of Theorem 4.7, defining the **Winning Operator** and proving relevant algebraic identities.
+- Run all `lake` commands from `projects/LCS`, not from repo root.
+- Full library build: `lake build`.
+- Focused module check: `lake build LCS.WinningCondition`.
+- Umbrella target: `LCS` via `projects/LCS/LCS.lean`.
+
+## Lean Library Layout (`projects/LCS/LCS`)
+
+1. **Core definitions and algebraic utilities**
+   - `Basic.lean`: `LCSLayout`, `Assignment`, `LCSGame`, `LinearSystem`.
+   - `Common.lean`: sign lemmas and finite-field arithmetic helpers.
+   - `Measurement.lean`: projector measurement systems (`IsMeasurementSystem`) and induced measurements.
+   - `Observable.lean`: observables (`IsObservable`) and observable/measurement conversions.
+   - `Pauli.lean`: Pauli matrices and Kronecker-product lemmas used by concrete strategies.
+
+2. **Strategy formalisms and bridges**
+   - `Strategy/ObservableStrategy.lean`: observable strategy data (`ObservableStrategyData`) and bipartite lift.
+   - `Strategy/ObservableToProjector.lean`: map `ObservableToProjector` and measurement proofs.
+   - `Strategy/ProjectorStrategy.lean`: projector strategy data (`LCSStrategy`) and derived observables.
+   - `Strategy/Equivalence.lean`: conversion from observable strategies to projector strategies.
+
+3. **Group-theoretic layer**
+   - `SolutionGroup.lean`: presented-group construction for LCS solution groups.
+
+4. **Winning-condition results**
+   - `WinningCondition.lean`: local winning/loss operators and SOS decomposition lemmas.
+
+5. **Concrete example: Mermin-Peres Magic Square**
+   - `Games/MagicSquare/Strategy.lean`: magic-square layout/game plus explicit observable strategy.
+   - `Games/MagicSquare/SolutionGroup.lean`: solution-group instantiation and inspectable relators.
+   - `Games/MagicSquare.lean`: re-export module for the game-specific files.
+
+## Docs Flow
+
+- Manual entrypoint: `projects/docs_LCS/MainManual.lean` (pulls `DocsLCS/*.lean`).
+- Build manual docs from `projects/docs_LCS` with `lake exe generate-docs`.
+- Docs examples target `../LCS` via `set_option verso.exampleProject "../LCS"`.
+- Root `update-docs.sh` is a larger interactive pipeline for manual docs, optional literate/API docs, post-processing, and publishing artifacts into `docs/`.
+
+## Gotchas
+
+- Prefer focused `lake build <Module>` checks while iterating on Lean files.
+- `projects/LCS/lakefile.toml` enables `weak.linter.mathlibStandardSet = true`; existing warnings can be non-blocking.
+- Treat generated `docs/` output as build artifacts unless the task is explicitly about docs publication.
