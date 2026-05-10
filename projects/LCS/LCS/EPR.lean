@@ -293,156 +293,18 @@ lemma one_sub_smul_kronecker_mulVec_epr_eq_zero_iff
 
 end BipartiteLiftAlgebra
 
-section SOSLocalIdentities
-/-!
-## Extracting Local Matrix Identities from SOS Relation Terms
-
-The sum-of-squares decomposition produces three relation terms.  Once a
-positivity argument shows that each term annihilates the EPR vector, the lemmas
-in this section remove $\Omega$ and produce the local matrix identities needed
-for the solution-group representation.
--/
-
-/-- If the consistency SOS relation annihilates EPR, the local Alice and Bob matrices agree
-up to transpose:
-$$
-  A_{ij} = B_j^T.
-$$
--/
-lemma consistency_of_epr_annihilates
-    {G : LCSLayout} (n : Type*) [Fintype n] [DecidableEq n]
-    (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
-    (i : Fin G.r) (j : G.V i)
-    (A B : Matrix n n ℂ)
-    (hCons :
-      Matrix.mulVec
-        (1 - Bob_B strat ↑j * Alice_A strat i j)
-        (eprVec n) = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hBobs : IsObservable B) :
-    A = Bᵀ := by
-  have hCons' :
-      Matrix.mulVec (1 - A ⊗ₖ B) (eprVec n) = 0 := by
-    simpa [hAlice, hBob, bipartiteBobLift_mul_bipartiteAliceLift] using hCons
-  have hAB : A * Bᵀ = 1 :=
-    (one_sub_kronecker_mulVec_epr_eq_zero_iff n A B).mp hCons'
-  have hBT : Bᵀ * Bᵀ = 1 := by
-    rw [← Matrix.transpose_mul, hBobs.involutive, Matrix.transpose_one]
-  calc
-    A = A * 1 := (Matrix.mul_one A).symm
-    _ = A * (Bᵀ * Bᵀ) := by rw [hBT]
-    _ = (A * Bᵀ) * Bᵀ := by rw [Matrix.mul_assoc]
-    _ = Bᵀ := by rw [hAB, Matrix.one_mul]
-
-/-- If the row SOS relation annihilates EPR, the corresponding local row product satisfies
-the LCS row equation:
-$$
-  R_i = (-1)^{b_i} I.
-$$
--/
-lemma row_relation_of_epr_annihilates
-    {G : LCSLayout} (game : LCSGame G)
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
-    (i : Fin G.r)
-    (Row : Matrix n n ℂ)
-    (hRow :
-      Matrix.mulVec
-        (1 - (-1 : ℂ) ^ (game.b i).val • Alice_Row_Prod strat i)
-        (eprVec n) = 0)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
-    Row = (-1 : ℂ) ^ (game.b i).val • 1 := by
-  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
-  have hLocal : 1 - c • Row = 0 := by
-    have hRow' :
-        Matrix.mulVec (1 - c • bipartiteAliceLift Row) (eprVec n) = 0 := by
-      simpa [c, hRowLift] using hRow
-    exact (alice_lift_one_sub_smul_mulVec_epr_eq_zero_iff n c Row).mp hRow'
-  have hcRow : c • Row = 1 := (sub_eq_zero.mp hLocal).symm
-  have hc : c * c = 1 := by
-    simpa [c] using sign_fin2_sq (game.b i)
-  calc
-    Row = (1 : ℂ) • Row := (one_smul ℂ Row).symm
-    _ = (c * c) • Row := by rw [hc]
-    _ = c • (c • Row) := by rw [smul_smul]
-    _ = c • (1 : Matrix n n ℂ) := by rw [hcRow]
-
-/-- If the third SOS relation annihilates EPR, the corresponding local product identity holds:
-$$
-  (-1)^{b_i} R_i A_{ij} B_j^T = I.
-$$
--/
-lemma product_relation_of_epr_annihilates
-    {G : LCSLayout} (game : LCSGame G)
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
-    (i : Fin G.r) (j : G.V i)
-    (A B Row : Matrix n n ℂ)
-    (hProd :
-      Matrix.mulVec
-        (1 - (-1 : ℂ) ^ (game.b i).val •
-          (Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j))
-        (eprVec n) = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
-    (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
-  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
-  have hProd' :
-      Matrix.mulVec (1 - c • ((Row * A) ⊗ₖ B)) (eprVec n) = 0 := by
-    simpa [c, hAlice, hBob, hRowLift, bipartiteAliceLift_mul,
-      bipartiteAliceLift_mul_bipartiteBobLift, Matrix.mul_assoc] using hProd
-  have hLocal :
-      c • ((Row * A) * Bᵀ) = 1 :=
-    (one_sub_smul_kronecker_mulVec_epr_eq_zero_iff n c (Row * A) B).mp hProd'
-  simpa [Matrix.mul_assoc] using hLocal
-
-/-- Bundled extraction of the local matrix identities from the individual SOS relation terms
-annihilating EPR.
-
-Given annihilation of the consistency, row, and product SOS terms, this returns
-the three local identities
-$$
-  A_{ij} = B_j^T,\qquad
-  R_i = (-1)^{b_i} I,\qquad
-  (-1)^{b_i} R_i A_{ij} B_j^T = I.
-$$
--/
-lemma local_matrix_identities_of_sos_terms_annihilate_epr
-    {G : LCSLayout} (game : LCSGame G)
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
-    (i : Fin G.r) (j : G.V i)
-    (A B Row : Matrix n n ℂ)
-    (hCons :
-      Matrix.mulVec
-        (1 - Bob_B strat ↑j * Alice_A strat i j)
-        (eprVec n) = 0)
-    (hRow :
-      Matrix.mulVec
-        (1 - (-1 : ℂ) ^ (game.b i).val • Alice_Row_Prod strat i)
-        (eprVec n) = 0)
-    (hProd :
-      Matrix.mulVec
-        (1 - (-1 : ℂ) ^ (game.b i).val •
-          (Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j))
-        (eprVec n) = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
-    (hBobs : IsObservable B) :
-    A = Bᵀ ∧
-      Row = (-1 : ℂ) ^ (game.b i).val • 1 ∧
-      (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
-  refine ⟨?_, ?_, ?_⟩
-  · exact consistency_of_epr_annihilates n strat i j A B hCons hAlice hBob hBobs
-  · exact row_relation_of_epr_annihilates game n strat i Row hRow hRowLift
-  · exact product_relation_of_epr_annihilates game n strat i j A B Row hProd hAlice hBob hRowLift
-
-end SOSLocalIdentities
 
 section LCSSOSTerms
+/-!
+## SOS Relation Terms and Main EPR Pipeline
+
+This section packages the three relation terms appearing in `local_loss_sos`
+(`sosConsistencyTerm`, `sosRowTerm`, `sosProductTerm`), their square-sum, and
+the three main proof stages used downstream:
+1. local loss annihilating `Ω` implies the scaled SOS square-sum annihilates `Ω`;
+2. annihilation of that SOS square-sum implies each individual SOS term annihilates `Ω`;
+3. annihilation of the individual SOS terms implies the local matrix identities.
+-/
 
 variable {G : LCSLayout}
 variable (game : LCSGame G)
@@ -485,6 +347,11 @@ noncomputable def sosSquareSum
     (sosRowTerm game strat i) ^ 2 +
     (sosProductTerm game strat i j) ^ 2
 
+section Stage1
+/-!
+### Stage 1: Local Loss ⇒ Scaled SOS Square-Sum
+-/
+
 /-- The part of the SOS pipeline that is purely a rewrite: if the local loss annihilates EPR,
 then the SOS expression from `local_loss_sos` annihilates EPR.  Extracting each individual
 square term from this sum requires a positivity/norm argument.
@@ -505,6 +372,13 @@ lemma local_loss_kills_epr_sos_sum
       ((1 / 8 : ℂ) • sosSquareSum game strat i j)
       Ω = 0 := by
   simpa [local_loss_sos, sosSquareSum, sosConsistencyTerm, sosRowTerm, sosProductTerm] using hLoss
+
+end Stage1
+
+section Stage2
+/-!
+### Stage 2: Scaled SOS Square-Sum ⇒ Individual SOS-Term Annihilation
+-/
 
 private lemma noncommProd_conjTranspose_eq_self
     {ι m : Type*} [Fintype m] [DecidableEq m]
@@ -644,4 +518,141 @@ lemma sos_sum_kills_epr_implies_terms_kill_epr
   simpa [T₁, T₂, T₃] using
     three_selfAdjoint_squares_mulVec_eq_zero T₁ T₂ T₃ Ω hT₁ hT₂ hT₃ hsum
 
+end Stage2
+
+section Stage3
+/-!
+### Stage 3: Individual SOS-Term Annihilation ⇒ Local Matrix Identities
+
+The sum-of-squares decomposition produces three relation terms.  Once a
+positivity argument shows that each term annihilates the EPR vector, the lemmas
+in this section remove $\Omega$ and produce the local matrix identities needed
+for the solution-group representation.
+-/
+
+/-- If the consistency SOS relation annihilates EPR, the local Alice and Bob matrices agree
+up to transpose:
+$$
+  A_{ij} = B_j^T.
+$$
+-/
+lemma consistency_of_epr_annihilates
+    (i : Fin G.r) (j : G.V i)
+    (A B : Matrix n n ℂ)
+    (hCons :
+      Matrix.mulVec
+        (sosConsistencyTerm strat i j)
+        Ω = 0)
+    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
+    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+    (hBobs : IsObservable B) :
+    A = Bᵀ := by
+  have hCons' :
+      Matrix.mulVec (1 - A ⊗ₖ B) Ω = 0 := by
+    simpa [hAlice, hBob, sosConsistencyTerm, bipartiteBobLift_mul_bipartiteAliceLift] using hCons
+  have hAB : A * Bᵀ = 1 :=
+    (one_sub_kronecker_mulVec_epr_eq_zero_iff n A B).mp hCons'
+  have hBT : Bᵀ * Bᵀ = 1 := by
+    rw [← Matrix.transpose_mul, hBobs.involutive, Matrix.transpose_one]
+  calc
+    A = A * 1 := (Matrix.mul_one A).symm
+    _ = A * (Bᵀ * Bᵀ) := by rw [hBT]
+    _ = (A * Bᵀ) * Bᵀ := by rw [Matrix.mul_assoc]
+    _ = Bᵀ := by rw [hAB, Matrix.one_mul]
+
+/-- If the row SOS relation annihilates EPR, the corresponding local row product satisfies
+the LCS row equation:
+$$
+  R_i = (-1)^{b_i} I.
+$$
+-/
+lemma row_relation_of_epr_annihilates
+    (i : Fin G.r)
+    (Row : Matrix n n ℂ)
+    (hRow :
+      Matrix.mulVec
+        (sosRowTerm game strat i)
+        Ω = 0)
+    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
+    Row = (-1 : ℂ) ^ (game.b i).val • 1 := by
+  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
+  have hLocal : 1 - c • Row = 0 := by
+    have hRow' :
+        Matrix.mulVec (1 - c • bipartiteAliceLift Row) Ω = 0 := by
+      simpa [c, hRowLift, sosRowTerm] using hRow
+    exact (alice_lift_one_sub_smul_mulVec_epr_eq_zero_iff n c Row).mp hRow'
+  have hcRow : c • Row = 1 := (sub_eq_zero.mp hLocal).symm
+  have hc : c * c = 1 := by
+    simpa [c] using sign_fin2_sq (game.b i)
+  calc
+    Row = (1 : ℂ) • Row := (one_smul ℂ Row).symm
+    _ = (c * c) • Row := by rw [hc]
+    _ = c • (c • Row) := by rw [smul_smul]
+    _ = c • (1 : Matrix n n ℂ) := by rw [hcRow]
+
+/-- If the third SOS relation annihilates EPR, the corresponding local product identity holds:
+$$
+  (-1)^{b_i} R_i A_{ij} B_j^T = I.
+$$
+-/
+lemma product_relation_of_epr_annihilates
+    (i : Fin G.r) (j : G.V i)
+    (A B Row : Matrix n n ℂ)
+    (hProd :
+      Matrix.mulVec
+        (sosProductTerm game strat i j)
+        Ω = 0)
+    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
+    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
+    (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
+  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
+  have hProd' :
+      Matrix.mulVec (1 - c • ((Row * A) ⊗ₖ B)) Ω = 0 := by
+    simpa [c, hAlice, hBob, hRowLift, sosProductTerm, bipartiteAliceLift_mul,
+      bipartiteAliceLift_mul_bipartiteBobLift, Matrix.mul_assoc] using hProd
+  have hLocal :
+      c • ((Row * A) * Bᵀ) = 1 :=
+    (one_sub_smul_kronecker_mulVec_epr_eq_zero_iff n c (Row * A) B).mp hProd'
+  simpa [Matrix.mul_assoc] using hLocal
+
+/-- Bundled extraction of the local matrix identities from the individual SOS relation terms
+annihilating EPR.
+
+Given annihilation of the consistency, row, and product SOS terms, this returns
+the three local identities
+$$
+  A_{ij} = B_j^T,\qquad
+  R_i = (-1)^{b_i} I,\qquad
+  (-1)^{b_i} R_i A_{ij} B_j^T = I.
+$$
+-/
+lemma local_matrix_identities_of_sos_terms_annihilate_epr
+    (i : Fin G.r) (j : G.V i)
+    (A B Row : Matrix n n ℂ)
+    (hCons :
+      Matrix.mulVec
+        (sosConsistencyTerm strat i j)
+        Ω = 0)
+    (hRow :
+      Matrix.mulVec
+        (sosRowTerm game strat i)
+        Ω = 0)
+    (hProd :
+      Matrix.mulVec
+        (sosProductTerm game strat i j)
+        Ω = 0)
+    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
+    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
+    (hBobs : IsObservable B) :
+    A = Bᵀ ∧
+      Row = (-1 : ℂ) ^ (game.b i).val • 1 ∧
+      (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
+  refine ⟨?_, ?_, ?_⟩
+  · exact consistency_of_epr_annihilates n strat i j A B hCons hAlice hBob hBobs
+  · exact row_relation_of_epr_annihilates game n strat i Row hRow hRowLift
+  · exact product_relation_of_epr_annihilates game n strat i j A B Row hProd hAlice hBob hRowLift
+
+end Stage3
 end LCSSOSTerms
