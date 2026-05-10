@@ -1,24 +1,18 @@
-import LCS.Basic
-import LCS.Common
 import LCS.Strategy.ObservableStrategy
-import LCS.Strategy.ProjectorStrategy
 import LCS.WinningCondition
 import LCS.MatrixSOS
 
 /-!
 # Minimal EPR Vector Lemmas
 
-This module contains the small amount of EPR/vectorization algebra needed for
-solution-group relation extraction.  The vector is intentionally unnormalized:
-normalization factors play no role in annihilation or injectivity arguments.
-
-The guiding calculation is the finite-dimensional identity
+This module contains the EPR/vectorization algebra used for solution-group
+relation extraction.  The EPR vector is intentionally unnormalized, since only
+annihilation and injectivity matter here.  The guiding calculation is
 $$
   (M \otimes N)\Omega = 0 \quad\Longleftrightarrow\quad M N^{T} = 0,
 $$
-where $\Omega = \sum_i e_i \otimes e_i$ is the unnormalized EPR vector.  The
-strategy-facing lemmas specialize this identity to the bipartite lifts used by
-LCS strategies and extract local matrix identities from the SOS relation terms.
+specialized below to the bipartite lifts and SOS relation terms used by LCS
+strategies.
 -/
 
 open scoped BigOperators
@@ -31,11 +25,7 @@ section EPRVector
 ## The Unnormalized EPR Vector
 
 The vector `eprVec n` is the coordinate function of
-$$
-  \Omega = \sum_{a : n} e_a \otimes e_a.
-$$
-It is intentionally unnormalized: all arguments below use only annihilation or
-injectivity, so no scalar normalization factor is needed.
+$\Omega = \sum_{a : n} e_a \otimes e_a$.
 -/
 
 /-- The unnormalized EPR vector $\Omega = \sum_a e_a \otimes e_a$, as a
@@ -43,18 +33,6 @@ function on pairs. -/
 noncomputable def eprVec
     (n : Type*) [Fintype n] [DecidableEq n] : (n × n) → ℂ :=
   fun ab => if ab.1 = ab.2 then 1 else 0
-
-/-- On diagonal coordinates, the unnormalized EPR vector has value $1$. -/
-@[simp] lemma eprVec_apply_same
-    (n : Type*) [Fintype n] [DecidableEq n] (a : n) :
-    eprVec n (a, a) = 1 := by
-  simp [eprVec]
-
-/-- On off-diagonal coordinates, the unnormalized EPR vector has value $0$. -/
-@[simp] lemma eprVec_apply_ne
-    (n : Type*) [Fintype n] [DecidableEq n] {a b : n} (h : a ≠ b) :
-    eprVec n (a, b) = 0 := by
-  simp [eprVec, h]
 
 /-- Summing a function over the diagonal of `n × n` is the same as summing it
 over `n`.
@@ -137,36 +115,6 @@ lemma alice_lift_mulVec_epr_eq_zero_iff
     Matrix.mulVec (bipartiteAliceLift M) (eprVec n) = 0 ↔ M = 0 := by
   rw [bipartiteAliceLift, kronecker_mulVec_epr_eq_zero_iff]
   simp
-
-/-- Equality after acting on Alice's side of EPR is equality of local matrices:
-$$
-  (M \otimes I)\Omega = (N \otimes I)\Omega
-    \quad\Longleftrightarrow\quad M = N.
-$$
--/
-lemma alice_lift_mulVec_epr_eq_iff
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (M N : Matrix n n ℂ) :
-    Matrix.mulVec (bipartiteAliceLift M) (eprVec n)
-      =
-    Matrix.mulVec (bipartiteAliceLift N) (eprVec n)
-      ↔ M = N := by
-  constructor
-  · intro h
-    have hsub :
-        bipartiteAliceLift (M - N) = bipartiteAliceLift M - bipartiteAliceLift N := by
-      change (M - N) ⊗ₖ (1 : Matrix n n ℂ) =
-        M ⊗ₖ (1 : Matrix n n ℂ) - N ⊗ₖ (1 : Matrix n n ℂ)
-      rw [sub_eq_add_neg, add_kronecker]
-      simp only [sub_eq_add_neg]
-      congr
-      rw [show -N = (-1 : ℂ) • N by simp, smul_kronecker]
-      simp
-    have h0 : Matrix.mulVec (bipartiteAliceLift (M - N)) (eprVec n) = 0 := by
-      simpa [hsub, Matrix.sub_mulVec] using sub_eq_zero.mpr h
-    exact sub_eq_zero.mp ((alice_lift_mulVec_epr_eq_zero_iff n (M - N)).mp h0)
-  · intro h
-    rw [h]
 
 /-- The relation term $1 - M \otimes N$ annihilates EPR precisely when
 $$
@@ -298,12 +246,9 @@ section LCSSOSTerms
 /-!
 ## SOS Relation Terms and Main EPR Pipeline
 
-This section packages the three relation terms appearing in `local_loss_sos`
-(`sosConsistencyTerm`, `sosRowTerm`, `sosProductTerm`), their square-sum, and
-the three main proof stages used downstream:
-1. local loss annihilating `Ω` implies the scaled SOS square-sum annihilates `Ω`;
-2. annihilation of that SOS square-sum implies each individual SOS term annihilates `Ω`;
-3. annihilation of the individual SOS terms implies the local matrix identities.
+This section packages the three relation terms from `local_loss_sos`, their
+square-sum, and the three extraction stages: loss kills `Ω`, the SOS terms kill
+`Ω`, and the local matrix identities follow.
 -/
 
 variable {G : LCSLayout}
