@@ -2,6 +2,8 @@ import LCS.Strategy.ObservableStrategy
 import LCS.Strategy.ProjectorStrategy
 import LCS.Strategy.Equivalence
 import LCS.Strategy.ObservableToProjector
+import LCS.MatrixSOS
+import LCS.EPR
 import LCS.SolutionGroup
 import LCS.Observable
 import LCS.Measurement
