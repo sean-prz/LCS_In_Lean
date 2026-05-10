@@ -1,4 +1,4 @@
-import LCS.Strategy.ObservableStrategy
+import LCS.Strategy.Equivalence
 import LCS.WinningCondition
 import LCS.MatrixSOS
 
@@ -600,4 +600,37 @@ lemma local_matrix_identities_of_sos_terms_annihilate_epr
   · exact product_relation_of_epr_annihilates game n strat i j A B Row hProd hAlice hBob hRowLift
 
 end Stage3
+
+/-- Final bundled extraction from local-loss annihilation on EPR to the local matrix
+identities.
+
+This packages the three stages:
+1. local loss annihilates `Ω`, so the scaled SOS square-sum annihilates `Ω`;
+2. the positivity argument extracts annihilation of each SOS relation term;
+3. EPR injectivity converts those annihilations into local matrix identities.
+-/
+lemma local_matrix_identities_of_local_loss_annihilate_epr
+    (i : Fin G.r) (j : G.V i)
+    (A B Row : Matrix n n ℂ)
+    (hLoss :
+      Matrix.mulVec
+        (local_loss_operator game strat i j)
+        Ω = 0)
+    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
+    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
+    (hBobs : IsObservable B) :
+    A = Bᵀ ∧
+      Row = (-1 : ℂ) ^ (game.b i).val • 1 ∧
+      (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
+  have hSos :
+      Matrix.mulVec
+        ((1 / 8 : ℂ) • sosSquareSum game strat i j)
+        Ω = 0 :=
+    local_loss_kills_epr_sos_sum game n strat i j hLoss
+  rcases sos_sum_kills_epr_implies_terms_kill_epr game n strat i j hSos with
+    ⟨hCons, hRow, hProd⟩
+  exact local_matrix_identities_of_sos_terms_annihilate_epr
+    game n strat i j A B Row hCons hRow hProd hAlice hBob hRowLift hBobs
+
 end LCSSOSTerms
