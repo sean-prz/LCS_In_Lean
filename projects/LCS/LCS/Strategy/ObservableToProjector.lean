@@ -109,6 +109,16 @@ lemma sum_one_observableToProjector (O : R) :
     _ = 1 := by
       norm_num
 
+lemma observable_mul_observableToProjector
+    (O : R) (hO : IsObservable O) (a : Fin 2) :
+    O * ObservableToProjector O a =
+      ((-1 : ℂ) ^ a.val) • ObservableToProjector O a := by
+  fin_cases a
+  · simp [ObservableToProjector, observableSign, hO.involutive, mul_add,
+      smul_add, add_comm]
+  · simp [ObservableToProjector, observableSign, hO.involutive, mul_add,
+      smul_add, add_comm]
+
 /-- If observables $O₁$ and $O₂$ commute, then all corresponding projectors
 $P_a(O₁)$ and $P_b(O₂)$ commute as well. -/
 lemma commute_observableToProjector {O1 O2 : R} (h : Commute O1 O2) (a b : Fin 2) :

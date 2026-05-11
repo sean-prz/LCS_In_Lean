@@ -358,6 +358,69 @@ lemma aliceMeasurement_bobMeasurement_commute
     Finset.noncommProd_commute (Finset.univ : Finset (G.V i)) f comm _ hBob
   simpa [AliceMeasurementFromObservables, BobMeasurementFromObservables] using hcomm_prod.eq.symm
 
+lemma aliceObservable_mul_aliceMeasurementFromObservables
+    (S : ObservableStrategyData R G)
+    (i : Fin G.r) (j : G.V i) (assignment : Assignment G i) :
+    S.alice_obs j.1 * AliceMeasurementFromObservables S i assignment =
+      ((-1 : ℂ) ^ (assignment j).val) •
+        AliceMeasurementFromObservables S i assignment := by
+  classical
+  let f : G.V i → R :=
+    fun k => ObservableToProjector (S.alice_obs k.1) (assignment k)
+  let comm : ((Finset.univ : Finset (G.V i)) : Set (G.V i)).Pairwise
+      (fun x y => Commute (f x) (f y)) := by
+    intro x hx y hy hxy
+    simpa [f] using projector_commute_in_equation S i x y (assignment x) (assignment y)
+  let restComm : (((Finset.univ : Finset (G.V i)).erase j) : Set (G.V i)).Pairwise
+      (fun x y => Commute (f x) (f y)) := by
+    intro x hx y hy hxy
+    exact comm
+      ((Finset.univ : Finset (G.V i)).mem_of_mem_erase hx)
+      ((Finset.univ : Finset (G.V i)).mem_of_mem_erase hy) hxy
+  have hsplit :
+      ((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm * f j =
+      (Finset.univ : Finset (G.V i)).noncommProd f comm := by
+    exact Finset.noncommProd_erase_mul
+      (Finset.univ : Finset (G.V i)) (by simp) f comm
+  have hcomm_rest :
+      Commute (S.alice_obs j.1)
+        (((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm) := by
+    refine Finset.noncommProd_commute _ _ _ _ ?_
+    intro k hk
+    have hkj : k ≠ j := by
+      intro h
+      exact (Finset.mem_erase.mp hk).1 h
+    have hobs : Commute (S.alice_obs j.1) (S.alice_obs k.1) := by
+      simpa [Function.onFun] using (S.sameEquation_comm i) hkj.symm
+    change Commute (S.alice_obs j.1)
+      (ObservableToProjector (S.alice_obs k.1) (assignment k))
+    rw [ObservableToProjector]
+    apply Commute.smul_right
+    apply Commute.add_right (.one_right _)
+    exact hobs.smul_right _
+  calc
+    S.alice_obs j.1 * AliceMeasurementFromObservables S i assignment
+        = S.alice_obs j.1 *
+            ((Finset.univ : Finset (G.V i)).noncommProd f comm) := by
+              simp [AliceMeasurementFromObservables, f]
+    _ = S.alice_obs j.1 *
+            ((((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm) *
+              f j) := by rw [hsplit]
+    _ = ((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm *
+            (S.alice_obs j.1 * f j) := by
+              rw [← mul_assoc, hcomm_rest.eq, mul_assoc]
+    _ = ((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm *
+            (((-1 : ℂ) ^ (assignment j).val) • f j) := by
+              rw [observable_mul_observableToProjector]
+              exact S.alice_observable j.1
+    _ = ((-1 : ℂ) ^ (assignment j).val) •
+            (((Finset.univ : Finset (G.V i)).erase j).noncommProd f restComm * f j) := by
+              rw [mul_smul_comm]
+    _ = ((-1 : ℂ) ^ (assignment j).val) •
+          AliceMeasurementFromObservables S i assignment := by
+            rw [hsplit]
+            simp [AliceMeasurementFromObservables, f]
+
 
 /-- The observable strategy data induces a projector-valued LCS strategy by taking, for each
 observable, its associated two-outcome spectral projectors. -/
@@ -376,3 +439,15 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
     commute := aliceMeasurement_bobMeasurement_commute S
   }
 -- ANCHOR_END: ObservableStrategy_To_ProjectorStrategy
+
+lemma alice_A_observableStrategy
+    (S : ObservableStrategyData R G)
+    (i : Fin G.r) (j : G.V i) :
+    Alice_A (ObservableStrategy_To_ProjectorStrategy S) i j = S.alice_obs j.1 := by
+  classical
+  refine eq_of_mul_projectors_eq
+    ((ObservableStrategy_To_ProjectorStrategy S).alice_ms i) ?_
+  intro assignment
+  rw [alice_A_mul_projector]
+  simpa [ObservableStrategy_To_ProjectorStrategy] using
+    (aliceObservable_mul_aliceMeasurementFromObservables S i j assignment).symm
