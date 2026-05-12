@@ -138,6 +138,32 @@
   - Implement a mapping from an LCS game to a group presentation of the solution group.
 ]
 
+#let week10_1 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Use milestone 2 to rewrite into the Sum of Square decomposition of the game.
+  - Use self-adjoint property to show each term of the sum of square must be 0 for a perfect strategy.
+  - Extract from the condition of each term being 0 identities used to prove the representation of the solution group. 
+]
+
+#let week10_2 = [
+  #set text(8pt)
+  #set align(left + top)
+]
+
+
+#let week11_1 = [
+  #set text(8pt)
+  #set align(left + top)
+  - Maps each generator of the solution group to an operator defined from the strategy, this is a mapping to the group of units matrices.
+  - Prove that each of the relations of the group presentation are satisfied by the image of this mapping, thus proving that we have a homomorphism from the solution group to a group of unitary matrices. 
+]
+
+#let week11_2 = [
+  #set text(8pt)
+  #set align(left + top)
+]
+
 #table(
   columns: (0.5fr, 1fr, 1fr),
   stroke: none,
@@ -181,10 +207,17 @@
   [ ], [#week9_1], [#week9_2],
   table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
 
+
+  [*Week 10*], table.cell(colspan: 2)[Deriving Global equalites from EPR anhilating local loss operators],
+  [ ], [#week10_1], [#week10_2],
+  table.cell(colspan: 3)[#line(length: 100%, stroke: (1pt + gray.transparentize(80%)))],
+
+  [*Week 11*], table.cell(colspan: 2)[Representation of the Solution Group],
+  [ ], [#week11_1], [#week11_2],
+  [ \ _(Milestone 3)_ ], table.cell(colspan: 2)[---*Constructing the Solution Group Representation via Matrix Homomorphisms*---],
   [], [.], [],
   [], [.], [],
   [], [.], [],
-  [*Week ?*  _(Milestone 3)_ ], table.cell(colspan: 2)[--- *???*---],
 )
 
 //   [W. ?], [#align(right)[-----------------------------------]], [#align(left)[-----------------------------------]],

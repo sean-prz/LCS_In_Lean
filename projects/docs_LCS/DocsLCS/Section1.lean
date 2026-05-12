@@ -47,26 +47,26 @@ On the abstract side, the project defines LCS layouts, LCS games, projector-valu
 ## Modules
 
 *Core modules*
-- **`LCS.Basic`**: core combinatorial data, including `LCSLayout`, `Assignment`, and `LCSGame`.
-- **`LCS.Measurement`**: projector-valued measurement systems and the algebraic lemmas attached to them.
-- **`LCS.Observable`**: observables and their basic interface.
+- *`LCS.Basic`*: core combinatorial data, including `LCSLayout`, `Assignment`, and `LCSGame`.
+- *`LCS.Measurement`*: projector-valued measurement systems and the algebraic lemmas attached to them.
+- *`LCS.Observable`*: observables and their basic interface.
 
 *Core modules*
 
-- **`LCS.Strategy.ProjectorStrategy`**: projector-based strategies for LCS games and the derived observables attached to Alice and Bob.
-- **`LCS.Strategy.ObservableStrategy`**: observable-based strategy data.
-- **`LCS.Strategy.ObservableToProjector`**: the construction turning observable strategy data into projector data.
-- **`LCS.Strategy.Equivalence`**: results comparing the observable and projector viewpoints.
+- *`LCS.Strategy.ProjectorStrategy`*: projector-based strategies for LCS games and the derived observables attached to Alice and Bob.
+- *`LCS.Strategy.ObservableStrategy`*: observable-based strategy data.
+- *`LCS.Strategy.ObservableToProjector`*: the construction turning observable strategy data into projector data.
+- *`LCS.Strategy.Equivalence`*: results comparing the observable and projector viewpoints.
 
 *Main results and examples*
 
-- **`LCS.WinningCondition`**: winning assignments, local winning operators, local loss operators, and the sum-of-squares theorem.
-- **`LCS.Games.MagicSquare`**: the Magic Square layout, observables, and strategy construction.
+- *`LCS.WinningCondition`*: winning assignments, local winning operators, local loss operators, and the sum-of-squares theorem.
+- *`LCS.Games.MagicSquare`*: the Magic Square layout, observables, and strategy construction.
 
 *Support modules*
 
-- **`LCS.Common`**: shared arithmetic and sign conventions.
-- **`LCS.Pauli`**: Pauli-matrix calculations used by the Magic Square example.
+- *`LCS.Common`*: shared arithmetic and sign conventions.
+- *`LCS.Pauli`*: Pauli-matrix calculations used by the Magic Square example.
 
 # Manual Overview
 

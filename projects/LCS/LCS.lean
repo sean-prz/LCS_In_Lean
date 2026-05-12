@@ -5,6 +5,7 @@ import LCS.Strategy.ObservableToProjector
 import LCS.MatrixSOS
 import LCS.EPR
 import LCS.SolutionGroup
+import LCS.SolutionGroup.Representation
 import LCS.Observable
 import LCS.Measurement
 import LCS.WinningCondition
