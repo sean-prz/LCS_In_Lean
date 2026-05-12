@@ -29,10 +29,12 @@
      "6718367cb60ab12f"],
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/Strategy/Equivalence.html",
      "d5e0dd8c7213ce0a"],
-    ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/SolutionGroup.html",
-     "6c3c0b0042d0e395"],
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/WinningCondition.html",
      "bc9d36986bde42c9"],
+    ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/EPR.html",
+     "f689e2e6104996e3"],
+    ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/SolutionGroup.html",
+     "6c3c0b0042d0e395"],
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/Pauli.html",
      "265be4c213158a5d"],
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/Games/MagicSquare/Strategy.html",
@@ -42,5 +44,5 @@
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS/Games/MagicSquare.html",
      "b644df75287b9048"],
     ["/Users/sean/Documents/MA2/lean/projects/LCS/docbuild/.lake/build/doc/LCS.html",
-     "2fe6ceb002ab51ad"]]]],
- "depHash": "77cecaf14d64d4df"}
+     "535f55b956b193d1"]]]],
+ "depHash": "c1148771d01e4dae"}
