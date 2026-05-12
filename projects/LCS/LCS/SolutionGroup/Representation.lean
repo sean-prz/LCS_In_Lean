@@ -4,43 +4,40 @@ import LCS.SolutionGroup
 /-!
 # Representations of Solution Groups
 
-This module constructs matrix representations of an LCS solution group from the
-local identities extracted by the EPR/local-loss pipeline.
+This module constructs matrix representations of an LCS solution group from
+observable matrices satisfying the analytic identities extracted by the
+EPR/local-loss pipeline.
 
-The intended representation sends the solution-group generators to matrix units:
+The representation sends the solution-group generators to units:
+$$
+  x_j \mapsto \operatorname{obs}_j,\qquad J \mapsto -I.
+$$
+The main point is to prove that this assignment respects every relator in the
+solution-group presentation, so that it descends to a homomorphism
+$$
+  \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
+    \to (\operatorname{Matrix}_n(\mathbb C))^\times .
+$$
 
-* `var j` is sent to the observable matrix `obs j`;
-* `J` is sent to the scalar matrix `-I`.
+The file is organized in three layers.
 
-The main work is proving that this assignment respects the relators in the
-presentation of the solution group.  The definitions are layered as follows.
-
-```text
-solutionGroupRepresentationOfEPRLoss
-└─ solutionGroupRepresentationOfGameEquationProof
-   └─ solutionGroupRepresentationOfEquationProof
-      ├─ solutionGroupRelatorProofOfEquationProof
-      │  ├─ observable/involutive facts for var^2 and J^2
-      │  ├─ commutation of -I with every unit
-      │  ├─ same-equation commutation of observable units
-      │  └─ equation relator proofs
-      └─ solutionGroupRepresentationOfRelatorProof
-         └─ PresentedGroup.toGroup
-```
-
-The EPR-specific constructor builds the missing equation-relator proofs by:
-
-```text
-local loss annihilates the EPR vector
-  ↓ local_matrix_identities_of_local_loss_annihilate_epr
-row observable product = (-I) ^ b_i
-  ↓ lift_equationRelator_toLinearSystem_of_row
-equationRelator i maps to 1
-```
-
-Thus the top-level theorem is mostly plumbing: analytic local identities imply
-the row equations, row equations imply all equation relators, and the generic
-presented-group universal property then produces the representation.
+* Matrix-unit packaging:
+  `involutiveMatrixUnit`, `observableMatrixUnit`, and `negOneMatrixUnit` turn
+  involutive matrices into units, so observable matrices and $-I$ can be used
+  as group-valued generator images.
+* Generic presented-group construction:
+  `solutionGroupRepresentationOfRelatorProof` applies the universal property of
+  the presented group, while `solutionGroupRelatorProofOfEquationProof` and
+  `solutionGroupRepresentationOfEquationProof` reduce the all-relators proof to
+  same-equation commutation and the equation relators.
+* Game and EPR construction:
+  `rowObservableProduct_eq_sign_of_local_loss` converts local-loss
+  annihilation on the EPR vector into the row identity
+  $$
+    \prod_{j \in V_i}\operatorname{obs}_j = (-1)^{b_i}I,
+  $$
+  and `solutionGroupRepresentationOfEPRLoss` uses these row identities to build
+  the final solution-group representation.
 -/
 
 open scoped BigOperators
@@ -79,36 +76,88 @@ noncomputable def negOneMatrixUnit : (Matrix n n ℂ)ˣ :=
     rw [smul_mul_smul]
     simp)
 
+/-- The underlying matrix of `involutiveMatrixUnit M hM` is $M$:
+$$
+  \operatorname{val}(\operatorname{involutiveMatrixUnit}(M)) = M.
+$$
+This simp lemma lets unit-valued generator images reduce back to their matrix
+values during relator and row-product calculations.
+-/
 @[simp] lemma involutiveMatrixUnit_val
     (M : Matrix n n ℂ) (hM : M * M = 1) :
     (involutiveMatrixUnit M hM : Matrix n n ℂ) = M :=
   rfl
 
+/-- The underlying matrix of `observableMatrixUnit M hM` is $M$:
+$$
+  \operatorname{val}(\operatorname{observableMatrixUnit}(M)) = M.
+$$
+This simp lemma keeps generator-image computations at the matrix level after an
+observable has been packaged as a unit.
+-/
 @[simp] lemma observableMatrixUnit_val
     (M : Matrix n n ℂ) (hM : IsObservable M) :
     (observableMatrixUnit M hM : Matrix n n ℂ) = M :=
   rfl
 
+/-- The underlying matrix of the distinguished unit for $J$ is $-I$:
+$$
+  \operatorname{val}(\operatorname{negOneMatrixUnit}) = -I.
+$$
+This is used whenever a group-level expression involving $J$ is compared with a
+matrix row identity.
+-/
 @[simp] lemma negOneMatrixUnit_val :
     (negOneMatrixUnit (n := n) : Matrix n n ℂ) =
       (-1 : ℂ) • (1 : Matrix n n ℂ) :=
   rfl
 
+/-- An involutive matrix unit squares to the identity unit:
+$$
+  \operatorname{involutiveMatrixUnit}(M)^2 = 1.
+$$
+This discharges the $x_j^2 = 1$ and $J^2 = 1$ style relators after matrices are
+turned into units.
+-/
 @[simp] lemma involutiveMatrixUnit_sq
     (M : Matrix n n ℂ) (hM : M * M = 1) :
     involutiveMatrixUnit M hM ^ 2 = 1 := by
   apply Units.ext
   simpa [pow_two, involutiveMatrixUnit] using hM
 
+/-- An observable matrix unit squares to $1$:
+$$
+  \operatorname{observableMatrixUnit}(M)^2 = 1.
+$$
+This is the representation-side proof of the variable involution relators
+$x_j^2 = 1$.
+-/
 @[simp] lemma observableMatrixUnit_sq
     (M : Matrix n n ℂ) (hM : IsObservable M) :
     observableMatrixUnit M hM ^ 2 = 1 := by
   simp [observableMatrixUnit]
 
+/-- The unit representing $J$ squares to $1$:
+$$
+  (-I)^2 = I.
+$$
+This is the representation-side proof of the distinguished involution relator
+$J^2 = 1$.
+-/
 @[simp] lemma negOneMatrixUnit_sq :
     negOneMatrixUnit (n := n) ^ 2 = 1 := by
   simp [negOneMatrixUnit]
 
+/-- Alice lift commutes with finite noncommutative products:
+$$
+  \operatorname{AliceLift}\!\left(\prod_{x \in s} f_x\right)
+    = \prod_{x \in s}\operatorname{AliceLift}(f_x).
+$$
+The product is written with `Finset.noncommProd`, so pairwise commutation fixes
+the order ambiguity.  This is useful when the EPR/local-loss row product
+`Alice_Row_Prod` must be identified with the Alice lift of the concrete row
+observable product.
+-/
 lemma bipartiteAliceLift_noncommProd
     {α : Type*} (s : Finset α) (f : α → Matrix n n ℂ)
     (comm : (s : Set α).Pairwise (fun x y => Commute (f x) (f y))) :
@@ -166,6 +215,14 @@ noncomputable def solutionGroupGeneratorImage
   | .var j => observableMatrixUnit (obs j) (obs_is_observable j)
   | .J => negOneMatrixUnit
 
+/-- On a variable generator, the intended generator image is the corresponding
+observable unit:
+$$
+  \rho_0(x_j) = \operatorname{obs}_j.
+$$
+This rewrite lemma is used to simplify the final representation on
+`SolutionGroup.var`.
+-/
 lemma solutionGroupGeneratorImage_var
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -174,6 +231,13 @@ lemma solutionGroupGeneratorImage_var
       observableMatrixUnit (obs j) (obs_is_observable j) :=
   rfl
 
+/-- On the distinguished generator, the intended generator image is $-I$:
+$$
+  \rho_0(J) = -I.
+$$
+This rewrite lemma is used to simplify the final representation on
+`SolutionGroup.J` and in equation-relator calculations.
+-/
 lemma solutionGroupGeneratorImage_J
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j)) :
@@ -204,19 +268,16 @@ noncomputable def solutionGroupRepresentationOfRelatorProof
     SolutionGroup S →* (Matrix n n ℂ)ˣ :=
   PresentedGroup.toGroup hrel
 
-/-- Build the full relator proof from the natural structured assumptions.
-
-The solution-group presentation has five families of relators:
-
-* variable involutions, `var j ^ 2 = 1`;
-* the involution relation for `J`;
-* centrality of `J`;
-* commutation of variables that appear in a common equation;
-* the equation relators themselves.
-
-The first two are discharged from `obs_is_observable` and the fact that `J`
-maps to `-I`.  The next two are supplied by `hJcomm` and `hsame`.  The final
-family is exactly `hequation`.
+/-- Build the full relator proof from the natural structured assumptions:
+$$
+  r \in R_S \Longrightarrow \operatorname{lift}(\rho_0)(r) = 1.
+$$
+The solution-group presentation has five families of relators: $x_j^2 = 1$,
+$J^2 = 1$, $x_jJ = Jx_j$, same-equation commutation $x_jx_k = x_kx_j$, and
+the equation relators.  This lemma proves the first two from observability and
+$J \mapsto -I$, consumes `hJcomm` and `hsame` for the commutation relators, and
+uses `hequation` for the row equations.  It is the structured all-relators proof
+needed before applying the presented-group universal property.
 -/
 lemma solutionGroupRelatorProofOfEquationProof
     (obs : Fin S.layout.s → Matrix n n ℂ)
@@ -254,7 +315,13 @@ lemma solutionGroupRelatorProofOfEquationProof
   · rcases heq with ⟨i, rfl⟩
     exact hequation i
 
-/-- Commuting matrices give commuting observable matrix units. -/
+/-- Commuting matrices give commuting observable matrix units:
+$$
+  MN = NM \Longrightarrow \widehat M\,\widehat N = \widehat N\,\widehat M.
+$$
+This lifts same-equation commutation from matrices to units, which is the form
+required by the relators in `SolutionGroup S`.
+-/
 lemma observableMatrixUnit_commute_of_commute
     {M N : Matrix n n ℂ} {hM : IsObservable M} {hN : IsObservable N}
     (h : Commute M N) :
@@ -262,7 +329,12 @@ lemma observableMatrixUnit_commute_of_commute
   apply Units.ext
   exact h.eq
 
-/-- The distinguished image of `J`, namely `-I`, commutes with every matrix unit. -/
+/-- The distinguished image of $J$, namely $-I$, commutes with every matrix unit:
+$$
+  U(-I) = (-I)U.
+$$
+This proves the centrality relators involving $J$ in the target unit group.
+-/
 lemma commute_negOneMatrixUnit
     (U : (Matrix n n ℂ)ˣ) :
     Commute U negOneMatrixUnit := by
@@ -304,6 +376,13 @@ noncomputable def solutionGroupRepresentationOfEquationProof
           (hM := obs_is_observable j) (hN := obs_is_observable k) (hsame h))
       hequation
 
+/-- The representation built from a relator proof sends `var j` to the observable unit:
+$$
+  \rho(x_j) = \operatorname{obs}_j.
+$$
+This is the public simp rule that records that the presented-group quotient did
+not change the intended generator image.
+-/
 @[simp] lemma solutionGroupRepresentationOfRelatorProof_var
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -317,6 +396,13 @@ noncomputable def solutionGroupRepresentationOfEquationProof
   simp [solutionGroupRepresentationOfRelatorProof, SolutionGroup.var,
     solutionGroupGeneratorImage]
 
+/-- The representation built from a relator proof sends $J$ to $-I$:
+$$
+  \rho(J) = -I.
+$$
+This is the companion generator-evaluation rule for the distinguished central
+involution.
+-/
 @[simp] lemma solutionGroupRepresentationOfRelatorProof_J
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -378,8 +464,11 @@ noncomputable def rowObservableProduct
     Matrix n n ℂ :=
   orderedSupportProduct (G := G) obs i
 
-/-- Relate the sorted row product to `Finset.noncommProd`.
-
+/-- Relate the sorted row product to `Finset.noncommProd`:
+$$
+  \prod_{j \in V_i}^{\mathrm{sorted}} f_j
+    = \prod_{j \in V_i}^{\mathrm{noncomm}} f_j.
+$$
 This is the monoid-level support-product lemma.  The sorted list fixes the same
 canonical order used by `equationWord`, while `noncommProd` is convenient for
 strategy row products.  Pairwise commutation makes the two presentations agree.
@@ -418,11 +507,16 @@ lemma orderedSupportProduct_eq_noncommProd
   · exact hsupport_prod
   · exact hsupport_nodup
 
-/-- Relate the sorted row product to the `noncommProd` used by `Alice_Row_Prod`.
-
+/-- Relate the sorted row observable product to the `noncommProd` used by
+`Alice_Row_Prod`:
+$$
+  \operatorname{rowObservableProduct}_i
+    = \prod_{j \in V_i}^{\mathrm{noncomm}}\operatorname{obs}_j.
+$$
 `rowObservableProduct` uses a sorted list to match `equationWord`, while
-`Alice_Row_Prod` uses `Finset.noncommProd` over the attached row support.  When
-the observables in the row commute pairwise, these products agree.
+`Alice_Row_Prod` uses `Finset.noncommProd` over the attached row support.  This
+bridge is useful when importing the row identity extracted from the EPR/SOS
+pipeline.
 -/
 lemma rowObservableProduct_eq_noncommProd
     (i : Fin G.r)
@@ -433,21 +527,42 @@ lemma rowObservableProduct_eq_noncommProd
         (fun _ _ _ _ hjk => sameEquation_comm i hjk) := by
   exact orderedSupportProduct_eq_noncommProd obs i sameEquation_comm
 
-/-- In `game.toLinearSystem`, `sameEquation` means membership in a common row. -/
+/-- In `game.toLinearSystem`, `sameEquation` is exactly common row membership:
+$$
+  \operatorname{sameEquation}(j,k)
+    \Longleftrightarrow \exists i,\; j \in V_i \land k \in V_i.
+$$
+This converts the generic presentation's commutation hypothesis into the
+row-wise commutation data carried by an LCS observable strategy.
+-/
 lemma sameEquation_toLinearSystem_iff
     (j k : Fin G.s) :
     sameEquation game.toLinearSystem j k ↔
       ∃ i : Fin G.r, j ∈ G.V i ∧ k ∈ G.V i := by
   simp [sameEquation, LCSGame.toLinearSystem]
 
-/-- The linear-system support of equation `i` is the game row support `G.V i`. -/
+/-- The linear-system support of equation $i$ is the game row support $V_i$:
+$$
+  \operatorname{eqSupport}(\operatorname{game.toLinearSystem}, i) = V_i.
+$$
+This rewrite aligns the generic `equationWord` construction with the LCS row
+support used in observable products.
+-/
 lemma eqSupport_toLinearSystem
     (i : Fin G.r) :
     eqSupport game.toLinearSystem i = G.V i := by
   ext j
   simp [eqSupport, LCSGame.toLinearSystem]
 
-/-- Evaluate the free-group lift of a list of variable generators as matrices. -/
+/-- Evaluate the free-group lift of a list of variable generators as matrices:
+$$
+  \operatorname{val}\!\left(\operatorname{lift}(\rho_0)
+    \prod_\ell x_{\ell}\right)
+    = \prod_\ell \operatorname{obs}_{\ell}.
+$$
+This list-level calculation is the basic evaluator for equation words before
+the support list is specialized to a row.
+-/
 lemma lift_genVar_list_prod_val
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -464,7 +579,14 @@ lemma lift_genVar_list_prod_val
   | cons j l ih =>
       simp [genVar, solutionGroupGeneratorImage, ih]
 
-/-- Evaluating an equation word gives the corresponding row observable product. -/
+/-- Evaluating an equation word gives the corresponding row observable product:
+$$
+  \operatorname{val}\bigl(\operatorname{lift}(\rho_0)(w_i)\bigr)
+    = \operatorname{rowObservableProduct}_i.
+$$
+This identifies the group word appearing in the equation relator with the
+matrix product whose value is extracted from the EPR/local-loss argument.
+-/
 lemma lift_equationWord_toLinearSystem_val
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -481,10 +603,17 @@ lemma lift_equationWord_toLinearSystem_val
       (lift_genVar_list_prod_val game obs obs_is_observable
         ((G.V i).sort (· ≤ ·)))
 
-/-- Turn a row matrix identity into the corresponding equation-relator proof.
-
-If the observable product in row `i` is `(-I) ^ b_i`, then the equation relator
-for row `i` maps to `1` under `solutionGroupGeneratorImage`.
+/-- Turn a row matrix identity into the corresponding equation-relator proof:
+if
+$$
+  \operatorname{rowObservableProduct}_i = (-1)^{b_i}I,
+$$
+then the equation relator maps to $1$:
+$$
+  \operatorname{lift}(\rho_0)(\operatorname{equationRelator}_i) = 1.
+$$
+This is the main algebraic bridge from row equations to the relator hypothesis
+needed by the presented-group universal property.
 -/
 lemma lift_equationRelator_toLinearSystem_of_row
     (obs : Fin G.s → Matrix n n ℂ)
@@ -529,7 +658,14 @@ lemma lift_equationRelator_toLinearSystem_of_row
 
 omit [DecidableEq n] in
 /-- Convert row-wise commutation into `sameEquation` commutation for
-`game.toLinearSystem`. -/
+`game.toLinearSystem`:
+$$
+  j,k \in V_i \Longrightarrow \operatorname{obs}_j\operatorname{obs}_k
+    = \operatorname{obs}_k\operatorname{obs}_j.
+$$
+This supplies the generic constructor with the commutation hypothesis required
+for every pair of variables that appears together in some equation.
+-/
 lemma sameEquation_comm_of_row_comm
     (obs : Fin G.s → Matrix n n ℂ)
     (sameEquation_comm :
@@ -545,8 +681,11 @@ lemma sameEquation_comm_of_row_comm
     exact Commute.refl _
   · exact sameEquation_comm i h
 
-/-- Game-specialized representation constructor.
-
+/-- Game-specialized representation constructor:
+$$
+  \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
+    \to (\operatorname{Matrix}_n(\mathbb C))^\times .
+$$
 This is `solutionGroupRepresentationOfEquationProof` with
 `S = game.toLinearSystem`.  The only extra work is translating the row-wise
 commutation hypothesis into the `sameEquation` form expected by the generic
@@ -569,17 +708,14 @@ noncomputable def solutionGroupRepresentationOfGameEquationProof
     (sameEquation_comm_of_row_comm game obs sameEquation_comm)
     hequation
 
-/-- Extract the row equation from the EPR/local-loss hypothesis.
-
-For each row `i`, the local loss for any support element contains the row SOS
+/-- Extract the row equation from the EPR/local-loss hypothesis:
+$$
+  \operatorname{rowObservableProduct}_i = (-1)^{b_i}I.
+$$
+For each row $i$, the local loss for any support element contains the row SOS
 term.  Since the row is assumed nonempty, one such support element is enough to
-recover
-
-```lean
-rowObservableProduct obs i = (-1) ^ (game.b i).val • I
-```
-
-This isolates the analytic EPR/SOS step from the presented-group construction.
+recover the row identity.  This isolates the analytic EPR/SOS step from the
+presented-group construction.
 -/
 lemma rowObservableProduct_eq_sign_of_local_loss
     (obs : Fin G.s → Matrix n n ℂ)
@@ -636,29 +772,18 @@ lemma rowObservableProduct_eq_sign_of_local_loss
   exact
     (local_matrix_identities_of_local_loss_annihilate_epr
       game n strat i j (obs j.1) (obs j.1) row
-      (hLoss i j) hAlice hBob hRowLift (obs_is_observable j.1)).2.1
+          (hLoss i j) hAlice hBob hRowLift (obs_is_observable j.1)).2.1
 
-/-- End-to-end representation constructor from the EPR/local-loss hypothesis.
-
-This is the main constructor in the file.  It builds the representation
-
-```lean
-SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ
-```
-
-with generator images `var j ↦ obs j` and `J ↦ -I`.
-
-The proof supplies `solutionGroupRepresentationOfGameEquationProof` with an
-equation-relator proof for every row.  For a fixed row `i`, it:
-
-1. builds the bipartite observable strategy from `obs`;
-2. uses the local-loss hypothesis on an arbitrary support element
-   `j : G.V i`;
-3. extracts the row identity
-   `rowObservableProduct obs i = (-1) ^ (game.b i).val • I` via
-   `local_matrix_identities_of_local_loss_annihilate_epr`;
-4. turns that row identity into the equation-relator proof using
-   `lift_equationRelator_toLinearSystem_of_row`.
+/-- End-to-end representation constructor from the EPR/local-loss hypothesis:
+$$
+  \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
+    \to (\operatorname{Matrix}_n(\mathbb C))^\times,
+  \qquad x_j \mapsto \operatorname{obs}_j,\quad J \mapsto -I.
+$$
+This is the main constructor in the file.  It extracts each row identity from
+local-loss annihilation on $\Omega$, turns the row identity into an equation
+relator proof, and then invokes the generic solution-group representation
+constructor.
 -/
 noncomputable def solutionGroupRepresentationOfEPRLoss
     (obs : Fin G.s → Matrix n n ℂ)
@@ -686,6 +811,13 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
           (rowObservableProduct_eq_sign_of_local_loss game
             obs obs_is_observable sameEquation_comm hNonempty hLoss i))
 
+/-- The EPR/local-loss representation sends `var j` to the observable unit:
+$$
+  \rho(x_j) = \operatorname{obs}_j.
+$$
+This confirms that the end-to-end constructor has the intended value on
+solution-group variable generators.
+-/
 @[simp] lemma solutionGroupRepresentationOfEPRLoss_var
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
@@ -710,6 +842,13 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
     solutionGroupRepresentationOfGameEquationProof,
     solutionGroupRepresentationOfEquationProof]
 
+/-- The EPR/local-loss representation sends $J$ to $-I$:
+$$
+  \rho(J) = -I.
+$$
+This confirms that the distinguished solution-group generator is represented by
+the scalar central involution in the final representation.
+-/
 @[simp] lemma solutionGroupRepresentationOfEPRLoss_J
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
