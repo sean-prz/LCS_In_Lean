@@ -451,3 +451,17 @@ lemma alice_A_observableStrategy
   rw [alice_A_mul_projector]
   simpa [ObservableStrategy_To_ProjectorStrategy] using
     (aliceObservable_mul_aliceMeasurementFromObservables S i j assignment).symm
+
+/-- The Bob observable recovered from the projector strategy is the original
+observable supplied to the observable strategy. -/
+lemma bob_B_observableStrategy
+    (S : ObservableStrategyData R G)
+    (j : Fin G.s) :
+    Bob_B (ObservableStrategy_To_ProjectorStrategy S) j = S.bob_obs j := by
+  change ObservableOfMeasurementSystem (BobMeasurementFromObservables S j) =
+    S.bob_obs j
+  unfold ObservableOfMeasurementSystem BobMeasurementFromObservables
+    ObservableToProjector observableSign
+  norm_num
+  rw [← add_smul]
+  norm_num

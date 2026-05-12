@@ -94,6 +94,21 @@ noncomputable def negOneMatrixUnit : (Matrix n n ℂ)ˣ :=
       (-1 : ℂ) • (1 : Matrix n n ℂ) :=
   rfl
 
+@[simp] lemma involutiveMatrixUnit_sq
+    (M : Matrix n n ℂ) (hM : M * M = 1) :
+    involutiveMatrixUnit M hM ^ 2 = 1 := by
+  apply Units.ext
+  simpa [pow_two, involutiveMatrixUnit] using hM
+
+@[simp] lemma observableMatrixUnit_sq
+    (M : Matrix n n ℂ) (hM : IsObservable M) :
+    observableMatrixUnit M hM ^ 2 = 1 := by
+  simp [observableMatrixUnit]
+
+@[simp] lemma negOneMatrixUnit_sq :
+    negOneMatrixUnit (n := n) ^ 2 = 1 := by
+  simp [negOneMatrixUnit]
+
 lemma bipartiteAliceLift_noncommProd
     {α : Type*} (s : Finset α) (f : α → Matrix n n ℂ)
     (comm : (s : Set α).Pairwise (fun x y => Commute (f x) (f y))) :
@@ -225,20 +240,9 @@ lemma solutionGroupRelatorProofOfEquationProof
   intro r hr
   rcases hr with hvar | hJ | hcentral | hcomm | heq
   · rcases hvar with ⟨j, rfl⟩
-    have hv :
-        solutionGroupGeneratorImage obs obs_is_observable (.var j) ^ 2 = 1 := by
-      ext a b
-      change ((obs j) ^ 2) a b = (1 : Matrix n n ℂ) a b
-      have hm : (obs j) ^ 2 = (1 : Matrix n n ℂ) := by
-        simpa [pow_two] using (obs_is_observable j).involutive
-      exact congrFun (congrFun hm a) b
-    simpa [involutionRel, genVar] using hv
+    simp [involutionRel, genVar, solutionGroupGeneratorImage]
   · subst r
-    have hJ :
-        solutionGroupGeneratorImage obs obs_is_observable .J ^ 2 = 1 := by
-      ext
-      simp [solutionGroupGeneratorImage, negOneMatrixUnit, involutiveMatrixUnit]
-    simpa [involutionRel, genJ] using hJ
+    simp [involutionRel, genJ, solutionGroupGeneratorImage]
   · rcases hcentral with ⟨j, rfl⟩
     have h := (hJcomm j).eq
     simpa [commuteRel, genVar, genJ, solutionGroupGeneratorImage, mul_assoc] using
@@ -374,6 +378,46 @@ noncomputable def rowObservableProduct
     Matrix n n ℂ :=
   orderedSupportProduct (G := G) obs i
 
+/-- Relate the sorted row product to `Finset.noncommProd`.
+
+This is the monoid-level support-product lemma.  The sorted list fixes the same
+canonical order used by `equationWord`, while `noncommProd` is convenient for
+strategy row products.  Pairwise commutation makes the two presentations agree.
+-/
+lemma orderedSupportProduct_eq_noncommProd
+    {M : Type*} [Monoid M]
+    (f : Fin G.s → M)
+    (i : Fin G.r)
+    (sameEquation_comm :
+      ∀ i, Pairwise (fun j k : G.V i => Commute (f j.1) (f k.1))) :
+    orderedSupportProduct (G := G) f i =
+      (G.V i).attach.noncommProd (fun j => f j.1)
+        (fun _ _ _ _ hjk => sameEquation_comm i hjk) := by
+  let support : List (G.V i) :=
+    ((G.V i).sort (· ≤ ·)).pmap
+      (fun j hj =>
+        ⟨j, by
+          simpa using (Finset.mem_sort (s := G.V i) (r := (· ≤ ·))).mp hj⟩)
+      (by intro _ hj; exact hj)
+  have hsupport_toFinset : support.toFinset = (G.V i).attach := by
+    ext j
+    simp [support]
+  have hsupport_prod :
+      (support.map (fun j => f j.1)).prod =
+        orderedSupportProduct (G := G) f i := by
+    simp [support, orderedSupportProduct]
+  have hsupport_nodup : support.Nodup := by
+    dsimp [support]
+    apply List.Nodup.pmap
+    · intro _ _ _ _ h
+      exact Subtype.ext_iff.mp h
+    · exact Finset.sort_nodup (G.V i) (· ≤ ·)
+  symm
+  rw [← hsupport_toFinset]
+  rw [Finset.noncommProd_toFinset]
+  · exact hsupport_prod
+  · exact hsupport_nodup
+
 /-- Relate the sorted row product to the `noncommProd` used by `Alice_Row_Prod`.
 
 `rowObservableProduct` uses a sorted list to match `equationWord`, while
@@ -387,31 +431,7 @@ lemma rowObservableProduct_eq_noncommProd
     rowObservableProduct obs i =
       (G.V i).attach.noncommProd (fun j => obs j.1)
         (fun _ _ _ _ hjk => sameEquation_comm i hjk) := by
-  rw [rowObservableProduct]
-  let support : List (G.V i) :=
-    ((G.V i).sort (· ≤ ·)).pmap
-      (fun j hj =>
-        ⟨j, by
-          simpa using (Finset.mem_sort (s := G.V i) (r := (· ≤ ·))).mp hj⟩)
-      (by intro _ hj; exact hj)
-  have hsupport_toFinset : support.toFinset = (G.V i).attach := by
-    ext j
-    simp [support]
-  have hsupport_prod :
-      (support.map (fun j => obs j.1)).prod =
-        orderedSupportProduct (G := G) obs i := by
-    simp [support, orderedSupportProduct]
-  have hsupport_nodup : support.Nodup := by
-    dsimp [support]
-    apply List.Nodup.pmap
-    · intro _ _ _ _ h
-      exact Subtype.ext_iff.mp h
-    · exact Finset.sort_nodup (G.V i) (· ≤ ·)
-  symm
-  rw [← hsupport_toFinset]
-  rw [Finset.noncommProd_toFinset]
-  · exact hsupport_prod
-  · exact hsupport_nodup
+  exact orderedSupportProduct_eq_noncommProd obs i sameEquation_comm
 
 /-- In `game.toLinearSystem`, `sameEquation` means membership in a common row. -/
 lemma sameEquation_toLinearSystem_iff
@@ -549,18 +569,74 @@ noncomputable def solutionGroupRepresentationOfGameEquationProof
     (sameEquation_comm_of_row_comm game obs sameEquation_comm)
     hequation
 
-/-- The Bob observable recovered from the projector strategy is the original
-observable supplied to the observable strategy. -/
-lemma bob_B_observableStrategy
-    (S : ObservableStrategyData (Matrix n n ℂ) G)
-    (j : Fin G.s) :
-    Bob_B (ObservableStrategy_To_ProjectorStrategy S) j = S.bob_obs j := by
-  change ObservableOfMeasurementSystem (BobMeasurementFromObservables S j) =
-    S.bob_obs j
-  ext a b
-  simp [ObservableOfMeasurementSystem, BobMeasurementFromObservables,
-    ObservableToProjector, observableSign]
-  ring
+/-- Extract the row equation from the EPR/local-loss hypothesis.
+
+For each row `i`, the local loss for any support element contains the row SOS
+term.  Since the row is assumed nonempty, one such support element is enough to
+recover
+
+```lean
+rowObservableProduct obs i = (-1) ^ (game.b i).val • I
+```
+
+This isolates the analytic EPR/SOS step from the presented-group construction.
+-/
+lemma rowObservableProduct_eq_sign_of_local_loss
+    (obs : Fin G.s → Matrix n n ℂ)
+    (obs_is_observable : ∀ j, IsObservable (obs j))
+    (sameEquation_comm :
+      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
+    (hNonempty : ∀ i, Nonempty (G.V i))
+    (hLoss :
+      ∀ i (j : G.V i),
+        Matrix.mulVec
+          (local_loss_operator game
+            (ObservableStrategy_To_ProjectorStrategy
+              (BipartiteObservableStrategy
+                obs obs_is_observable sameEquation_comm))
+            i j)
+          (eprVec n) = 0)
+    (i : Fin G.r) :
+    rowObservableProduct obs i =
+      (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ) := by
+  classical
+  let Sobs : ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G :=
+    BipartiteObservableStrategy obs obs_is_observable sameEquation_comm
+  let strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G :=
+    ObservableStrategy_To_ProjectorStrategy Sobs
+  let row := rowObservableProduct obs i
+  change row = (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ)
+  rcases hNonempty i with ⟨j⟩
+  have hAlice :
+      Alice_A strat i j = bipartiteAliceLift (obs j.1) := by
+    simpa [strat, Sobs, BipartiteObservableStrategy] using
+      (alice_A_observableStrategy
+        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
+        i j)
+  have hBob :
+      Bob_B strat j.1 = bipartiteBobLift (obs j.1) := by
+    simpa [strat, Sobs, BipartiteObservableStrategy] using
+      (bob_B_observableStrategy
+        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
+        j.1)
+  have hRowLift :
+      Alice_Row_Prod strat i = bipartiteAliceLift row := by
+    change Alice_Row_Prod strat i =
+      bipartiteAliceLift (rowObservableProduct obs i)
+    rw [rowObservableProduct_eq_noncommProd
+      (sameEquation_comm := sameEquation_comm)]
+    unfold Alice_Row_Prod
+    rw [bipartiteAliceLift_noncommProd]
+    refine Finset.noncommProd_congr rfl ?_ ?_
+    intro k _
+    simpa [strat, Sobs, BipartiteObservableStrategy] using
+      (alice_A_observableStrategy
+        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
+        i k)
+  exact
+    (local_matrix_identities_of_local_loss_annihilate_epr
+      game n strat i j (obs j.1) (obs j.1) row
+      (hLoss i j) hAlice hBob hRowLift (obs_is_observable j.1)).2.1
 
 /-- End-to-end representation constructor from the EPR/local-loss hypothesis.
 
@@ -604,49 +680,11 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
     obs obs_is_observable sameEquation_comm
     (by
       intro i
-      let Sobs : ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G :=
-        BipartiteObservableStrategy obs obs_is_observable sameEquation_comm
-      let strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G :=
-        ObservableStrategy_To_ProjectorStrategy Sobs
-      let row :=
-        rowObservableProduct obs i
-      have hrow :
-          row = (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ) := by
-        classical
-        rcases hNonempty i with ⟨j⟩
-        have hAlice :
-            Alice_A strat i j = bipartiteAliceLift (obs j.1) := by
-          simpa [strat, Sobs, BipartiteObservableStrategy] using
-            (alice_A_observableStrategy
-              (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-              i j)
-        have hBob :
-            Bob_B strat j.1 = bipartiteBobLift (obs j.1) := by
-          simpa [strat, Sobs, BipartiteObservableStrategy] using
-            (bob_B_observableStrategy
-              (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-              j.1)
-        have hRowLift :
-            Alice_Row_Prod strat i = bipartiteAliceLift row := by
-          change Alice_Row_Prod strat i =
-            bipartiteAliceLift (rowObservableProduct obs i)
-          rw [rowObservableProduct_eq_noncommProd
-            (sameEquation_comm := sameEquation_comm)]
-          unfold Alice_Row_Prod
-          rw [bipartiteAliceLift_noncommProd]
-          refine Finset.noncommProd_congr rfl ?_ ?_
-          intro k _
-          simpa [strat, Sobs, BipartiteObservableStrategy] using
-            (alice_A_observableStrategy
-              (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-              i k)
-        exact
-          (local_matrix_identities_of_local_loss_annihilate_epr
-            game n strat i j (obs j.1) (obs j.1) row
-            (hLoss i j) hAlice hBob hRowLift (obs_is_observable j.1)).2.1
       exact
         lift_equationRelator_toLinearSystem_of_row game
-          obs obs_is_observable i hrow)
+          obs obs_is_observable i
+          (rowObservableProduct_eq_sign_of_local_loss game
+            obs obs_is_observable sameEquation_comm hNonempty hLoss i))
 
 @[simp] lemma solutionGroupRepresentationOfEPRLoss_var
     (obs : Fin G.s → Matrix n n ℂ)
