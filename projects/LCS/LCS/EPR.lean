@@ -3,16 +3,47 @@ import LCS.WinningCondition
 import LCS.MatrixSOS
 
 /-!
-# Minimal EPR Vector Lemmas
+# EPR Extraction for LCS Relation Terms
 
-This module contains the EPR/vectorization algebra used for solution-group
-relation extraction.  The EPR vector is intentionally unnormalized, since only
-annihilation and injectivity matter here.  The guiding calculation is
+This module contains the EPR/vectorization algebra and SOS extraction lemmas
+used to turn perfect local LCS play into local matrix identities.  The EPR
+vector is intentionally unnormalized:
 $$
-  (M \otimes N)\Omega = 0 \quad\Longleftrightarrow\quad M N^{T} = 0,
+  \Omega = \sum_a e_a \otimes e_a,
 $$
-specialized below to the bipartite lifts and SOS relation terms used by LCS
-strategies.
+since the arguments only use annihilation and injectivity.
+
+The basic EPR identities are:
+
+* `kronecker_mulVec_epr`, computing the action of a two-sided Kronecker product:
+  $$
+    ((M \otimes N)\Omega)_{a,b} = \sum_k M_{a,k}N_{b,k}.
+  $$
+* `kronecker_mulVec_epr_eq_zero_iff`, converting EPR annihilation into the local
+  matrix equation
+  $$
+    (M \otimes N)\Omega = 0 \quad\Longleftrightarrow\quad MN^T = 0.
+  $$
+* `alice_lift_mulVec_epr_eq_zero_iff`,
+  `one_sub_kronecker_mulVec_epr_eq_zero_iff`,
+  `alice_lift_one_sub_smul_mulVec_epr_eq_zero_iff`, and
+  `one_sub_smul_kronecker_mulVec_epr_eq_zero_iff`, which are the specialized
+  injectivity forms used for bipartite Alice/Bob lifts.
+
+The LCS-specific part defines the three SOS relation terms
+`sosConsistencyTerm`, `sosRowTerm`, and `sosProductTerm`, together with their
+square-sum `sosSquareSum`.  The extraction pipeline is:
+
+* `local_loss_kills_epr_sos_sum`: a local loss operator killing $\Omega$ rewrites
+  to the scaled SOS square-sum killing $\Omega$.
+* `sos_sum_kills_epr_implies_terms_kill_epr`: positivity for self-adjoint
+  squares gives the three individual relation annihilations.
+* `consistency_of_epr_annihilates`, `row_relation_of_epr_annihilates`, and
+  `product_relation_of_epr_annihilates`: the EPR identities remove $\Omega$ and
+  produce the corresponding local matrix equations.
+* `local_matrix_identities_of_local_loss_annihilate_epr`: the final bundled
+  theorem, extracting all three local matrix identities directly from local-loss
+  annihilation on $\Omega$.
 -/
 
 open scoped BigOperators
@@ -325,6 +356,15 @@ section Stage2
 ### Stage 2: Scaled SOS Square-Sum ⇒ Individual SOS-Term Annihilation
 -/
 
+/-- A noncommutative product of pairwise commuting self-adjoint matrices is self-adjoint:
+if every factor satisfies $f_x^* = f_x$, then
+$$
+  \left(\prod_{x \in s} f_x\right)^* = \prod_{x \in s} f_x .
+$$
+This is the generic finite-product input used below to show that Alice's row product is
+self-adjoint, which is needed before the SOS square-sum can be split into individual
+annihilation relations.
+-/
 private lemma noncommProd_conjTranspose_eq_self
     {ι m : Type*} [Fintype m] [DecidableEq m]
     (s : Finset ι) (f : ι → Matrix m m ℂ)
@@ -354,6 +394,14 @@ private lemma noncommProd_conjTranspose_eq_self
           exact ha (by simpa [h] using hy))
       exact hcomm.symm.eq
 
+/-- Alice's row product is self-adjoint:
+$$
+  \operatorname{Row}_i(A)^* = \operatorname{Row}_i(A).
+$$
+It packages the observable self-adjointness of the individual row entries and their
+within-row commutativity.  This is useful for proving that the row SOS term
+$1 - (-1)^{b_i}\operatorname{Row}_i(A)$ is self-adjoint.
+-/
 private lemma alice_row_prod_conjTranspose_eq_self
     {G : LCSLayout} [Fintype m] [DecidableEq m]
     (strat : LCSStrategy (Matrix m m ℂ) G)
@@ -364,10 +412,25 @@ private lemma alice_row_prod_conjTranspose_eq_self
   intro j _
   simpa [star_eq_conjTranspose] using (alice_is_observable strat i j).self_adjoint
 
+/-- The LCS sign attached to row $i$ is real:
+$$
+  \overline{(-1)^{b_i}} = (-1)^{b_i}.
+$$
+This small scalar fact is used when taking adjoints of signed relation terms such as
+$1 - (-1)^{b_i}T$ in the Stage 2 self-adjointness checks.
+-/
 private lemma sign_star_eq_self {G : LCSLayout} (game : LCSGame G) (i : Fin G.r) :
     star ((-1 : ℂ) ^ (game.b i).val) = (-1 : ℂ) ^ (game.b i).val := by
   rcases fin2_eq_zero_or_one (game.b i) with hb | hb <;> simp [hb]
 
+/-- If $c$ is real and $T$ is self-adjoint, then the affine relation
+$1 - cT$ is self-adjoint:
+$$
+  (1 - cT)^* = 1 - cT .
+$$
+This avoids repeating the adjoint calculation for both signed SOS relation terms in
+Stage 2.
+-/
 private lemma one_sub_smul_conjTranspose_eq_self
     {m : Type*} [DecidableEq m]
     (c : ℂ) (T : Matrix m m ℂ)
@@ -376,6 +439,14 @@ private lemma one_sub_smul_conjTranspose_eq_self
   rw [Matrix.conjTranspose_sub, Matrix.conjTranspose_one,
     Matrix.conjTranspose_smul, hc, hT]
 
+/-- The consistency SOS relation term is self-adjoint:
+$$
+  (1 - B_jA_{ij})^* = 1 - B_jA_{ij}.
+$$
+The proof uses that Alice and Bob observables are self-adjoint and commute.  This is one
+of the three self-adjointness hypotheses required to turn
+$(T_1^2 + T_2^2 + T_3^2)\Omega = 0$ into $T_1\Omega = 0$.
+-/
 private lemma sos_consistency_term_conjTranspose_eq_self
     {G : LCSLayout} [Fintype m] [DecidableEq m]
     (strat : LCSStrategy (Matrix m m ℂ) G)
@@ -390,6 +461,15 @@ private lemma sos_consistency_term_conjTranspose_eq_self
   rw [Matrix.conjTranspose_sub, Matrix.conjTranspose_one, Matrix.conjTranspose_mul, hA, hB]
   rw [(alice_bob_commute_gen strat i j ↑j).eq]
 
+/-- The product inside the third SOS relation is self-adjoint:
+$$
+  \bigl(\operatorname{Row}_i(A) A_{ij} B_j\bigr)^*
+    = \operatorname{Row}_i(A) A_{ij} B_j .
+$$
+It combines self-adjointness of the row product, Alice entry, and Bob entry with the local
+commutation rules.  This is the key input for showing that the signed product SOS term
+$1 - (-1)^{b_i}\operatorname{Row}_i(A)A_{ij}B_j$ is self-adjoint.
+-/
 private lemma sos_product_core_conjTranspose_eq_self
     {G : LCSLayout} [Fintype m] [DecidableEq m]
     (strat : LCSStrategy (Matrix m m ℂ) G)
@@ -418,22 +498,25 @@ private lemma sos_product_core_conjTranspose_eq_self
     _ = Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j := by
           rw [Matrix.mul_assoc]
 
-/-- If the SOS sum annihilates EPR, then each self-adjoint SOS relation term annihilates EPR. -/
+/-- If the scaled SOS square-sum annihilates EPR, then each individual SOS relation term
+annihilates EPR:
+$$
+  \frac18(T_1^2 + T_2^2 + T_3^2)\Omega = 0
+    \quad\Longrightarrow\quad
+  T_1\Omega = T_2\Omega = T_3\Omega = 0 .
+$$
+Here $T_1 = 1 - B_jA_{ij}$, $T_2 = 1 - (-1)^{b_i}\operatorname{Row}_i(A)$, and
+$T_3 = 1 - (-1)^{b_i}\operatorname{Row}_i(A)A_{ij}B_j$.  This is the positivity step
+that bridges the rewritten local-loss SOS identity from Stage 1 to the concrete local
+matrix identities extracted in Stage 3.
+-/
 lemma sos_sum_kills_epr_implies_terms_kill_epr
     (i : Fin G.r) (j : G.V i)
     (h :
-      Matrix.mulVec
-        ((1 / 8 : ℂ) • sosSquareSum game strat i j)
-        Ω = 0) :
-    Matrix.mulVec
-        (sosConsistencyTerm strat i j)
-        Ω = 0 ∧
-      Matrix.mulVec
-        (sosRowTerm game strat i)
-        Ω = 0 ∧
-      Matrix.mulVec
-        (sosProductTerm game strat i j)
-        Ω = 0 := by
+      ((1 / 8 : ℂ) • sosSquareSum game strat i j) *ᵥ Ω = 0) :
+    sosConsistencyTerm strat i j *ᵥ Ω = 0 ∧
+      sosRowTerm game strat i *ᵥ Ω = 0 ∧
+      sosProductTerm game strat i j *ᵥ Ω = 0 := by
   let T₁ : Matrix (n × n) (n × n) ℂ := sosConsistencyTerm strat i j
   let T₂ : Matrix (n × n) (n × n) ℂ := sosRowTerm game strat i
   let T₃ : Matrix (n × n) (n × n) ℂ := sosProductTerm game strat i j
@@ -576,17 +659,11 @@ lemma local_matrix_identities_of_sos_terms_annihilate_epr
     (i : Fin G.r) (j : G.V i)
     (A B Row : Matrix n n ℂ)
     (hCons :
-      Matrix.mulVec
-        (sosConsistencyTerm strat i j)
-        Ω = 0)
+      sosConsistencyTerm strat i j *ᵥ Ω = 0)
     (hRow :
-      Matrix.mulVec
-        (sosRowTerm game strat i)
-        Ω = 0)
+      sosRowTerm game strat i *ᵥ Ω = 0)
     (hProd :
-      Matrix.mulVec
-        (sosProductTerm game strat i j)
-        Ω = 0)
+      sosProductTerm game strat i j *ᵥ Ω = 0)
     (hAlice : Alice_A strat i j = bipartiteAliceLift A)
     (hBob : Bob_B strat ↑j = bipartiteBobLift B)
     (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
@@ -601,7 +678,8 @@ lemma local_matrix_identities_of_sos_terms_annihilate_epr
 
 end Stage3
 
-/-- Final bundled extraction from local-loss annihilation on EPR to the local matrix
+/-- ### Final Bundle: Local Loss Annihilation on EPR ⇒ Local Matrix Identities
+Final bundled extraction from local-loss annihilation on EPR to the local matrix
 identities.
 
 This packages the three stages:
