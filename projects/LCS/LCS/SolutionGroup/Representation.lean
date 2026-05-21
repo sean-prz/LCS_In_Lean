@@ -100,18 +100,6 @@ observable has been packaged as a unit.
     (observableMatrixUnit M hM : Matrix n n ℂ) = M :=
   rfl
 
-/-- The underlying matrix of the distinguished unit for $J$ is $-I$:
-$$
-  \operatorname{val}(\operatorname{negOneMatrixUnit}) = -I.
-$$
-This is used whenever a group-level expression involving $J$ is compared with a
-matrix row identity.
--/
-@[simp] lemma negOneMatrixUnit_val :
-    (negOneMatrixUnit (n := n) : Matrix n n ℂ) =
-      (-1 : ℂ) • (1 : Matrix n n ℂ) :=
-  rfl
-
 /-- An involutive matrix unit squares to the identity unit:
 $$
   \operatorname{involutiveMatrixUnit}(M)^2 = 1.
@@ -213,36 +201,6 @@ noncomputable def solutionGroupGeneratorImage
     SolutionGen S → (Matrix n n ℂ)ˣ
   | .var j => observableMatrixUnit (obs j) (obs_is_observable j)
   | .J => negOneMatrixUnit
-
-/-- On a variable generator, the intended generator image is the corresponding
-observable unit:
-$$
-  \rho_0(x_j) = \operatorname{obs}_j.
-$$
-This rewrite lemma is used to simplify the final representation on
-`SolutionGroup.var`.
--/
-lemma solutionGroupGeneratorImage_var
-    (obs : Fin S.layout.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (j : Fin S.layout.s) :
-    solutionGroupGeneratorImage obs obs_is_observable (.var j) =
-      observableMatrixUnit (obs j) (obs_is_observable j) :=
-  rfl
-
-/-- On the distinguished generator, the intended generator image is $-I$:
-$$
-  \rho_0(J) = -I.
-$$
-This rewrite lemma is used to simplify the final representation on
-`SolutionGroup.J` and in equation-relator calculations.
--/
-lemma solutionGroupGeneratorImage_J
-    (obs : Fin S.layout.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j)) :
-    solutionGroupGeneratorImage obs obs_is_observable .J =
-      negOneMatrixUnit :=
-  rfl
 
 /-- Commuting matrices give commuting observable matrix units:
 $$
@@ -658,51 +616,6 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
   solutionGroupRepresentationOfRows game
     strat.obs strat.is_observable strat.sameEquation_comm
     (rowObservableProduct_eq_sign_of_local_loss game strat hNonempty hLoss)
-
-/-- The EPR/local-loss representation sends `var j` to the observable unit:
-$$
-  \rho(x_j) = \operatorname{obs}_j.
-$$
-This confirms that the end-to-end constructor has the intended value on
-solution-group variable generators.
--/
-@[simp] lemma solutionGroupRepresentationOfEPRLoss_var
-    (strat : BipartiteObservableStrategy n G)
-    (hNonempty : ∀ i, Nonempty (G.V i))
-    (hLoss :
-      ∀ i (j : G.V i),
-        Matrix.mulVec
-          (local_loss_operator game strat.toProjectorStrategy i j)
-          (eprVec n) = 0)
-    (j : Fin G.s) :
-    solutionGroupRepresentationOfEPRLoss game
-        strat hNonempty hLoss
-        (SolutionGroup.var (S := game.toLinearSystem) j) =
-      observableMatrixUnit (strat.obs j) (strat.is_observable j) := by
-  simp [solutionGroupRepresentationOfEPRLoss,
-    solutionGroupRepresentationOfRows]
-
-/-- The EPR/local-loss representation sends $J$ to $-I$:
-$$
-  \rho(J) = -I.
-$$
-This confirms that the distinguished solution-group generator is represented by
-the scalar central involution in the final representation.
--/
-@[simp] lemma solutionGroupRepresentationOfEPRLoss_J
-    (strat : BipartiteObservableStrategy n G)
-    (hNonempty : ∀ i, Nonempty (G.V i))
-    (hLoss :
-      ∀ i (j : G.V i),
-        Matrix.mulVec
-          (local_loss_operator game strat.toProjectorStrategy i j)
-          (eprVec n) = 0) :
-    solutionGroupRepresentationOfEPRLoss game
-        strat hNonempty hLoss
-        (SolutionGroup.J (S := game.toLinearSystem)) =
-      negOneMatrixUnit := by
-  simp [solutionGroupRepresentationOfEPRLoss,
-    solutionGroupRepresentationOfRows]
 
 end RepresentationData
 
