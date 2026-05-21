@@ -232,6 +232,13 @@
 #line()
 *Monday 11.15am in BC110* to debrief previous week and plan the next one.
 
+== Week 12
+Currently, BipartiteObservableStrategy is a function that takes `obs`,`obs_is_observable`, and `sameEquation_comm `and returns an`ObservableStrategyData`. Because ObservableStrategyData abstracts away the bipartite structure (it just has alice_obs and bob_obs), we lose the explicit information that alice_obs = obs ⊗ 1 and bob_obs = 1 ⊗ obs. This lost information forces downstream files (like Representation.lean and EPR loss proofs) to pass around the raw obs arrays and constantly invoke bridging lemmas to unpack the strategy.
+
+To keep this information crucial for the representation.lean proofs, we introudce structure `BipartiteObservableStrategy`.
+
+== Week 11
+
 
 == Week 10
 
