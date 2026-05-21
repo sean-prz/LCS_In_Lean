@@ -26,18 +26,18 @@ The file is organized in three layers.
   involutive matrices into units, so observable matrices and $-I$ can be used
   as group-valued generator images.
 * Generic presented-group construction:
-  `solutionGroupRepresentationOfRelatorProof` applies the universal property of
-  the presented group, while `solutionGroupRelatorProofOfEquationProof` and
-  `solutionGroupRepresentationOfEquationProof` reduce the all-relators proof to
-  same-equation commutation and the equation relators.
+  `solutionGroupRepresentation` packages the observable generator image,
+  same-equation commutation, and equation relators into a representation of the
+  presented solution group.
 * Game and EPR construction:
   `rowObservableProduct_eq_sign_of_local_loss` converts local-loss
   annihilation on the EPR vector into the row identity
   $$
     \prod_{j \in V_i}\operatorname{obs}_j = (-1)^{b_i}I,
   $$
-  and `solutionGroupRepresentationOfEPRLoss` uses these row identities to build
-  the final solution-group representation.
+  `solutionGroupRepresentationOfRows` turns row identities into a
+  game-specialized representation, and `solutionGroupRepresentationOfEPRLoss`
+  supplies those row identities from the EPR/local-loss argument.
 -/
 
 open scoped BigOperators
@@ -148,6 +148,12 @@ $J^2 = 1$.
     negOneMatrixUnit (n := n) ^ 2 = 1 := by
   simp [negOneMatrixUnit]
 
+@[simp] lemma negOneMatrixUnit_pow_fin2_val
+    (b : Fin 2) :
+    ((negOneMatrixUnit (n := n) ^ b.val : (Matrix n n ℂ)ˣ) : Matrix n n ℂ) =
+      (-1 : ℂ) ^ b.val • (1 : Matrix n n ℂ) := by
+  rcases fin2_eq_zero_or_one b with rfl | rfl <;> simp [negOneMatrixUnit]
+
 /-- Alice lift commutes with finite noncommutative products:
 $$
   \operatorname{AliceLift}\!\left(\prod_{x \in s} f_x\right)
@@ -180,17 +186,10 @@ end MatrixUnits
 This section is independent of a concrete `LCSGame`.  It starts with a
 `LinearSystem S` and a proposed image of the solution-group generators.
 
-There are three levels:
-
-* `solutionGroupRepresentationOfRelatorProof` is the raw universal-property
-  constructor: if every relator maps to `1`, the generator map descends to a
-  homomorphism out of `SolutionGroup S`.
-* `solutionGroupRelatorProofOfEquationProof` proves the all-relators hypothesis
-  from structured assumptions: generator involutions, centrality of `J`,
-  same-equation commutation, and the equation relators.
-* `solutionGroupRepresentationOfEquationProof` packages those two steps.  It
-  automatically handles the `J`-commutation and unit-lifting details, leaving
-  only matrix commutation and equation-relator proofs to the caller.
+The public constructor in this section is `solutionGroupRepresentation`.  It
+handles the involution and centrality relators internally, so the caller only
+needs to supply matrix commutation for variables in a common equation and the
+equation-relator proofs themselves.
 -/
 
 section PresentedGroupConstruction
@@ -245,76 +244,6 @@ lemma solutionGroupGeneratorImage_J
       negOneMatrixUnit :=
   rfl
 
-/-- The raw universal-property constructor for solution-group representations.
-
-The input `hrel` says that every defining relator of `SolutionGroup S` maps to
-`1` under the free-group lift of `solutionGroupGeneratorImage`.  With that
-proof in hand, `PresentedGroup.toGroup` descends the generator assignment to a
-group homomorphism
-
-```lean
-SolutionGroup S →* (Matrix n n ℂ)ˣ
-```
-
-This definition does not prove any relators itself; it only consumes the full
-relator proof.
--/
-noncomputable def solutionGroupRepresentationOfRelatorProof
-    (obs : Fin S.layout.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (hrel :
-      ∀ r ∈ solutionRelators S,
-        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1) :
-    SolutionGroup S →* (Matrix n n ℂ)ˣ :=
-  PresentedGroup.toGroup hrel
-
-/-- Build the full relator proof from the natural structured assumptions:
-$$
-  r \in R_S \Longrightarrow \operatorname{lift}(\rho_0)(r) = 1.
-$$
-The solution-group presentation has five families of relators: $x_j^2 = 1$,
-$J^2 = 1$, $x_jJ = Jx_j$, same-equation commutation $x_jx_k = x_kx_j$, and
-the equation relators.  This lemma proves the first two from observability and
-$J \mapsto -I$, consumes `hJcomm` and `hsame` for the commutation relators, and
-uses `hequation` for the row equations.  It is the structured all-relators proof
-needed before applying the presented-group universal property.
--/
-lemma solutionGroupRelatorProofOfEquationProof
-    (obs : Fin S.layout.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (hJcomm :
-      ∀ j,
-        Commute
-          (solutionGroupGeneratorImage obs obs_is_observable (.var j))
-          (solutionGroupGeneratorImage obs obs_is_observable .J))
-    (hsame :
-      ∀ {j k}, sameEquation S j k →
-        Commute
-          (solutionGroupGeneratorImage obs obs_is_observable (.var j))
-          (solutionGroupGeneratorImage obs obs_is_observable (.var k)))
-    (hequation :
-      ∀ i,
-        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
-          (equationRelator S i) = 1) :
-    ∀ r ∈ solutionRelators S,
-      FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1 := by
-  intro r hr
-  rcases hr with hvar | hJ | hcentral | hcomm | heq
-  · rcases hvar with ⟨j, rfl⟩
-    simp [involutionRel, genVar, solutionGroupGeneratorImage]
-  · subst r
-    simp [involutionRel, genJ, solutionGroupGeneratorImage]
-  · rcases hcentral with ⟨j, rfl⟩
-    have h := (hJcomm j).eq
-    simpa [commuteRel, genVar, genJ, solutionGroupGeneratorImage, mul_assoc] using
-      mul_inv_eq_one.mpr h
-  · rcases hcomm with ⟨j, k, _hjk, hsameEq, rfl⟩
-    have h := (hsame hsameEq).eq
-    simpa [commuteRel, genVar, solutionGroupGeneratorImage, mul_assoc] using
-      mul_inv_eq_one.mpr h
-  · rcases heq with ⟨i, rfl⟩
-    exact hequation i
-
 /-- Commuting matrices give commuting observable matrix units:
 $$
   MN = NM \Longrightarrow \widehat M\,\widehat N = \widehat N\,\widehat M.
@@ -341,78 +270,63 @@ lemma commute_negOneMatrixUnit
   apply Units.ext
   simp [negOneMatrixUnit, involutiveMatrixUnit]
 
-/-- Construct a representation once the equation relators are known.
-
-This is the main generic constructor used by later sections.  It packages the
-two lower-level steps:
-
-```text
-hsame + hequation
-  ↓ solutionGroupRelatorProofOfEquationProof
-all relators map to 1
-  ↓ solutionGroupRepresentationOfRelatorProof
-SolutionGroup S →* (Matrix n n ℂ)ˣ
-```
-
-The call to `solutionGroupRelatorProofOfEquationProof` also inserts two routine
-facts: `-I` commutes with every matrix unit, and matrix-level commutation of
-observables lifts to commutation of the corresponding units.
--/
-noncomputable def solutionGroupRepresentationOfEquationProof
+/-- Construct a representation of `SolutionGroup S` from observable generator
+images, same-equation commutation, and the equation-relator proofs. -/
+noncomputable def solutionGroupRepresentation
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
-    (hsame :
-      ∀ {j k}, sameEquation S j k → Commute (obs j) (obs k))
-    (hequation :
-      ∀ i,
-        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
-          (equationRelator S i) = 1) :
+    (hsame : ∀ {j k}, sameEquation S j k → Commute (obs j) (obs k))
+    (hequation : ∀ i, FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
+      (equationRelator S i) = 1) :
     SolutionGroup S →* (Matrix n n ℂ)ˣ :=
-  solutionGroupRepresentationOfRelatorProof obs obs_is_observable <|
-    solutionGroupRelatorProofOfEquationProof obs obs_is_observable
-      (fun _ => commute_negOneMatrixUnit _)
-      (fun {j k} h =>
-        observableMatrixUnit_commute_of_commute
-          (hM := obs_is_observable j) (hN := obs_is_observable k) (hsame h))
-      hequation
+  have hrel :
+      ∀ r ∈ solutionRelators S,
+        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1 := by
+    intro r hr
+    rcases hr with hvar | hJ | hcentral | hcomm | heq
+    · rcases hvar with ⟨j, rfl⟩
+      simp [involutionRel, genVar, solutionGroupGeneratorImage]
+    · subst r
+      simp [involutionRel, genJ, solutionGroupGeneratorImage]
+    · rcases hcentral with ⟨j, rfl⟩
+      have h : Commute (solutionGroupGeneratorImage obs obs_is_observable (.var j))
+                       (negOneMatrixUnit (n := n)) :=
+        commute_negOneMatrixUnit _
+      simpa [commuteRel, genVar, genJ, solutionGroupGeneratorImage, mul_assoc] using
+        mul_inv_eq_one.mpr h.eq
+    · rcases hcomm with ⟨j, k, _, hsameEq, rfl⟩
+      have h : Commute (observableMatrixUnit (obs j) (obs_is_observable j))
+                       (observableMatrixUnit (obs k) (obs_is_observable k)) :=
+        observableMatrixUnit_commute_of_commute (hsame hsameEq)
+      simpa [commuteRel, genVar, solutionGroupGeneratorImage, mul_assoc] using
+        mul_inv_eq_one.mpr h.eq
+    · rcases heq with ⟨i, rfl⟩
+      exact hequation i
+  PresentedGroup.toGroup hrel
 
-/-- The representation built from a relator proof sends `var j` to the observable unit:
-$$
-  \rho(x_j) = \operatorname{obs}_j.
-$$
-This is the public simp rule that records that the presented-group quotient did
-not change the intended generator image.
--/
-@[simp] lemma solutionGroupRepresentationOfRelatorProof_var
+@[simp] lemma solutionGroupRepresentation_var
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
-    (hrel :
-      ∀ r ∈ solutionRelators S,
-        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1)
+    (hsame : ∀ {j k}, sameEquation S j k → Commute (obs j) (obs k))
+    (hequation : ∀ i, FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
+      (equationRelator S i) = 1)
     (j : Fin S.layout.s) :
-    solutionGroupRepresentationOfRelatorProof obs obs_is_observable hrel
+    solutionGroupRepresentation obs obs_is_observable hsame hequation
         (SolutionGroup.var (S := S) j) =
       observableMatrixUnit (obs j) (obs_is_observable j) := by
-  simp [solutionGroupRepresentationOfRelatorProof, SolutionGroup.var,
+  simp [solutionGroupRepresentation, SolutionGroup.var,
     solutionGroupGeneratorImage]
 
-/-- The representation built from a relator proof sends $J$ to $-I$:
-$$
-  \rho(J) = -I.
-$$
-This is the companion generator-evaluation rule for the distinguished central
-involution.
--/
-@[simp] lemma solutionGroupRepresentationOfRelatorProof_J
+@[simp] lemma solutionGroupRepresentation_J
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
-    (hrel :
-      ∀ r ∈ solutionRelators S,
-        FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1) :
-    solutionGroupRepresentationOfRelatorProof obs obs_is_observable hrel
+    (hsame : ∀ {j k}, sameEquation S j k → Commute (obs j) (obs k))
+    (hequation : ∀ i, FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
+      (equationRelator S i) = 1) :
+    solutionGroupRepresentation obs obs_is_observable hsame hequation
         (SolutionGroup.J (S := S)) =
       negOneMatrixUnit := by
-  simp [solutionGroupRepresentationOfRelatorProof, SolutionGroup.J,
+  simp [solutionGroupRepresentation, SolutionGroup.J,
     solutionGroupGeneratorImage]
 
 end PresentedGroupConstruction
@@ -428,7 +342,7 @@ The key bridge is:
 
 ```text
 rowObservableProduct obs i = (-1) ^ (game.b i).val • I
-  ↓ lift_equationRelator_toLinearSystem_of_row
+  ↓ lift_equationRelator_of_rowIdentity
 equationRelator game.toLinearSystem i maps to 1
 ```
 
@@ -473,7 +387,7 @@ This is the monoid-level support-product lemma.  The sorted list fixes the same
 canonical order used by `equationWord`, while `noncommProd` is convenient for
 strategy row products.  Pairwise commutation makes the two presentations agree.
 -/
-lemma orderedSupportProduct_eq_noncommProd
+private lemma orderedSupportProduct_eq_noncommProd
     {M : Type*} [Monoid M]
     (f : Fin G.s → M)
     (i : Fin G.r)
@@ -518,23 +432,14 @@ $$
 bridge is useful when importing the row identity extracted from the EPR/SOS
 pipeline.
 -/
-lemma rowObservableProduct_eq_noncommProd
-    (i : Fin G.r)
-    (sameEquation_comm :
-      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))) :
-    rowObservableProduct obs i =
-      (G.V i).attach.noncommProd (fun j => obs j.1)
-        (fun _ _ _ _ hjk => sameEquation_comm i hjk) := by
-  exact orderedSupportProduct_eq_noncommProd obs i sameEquation_comm
-
 @[simp] lemma aliceRowProd_bipartite
     (strat : BipartiteObservableStrategy n G)
     (i : Fin G.r) :
     Alice_Row_Prod strat.toProjectorStrategy i =
       bipartiteAliceLift (rowObservableProduct strat.obs i) := by
-  rw [rowObservableProduct_eq_noncommProd
-    (obs := strat.obs) (sameEquation_comm := strat.sameEquation_comm)]
-  unfold Alice_Row_Prod
+  unfold rowObservableProduct Alice_Row_Prod
+  rw [orderedSupportProduct_eq_noncommProd
+    (f := strat.obs) (sameEquation_comm := strat.sameEquation_comm)]
   rw [bipartiteAliceLift_noncommProd]
   simp
 
@@ -546,7 +451,7 @@ $$
 This converts the generic presentation's commutation hypothesis into the
 row-wise commutation data carried by an LCS observable strategy.
 -/
-lemma sameEquation_toLinearSystem_iff
+private lemma sameEquation_toLinearSystem_iff
     (j k : Fin G.s) :
     sameEquation game.toLinearSystem j k ↔
       ∃ i : Fin G.r, j ∈ G.V i ∧ k ∈ G.V i := by
@@ -559,7 +464,7 @@ $$
 This rewrite aligns the generic `equationWord` construction with the LCS row
 support used in observable products.
 -/
-lemma eqSupport_toLinearSystem
+private lemma eqSupport_toLinearSystem
     (i : Fin G.r) :
     eqSupport game.toLinearSystem i = G.V i := by
   ext j
@@ -574,7 +479,7 @@ $$
 This list-level calculation is the basic evaluator for equation words before
 the support list is specialized to a row.
 -/
-lemma lift_genVar_list_prod_val
+private lemma lift_genVar_list_prod_val
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
     (l : List (Fin G.s)) :
@@ -598,7 +503,7 @@ $$
 This identifies the group word appearing in the equation relator with the
 matrix product whose value is extracted from the EPR/local-loss argument.
 -/
-lemma lift_equationWord_toLinearSystem_val
+private lemma lift_equationWord_toLinearSystem_val
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
     (i : Fin G.r) :
@@ -626,7 +531,7 @@ $$
 This is the main algebraic bridge from row equations to the relator hypothesis
 needed by the presented-group universal property.
 -/
-lemma lift_equationRelator_toLinearSystem_of_row
+lemma lift_equationRelator_of_rowIdentity
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
     (i : Fin G.r)
@@ -637,33 +542,15 @@ lemma lift_equationRelator_toLinearSystem_of_row
         (solutionGroupGeneratorImage (S := game.toLinearSystem)
           obs obs_is_observable)
         (equationRelator game.toLinearSystem i) = 1 := by
-  have hword :=
-    lift_equationWord_toLinearSystem_val game
-      obs obs_is_observable i
+  have hword := lift_equationWord_toLinearSystem_val game obs obs_is_observable i
   have hwordUnit :
       FreeGroup.lift
-          (solutionGroupGeneratorImage (S := game.toLinearSystem)
-            obs obs_is_observable)
+          (solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable)
           (equationWord game.toLinearSystem i) =
-        solutionGroupGeneratorImage (S := game.toLinearSystem)
-          obs obs_is_observable .J ^ (game.b i).val := by
+        solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable .J ^ (game.b i).val := by
     apply Units.ext
-    change
-      ((FreeGroup.lift
-          (solutionGroupGeneratorImage (S := game.toLinearSystem)
-            obs obs_is_observable)
-          (equationWord game.toLinearSystem i) : (Matrix n n ℂ)ˣ) :
-        Matrix n n ℂ) =
-      ((solutionGroupGeneratorImage (S := game.toLinearSystem)
-          obs obs_is_observable .J ^ (game.b i).val :
-        (Matrix n n ℂ)ˣ) : Matrix n n ℂ)
-    rcases fin2_eq_zero_or_one (game.b i) with hb | hb
-    · rw [hb] at hrow
-      simp [hword, hrow, solutionGroupGeneratorImage,
-        hb]
-    · rw [hb] at hrow
-      simp [hword, hrow, solutionGroupGeneratorImage,
-        negOneMatrixUnit, involutiveMatrixUnit, hb]
+    change _ = (((negOneMatrixUnit (n := n)) ^ (game.b i).val : (Matrix n n ℂ)ˣ) : Matrix n n ℂ)
+    rw [hword, hrow, negOneMatrixUnit_pow_fin2_val]
   have hbLinear : game.toLinearSystem.b i = game.b i := rfl
   simp [equationRelator, genJ, hwordUnit, hbLinear]
 
@@ -677,7 +564,7 @@ $$
 This supplies the generic constructor with the commutation hypothesis required
 for every pair of variables that appears together in some equation.
 -/
-lemma sameEquation_comm_of_row_comm
+private lemma sameEquation_comm_of_row_comm
     (obs : Fin G.s → Matrix n n ℂ)
     (sameEquation_comm :
       ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
@@ -692,32 +579,23 @@ lemma sameEquation_comm_of_row_comm
     exact Commute.refl _
   · exact sameEquation_comm i h
 
-/-- Game-specialized representation constructor:
-$$
-  \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
-    \to (\operatorname{Matrix}_n(\mathbb C))^\times .
-$$
-This is `solutionGroupRepresentationOfEquationProof` with
-`S = game.toLinearSystem`.  The only extra work is translating the row-wise
-commutation hypothesis into the `sameEquation` form expected by the generic
-constructor.
--/
-noncomputable def solutionGroupRepresentationOfGameEquationProof
+/-- Build the game-level representation from the row identities.
+This is the natural intermediate constructor between the generic
+presented-group layer and the EPR/local-loss extraction. -/
+noncomputable def solutionGroupRepresentationOfRows
     (obs : Fin G.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j))
     (sameEquation_comm :
       ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
-    (hequation :
-      ∀ i,
-        FreeGroup.lift
-            (solutionGroupGeneratorImage (S := game.toLinearSystem)
-              obs obs_is_observable)
-          (equationRelator game.toLinearSystem i) = 1) :
+    (hrow :
+      ∀ i, rowObservableProduct obs i =
+        (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ)) :
     SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ :=
-  solutionGroupRepresentationOfEquationProof
+  solutionGroupRepresentation
     (S := game.toLinearSystem) obs obs_is_observable
     (sameEquation_comm_of_row_comm game obs sameEquation_comm)
-    hequation
+    (fun i => lift_equationRelator_of_rowIdentity game
+      obs obs_is_observable i (hrow i))
 
 /-- Extract the row equation from the EPR/local-loss hypothesis:
 $$
@@ -777,15 +655,9 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
           (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0) :
     SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ :=
-  solutionGroupRepresentationOfGameEquationProof game
+  solutionGroupRepresentationOfRows game
     strat.obs strat.is_observable strat.sameEquation_comm
-    (by
-      intro i
-      exact
-        lift_equationRelator_toLinearSystem_of_row game
-          strat.obs strat.is_observable i
-          (rowObservableProduct_eq_sign_of_local_loss game
-            strat hNonempty hLoss i))
+    (rowObservableProduct_eq_sign_of_local_loss game strat hNonempty hLoss)
 
 /-- The EPR/local-loss representation sends `var j` to the observable unit:
 $$
@@ -808,8 +680,7 @@ solution-group variable generators.
         (SolutionGroup.var (S := game.toLinearSystem) j) =
       observableMatrixUnit (strat.obs j) (strat.is_observable j) := by
   simp [solutionGroupRepresentationOfEPRLoss,
-    solutionGroupRepresentationOfGameEquationProof,
-    solutionGroupRepresentationOfEquationProof]
+    solutionGroupRepresentationOfRows]
 
 /-- The EPR/local-loss representation sends $J$ to $-I$:
 $$
@@ -831,8 +702,7 @@ the scalar central involution in the final representation.
         (SolutionGroup.J (S := game.toLinearSystem)) =
       negOneMatrixUnit := by
   simp [solutionGroupRepresentationOfEPRLoss,
-    solutionGroupRepresentationOfGameEquationProof,
-    solutionGroupRepresentationOfEquationProof]
+    solutionGroupRepresentationOfRows]
 
 end RepresentationData
 
