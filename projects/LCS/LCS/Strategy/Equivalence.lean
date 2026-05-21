@@ -465,3 +465,25 @@ lemma bob_B_observableStrategy
   norm_num
   rw [← add_smul]
   norm_num
+
+namespace BipartiteObservableStrategy
+
+noncomputable def toProjectorStrategy
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) :
+    LCSStrategy (Matrix (n × n) (n × n) ℂ) G :=
+  ObservableStrategy_To_ProjectorStrategy strat.toObservableStrategy
+
+@[simp] lemma alice_A_bipartite
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (i : Fin G.r) (j : G.V i) :
+    Alice_A strat.toProjectorStrategy i j = bipartiteAliceLift (strat.obs j.1) := by
+  simpa using alice_A_observableStrategy strat.toObservableStrategy i j
+
+@[simp] lemma bob_B_bipartite
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (j : Fin G.s) :
+    Bob_B strat.toProjectorStrategy j = bipartiteBobLift (strat.obs j) := by
+  simpa using bob_B_observableStrategy strat.toObservableStrategy j
+
+end BipartiteObservableStrategy

@@ -181,9 +181,12 @@ This section shows that the grid strategy is a valid strategy for the magic squa
 
 /-- The Mermin-Peres strategy for the magic square game.
 This strategy uses `BipartiteObservableStrategy` to lift the 9 `MP_observables` to a
-valid `ObservableStrategyData` on a 16x16 bipartite space. It relies on
+valid bipartite observable strategy on a 16x16 space. It relies on
 `MP_sameEquation_comm` to satisfy the commutativity constraints for each equation. -/
-noncomputable def Strat_merminPeres : ObservableStrategyData mat16 magic_square_layout :=
-  BipartiteObservableStrategy magic_square_grid magic_square_is_observable MP_sameEquation_comm
+noncomputable def Strat_merminPeres :
+    BipartiteObservableStrategy (Fin 2 × Fin 2) magic_square_layout where
+  obs := magic_square_grid
+  is_observable := magic_square_is_observable
+  sameEquation_comm := MP_sameEquation_comm
 
 end Strategy

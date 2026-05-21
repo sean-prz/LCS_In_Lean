@@ -81,18 +81,61 @@ lemma bipartiteAliceLift_commute {n : Type*} [Fintype n] [DecidableEq n]
       (N ⊗ₖ (1 : Matrix n n ℂ)) * (M ⊗ₖ (1 : Matrix n n ℂ))
   rw [← mul_kronecker_mul, ← mul_kronecker_mul, h]
 
-noncomputable def BipartiteObservableStrategy
-    {n : Type*} [Fintype n] [DecidableEq n]
-    {G : LCSLayout}
-    (obs : Fin G.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (sameEquation_comm : ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))) :
+structure BipartiteObservableStrategy
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (G : LCSLayout) where
+  obs : Fin G.s → Matrix n n ℂ
+  is_observable : ∀ j, IsObservable (obs j)
+  sameEquation_comm :
+    ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))
+
+namespace BipartiteObservableStrategy
+
+noncomputable def toObservableStrategy
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) :
     ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G where
-  alice_obs := fun j => bipartiteAliceLift (obs j)
-  bob_obs := fun j => bipartiteBobLift (obs j)
-  alice_observable := fun j => bipartiteAliceLift_observable (obs_is_observable j)
-  bob_observable := fun j => bipartiteBobLift_observable (obs_is_observable j)
+  alice_obs := fun j => bipartiteAliceLift (strat.obs j)
+  bob_obs := fun j => bipartiteBobLift (strat.obs j)
+  alice_observable := fun j => bipartiteAliceLift_observable (strat.is_observable j)
+  bob_observable := fun j => bipartiteBobLift_observable (strat.is_observable j)
   sameEquation_comm := fun i => by
     intro a b hab
-    exact bipartiteAliceLift_commute (sameEquation_comm i hab)
-  alice_bob_commute := fun j k => bipartite_alice_bob_commute (obs j) (obs k)
+    exact bipartiteAliceLift_commute (strat.sameEquation_comm i hab)
+  alice_bob_commute := fun j k => bipartite_alice_bob_commute (strat.obs j) (strat.obs k)
+
+@[simp] lemma alice_obs_eq
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (j : Fin G.s) :
+    strat.toObservableStrategy.alice_obs j = bipartiteAliceLift (strat.obs j) :=
+  rfl
+
+@[simp] lemma bob_obs_eq
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (j : Fin G.s) :
+    strat.toObservableStrategy.bob_obs j = bipartiteBobLift (strat.obs j) :=
+  rfl
+
+@[simp] lemma alice_observable_eq
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (j : Fin G.s) :
+    strat.toObservableStrategy.alice_observable j =
+      bipartiteAliceLift_observable (strat.is_observable j) :=
+  rfl
+
+@[simp] lemma bob_observable_eq
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (j : Fin G.s) :
+    strat.toObservableStrategy.bob_observable j =
+      bipartiteBobLift_observable (strat.is_observable j) :=
+  rfl
+
+@[simp] lemma sameEquation_comm_eq
+    {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
+    (strat : BipartiteObservableStrategy n G) (i : Fin G.r)
+    (j k : G.V i) (hjk : j ≠ k) :
+    strat.toObservableStrategy.sameEquation_comm i hjk =
+      bipartiteAliceLift_commute (strat.sameEquation_comm i hjk) :=
+  rfl
+
+end BipartiteObservableStrategy

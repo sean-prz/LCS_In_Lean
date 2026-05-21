@@ -527,6 +527,17 @@ lemma rowObservableProduct_eq_noncommProd
         (fun _ _ _ _ hjk => sameEquation_comm i hjk) := by
   exact orderedSupportProduct_eq_noncommProd obs i sameEquation_comm
 
+@[simp] lemma aliceRowProd_bipartite
+    (strat : BipartiteObservableStrategy n G)
+    (i : Fin G.r) :
+    Alice_Row_Prod strat.toProjectorStrategy i =
+      bipartiteAliceLift (rowObservableProduct strat.obs i) := by
+  rw [rowObservableProduct_eq_noncommProd
+    (obs := strat.obs) (sameEquation_comm := strat.sameEquation_comm)]
+  unfold Alice_Row_Prod
+  rw [bipartiteAliceLift_noncommProd]
+  simp
+
 /-- In `game.toLinearSystem`, `sameEquation` is exactly common row membership:
 $$
   \operatorname{sameEquation}(j,k)
@@ -718,61 +729,33 @@ recover the row identity.  This isolates the analytic EPR/SOS step from the
 presented-group construction.
 -/
 lemma rowObservableProduct_eq_sign_of_local_loss
-    (obs : Fin G.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (sameEquation_comm :
-      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
+    (strat : BipartiteObservableStrategy n G)
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
         Matrix.mulVec
-          (local_loss_operator game
-            (ObservableStrategy_To_ProjectorStrategy
-              (BipartiteObservableStrategy
-                obs obs_is_observable sameEquation_comm))
-            i j)
+          (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0)
     (i : Fin G.r) :
-    rowObservableProduct obs i =
+    rowObservableProduct strat.obs i =
       (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ) := by
   classical
-  let Sobs : ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G :=
-    BipartiteObservableStrategy obs obs_is_observable sameEquation_comm
-  let strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G :=
-    ObservableStrategy_To_ProjectorStrategy Sobs
-  let row := rowObservableProduct obs i
+  let row := rowObservableProduct strat.obs i
   change row = (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ)
   rcases hNonempty i with ⟨j⟩
   have hAlice :
-      Alice_A strat i j = bipartiteAliceLift (obs j.1) := by
-    simpa [strat, Sobs, BipartiteObservableStrategy] using
-      (alice_A_observableStrategy
-        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-        i j)
+      Alice_A strat.toProjectorStrategy i j = bipartiteAliceLift (strat.obs j.1) := by
+    simp
   have hBob :
-      Bob_B strat j.1 = bipartiteBobLift (obs j.1) := by
-    simpa [strat, Sobs, BipartiteObservableStrategy] using
-      (bob_B_observableStrategy
-        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-        j.1)
+      Bob_B strat.toProjectorStrategy j.1 = bipartiteBobLift (strat.obs j.1) := by
+    simp
   have hRowLift :
-      Alice_Row_Prod strat i = bipartiteAliceLift row := by
-    change Alice_Row_Prod strat i =
-      bipartiteAliceLift (rowObservableProduct obs i)
-    rw [rowObservableProduct_eq_noncommProd
-      (sameEquation_comm := sameEquation_comm)]
-    unfold Alice_Row_Prod
-    rw [bipartiteAliceLift_noncommProd]
-    refine Finset.noncommProd_congr rfl ?_ ?_
-    intro k _
-    simpa [strat, Sobs, BipartiteObservableStrategy] using
-      (alice_A_observableStrategy
-        (BipartiteObservableStrategy obs obs_is_observable sameEquation_comm)
-        i k)
+      Alice_Row_Prod strat.toProjectorStrategy i = bipartiteAliceLift row := by
+    simpa [row] using aliceRowProd_bipartite (n := n) strat i
   exact
     (local_matrix_identities_of_local_loss_annihilate_epr
-      game n strat i j (obs j.1) (obs j.1) row
-          (hLoss i j) hAlice hBob hRowLift (obs_is_observable j.1)).2.1
+      game n strat.toProjectorStrategy i j (strat.obs j.1) (strat.obs j.1) row
+          (hLoss i j) hAlice hBob hRowLift (strat.is_observable j.1)).2.1
 
 /-- End-to-end representation constructor from the EPR/local-loss hypothesis:
 $$
@@ -786,30 +769,23 @@ relator proof, and then invokes the generic solution-group representation
 constructor.
 -/
 noncomputable def solutionGroupRepresentationOfEPRLoss
-    (obs : Fin G.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (sameEquation_comm :
-      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
+    (strat : BipartiteObservableStrategy n G)
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
         Matrix.mulVec
-          (local_loss_operator game
-            (ObservableStrategy_To_ProjectorStrategy
-              (BipartiteObservableStrategy
-                obs obs_is_observable sameEquation_comm))
-            i j)
+          (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0) :
     SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ :=
   solutionGroupRepresentationOfGameEquationProof game
-    obs obs_is_observable sameEquation_comm
+    strat.obs strat.is_observable strat.sameEquation_comm
     (by
       intro i
       exact
         lift_equationRelator_toLinearSystem_of_row game
-          obs obs_is_observable i
+          strat.obs strat.is_observable i
           (rowObservableProduct_eq_sign_of_local_loss game
-            obs obs_is_observable sameEquation_comm hNonempty hLoss i))
+            strat hNonempty hLoss i))
 
 /-- The EPR/local-loss representation sends `var j` to the observable unit:
 $$
@@ -819,25 +795,18 @@ This confirms that the end-to-end constructor has the intended value on
 solution-group variable generators.
 -/
 @[simp] lemma solutionGroupRepresentationOfEPRLoss_var
-    (obs : Fin G.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (sameEquation_comm :
-      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
+    (strat : BipartiteObservableStrategy n G)
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
         Matrix.mulVec
-          (local_loss_operator game
-            (ObservableStrategy_To_ProjectorStrategy
-              (BipartiteObservableStrategy
-                obs obs_is_observable sameEquation_comm))
-            i j)
+          (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0)
     (j : Fin G.s) :
     solutionGroupRepresentationOfEPRLoss game
-        obs obs_is_observable sameEquation_comm hNonempty hLoss
+        strat hNonempty hLoss
         (SolutionGroup.var (S := game.toLinearSystem) j) =
-      observableMatrixUnit (obs j) (obs_is_observable j) := by
+      observableMatrixUnit (strat.obs j) (strat.is_observable j) := by
   simp [solutionGroupRepresentationOfEPRLoss,
     solutionGroupRepresentationOfGameEquationProof,
     solutionGroupRepresentationOfEquationProof]
@@ -850,22 +819,15 @@ This confirms that the distinguished solution-group generator is represented by
 the scalar central involution in the final representation.
 -/
 @[simp] lemma solutionGroupRepresentationOfEPRLoss_J
-    (obs : Fin G.s → Matrix n n ℂ)
-    (obs_is_observable : ∀ j, IsObservable (obs j))
-    (sameEquation_comm :
-      ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1)))
+    (strat : BipartiteObservableStrategy n G)
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
         Matrix.mulVec
-          (local_loss_operator game
-            (ObservableStrategy_To_ProjectorStrategy
-              (BipartiteObservableStrategy
-                obs obs_is_observable sameEquation_comm))
-            i j)
+          (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0) :
     solutionGroupRepresentationOfEPRLoss game
-        obs obs_is_observable sameEquation_comm hNonempty hLoss
+        strat hNonempty hLoss
         (SolutionGroup.J (S := game.toLinearSystem)) =
       negOneMatrixUnit := by
   simp [solutionGroupRepresentationOfEPRLoss,
