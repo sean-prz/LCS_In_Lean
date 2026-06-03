@@ -44,6 +44,31 @@
 
 = Introduction
 
+== Quantum Nonlocal games
+In the world of quantum information theory, non-local games serve as a powerfl framework for understanding the profound phenomenon of quantum entanglement and non-locality. 
+Non-locality refers to the ability of quantum systems to exhibit correclations that defy classical phyiscal laws, specifically the principle of local realism, which dictactes that distant objects cannot influence one another instantaneously.
+In a standard non-local game, two or more cooperatings players, are phyisically seperated and forbidden from communicating. 
+They receive inputs from a referee and must produce outputs that satisfy certain conditions to win the game.
+While Classical strategies for non-local games are limited by local realism, quantum strategies can leverage entanglement to achieve higher winning probabilities, often surpassing classical limits. This setting makes it possible to compare the correlations achievable by classical and quantum resources, providing insights into the fundamental differences between classical and quantum physics.
+
+== Historical Context and Significance
+The study of such games is rooted in the foundations of quantum mechanics. The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, "spooky action at a distance." 
+In 1964, Bell's theorem later showed that no local hidden variable theory could reproduce all the predictions of quantum, establishing non-locality as a central featrure of quantum theory rather than a philophical curiosity.
+Since then, non-local games have become a standard for expressing and analyzing this phenomenon:
+They form the theoritical backbone for device-independent quantum cryptography, where security guarantees are derived directly from
+the violation of classical bounds in non-local games, without relying on assumptions about the internal workings of the devices used.
+
+== Linear Constraint System Games
+Within this borad class, Linear Constraint Systems games form a particulary simple and structured family. 
+Instead of arbitrary input-output rules, the winning conditions in an LCS game are determined by a system of linear equations over a finite field (typically modulo 2), where the players' objective is to convince a referee that they possess a valid assignment of variables satisfying these constraints. 
+Typically the first player, conventionally called Alice, is responsible for providing an assignement to the variables of a given equation, while the second player, Bob, is responsible for providing an assignement to a single variable of the same equation.
+Because their underlying structure is firmly rooted in group theory and linear algebra, LCS games offer a highly systematic and mathematically elegant way to map out the exact boundaries of quantum advantage
+
+=== Mermin-Peres Magic Square Game
+
+Canonical examples, such as the Mermin-Peres magic square game, perfectly illustrate the power of this framework; they showcase "quantum pseudotelepathy," a scenario where quantum players can satisfy the constraints to win with 100% certainty, bridging the gap between abstract algebra and observable quantum phenomena.
+
+/*
 == Linear Constraint System Games
 
 === What is a Linear Constraint System Game?
@@ -54,6 +79,7 @@
 == Quantum Strategies for Linear Constraint System Games
 
 == Mermin Peres Magic Square Game
+*/
 
 == Contributions and Scope
 
