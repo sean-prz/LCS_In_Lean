@@ -1,1 +1,0 @@
-{"declarations":[],"imports":["Lean.Elab.Command","Lean.Data.OpenDecl"],"instances":[],"name":"Lean.Elab.Command.WithWeakNamespace"}
