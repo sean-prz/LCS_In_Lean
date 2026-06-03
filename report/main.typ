@@ -82,7 +82,20 @@ Canonical examples, such as the Mermin-Peres magic square game, perfectly illust
 */
 
 == Contributions and Scope
+This project makes the following contributions to the formalization of binary Linear Constraint System games in Lean 4:
 
+- It formalises the core definitions of binary Linear Constraint System games, including layouts, assignments, games, and explicit binary linear systems over $F_2$.
+- It develops two quantum strategy formalisms:
+  a projector-based formalism using projective measurement systems, and an observable-based formalism using self-adjoint involutive operators.
+- It implements a bridge between these two formalisms, allowing observable strategies to be translated into projector strategies.
+- It defines local and global winning/loss operators for binary LCS games and proves a sum-of-squares decomposition of the local loss operator, which is then used in the EPR-state argument.
+- It formalises an EPR-state argument that extracts row identities from local-loss annihilation in the bipartite setting.
+- It defines the solution group of a binary linear system and constructs matrix representations of this group from the previously derived row identities.
+- It instantiates the general framework on the Mermin-Peres Magic Square game as the main case study.
+The scope of the project is intentionally limited to the binary setting. In particular:
+- the formalisation is restricted to LCS games over $F_2$,
+- the solution-group construction is the binary one associated with this setting,
+- and the final representation theorem is proved in the bipartite EPR framework.
 
 = Approach
 
