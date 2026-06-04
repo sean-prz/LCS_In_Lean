@@ -18,7 +18,7 @@
   title: [Formalising Binary Linear Constraint System Games in Lean 4],
   abstract: [
   This project presents a Lean 4 formalization of binary Linear Constraint System (LCS) games and their quantum strategies. 
-  It provides the core definitions for LCS games over $F_2$, together with two complementary quantum strategy formalisms: a project based formalism, where strategies are described by projector measurement systems for the players, and an observable based formalism, where strategies are described by self-adjoing involutive operators satisfying the relevant commutation relations. 
+  It provides the core definitions for LCS games over $F_2$, together with two complementary quantum strategy formalisms: a projector-based formalism, where strategies are described by projective measurement systems for the players, and an observable-based formalism, where strategies are described by self-adjoint involutive operators satisfying the relevant commutation relations. 
   The development also includes a bridge between these two formalisms, allowing strategies to be translated from one description to the other.
 
   On the analytic side, the formalization develops local winning and local loss operators for binary LCS games and proves a sum-of-squares decomposition of the local loss operator. This is then combined with an EPR-state argument to extract row identities for observables arising from bipartite strategies.
@@ -99,38 +99,50 @@ The scope of the project is intentionally limited to the binary setting. In part
 
 = Approach
 
+== Structure of the Lean Development
+
+The formalization is organized into a small collection of modules following the main stages of the development. 
+
+The foundational definitions are introduced in `LCS/Basic.lean`, which defines layouts, games, and explicit binary linear systems. 
+
+The strategy layer is developed in `LCS/Strategy`, with separate modules for projector-based strategies, observable-based strategies, and the bridge between them. 
+
+The main proof-oriented part of the project is then divided between `LCS/WinningCondition.lean`, which defines the winning and loss operators and proves the sum-of-squares decomposition of the local loss operator, `LCS/EPR.lean`, which extracts matrix identities from local-loss annihilation on the EPR state, and `LCS/SolutionGroup.lean` together with `LCS/SolutionGroup/Representation.lean`, which define the binary solution group and construct its matrix representations.
+
+Finally, the abstract framework is instantiated in `LCS/Games/MagicSquare`, which develops the Mermin-Peres Magic Square game as the main case study.
+
 == Linear Constraint System Games Formalization 
 
 We begin by formalising Linear Constraint System games. 
+
 === The Mathematical Object
-Mathematically, a LCS game is specified by a a finite family of variables and a finite family of linear equations over these variables of the form :
-$ sum_(j in V_i) x_j = b_i $ over a field $K$.
+More generally, a linear constraint system over a field $K$ consists of a finite family of variables $x_1, dots, x_s$ together with a finite family of $r$ equations
+$ sum_(j=1)^s A_(i j) x_j = b_i $,
+where $A_(i j), b_i in K$.
 
-Here $V_i$ is the set of variables appearing in the $i$-th equation, $x_j$ are the variables, and $b_i$ are the constants on the right-hand side of the equations.
-
-In this project we restrain ourselves to the binary setting, where
-the underlying field is $F_2$.
-This means that the variables $x_j$ take values in $\{0,1\}$, and the equations are evaluated modulo 2.
+In this project, we restrict to the binary setting over $F_2$.
+In this case, variables take values in $\{0,1\}$ and the equations are evaluated modulo $2$.
+The support-based presentation used throughout the development records, for each equation, the set of variables that occur in it; equivalently, this is the binary case where the coefficients are implicitly equal to $1$ on the support of the equation.
 
 === The Game
-In the associated game the referee selects an equation $i$ uniformly at random and sends it to Alice, while Bob receives a variable $j$ that appears in that equation.
+In the associated game, the referee selects an equation $i$ and sends it to Alice, while Bob receives a variable $j$ that appears in that equation.
 
-Alice must respond with an assignment of values to the variables in $V_i$ that satisfies the equation constraint, while Bob must respond with an assignment to the variable $x_j$ that is consistent with Alice's assignment.
+Alice responds with an assignment of values to the variables appearing in the chosen equation, while Bob responds with a value for the queried variable.
 
-The players win if Alice's assignment satisfies the equation and is consistent with Bob's assignment.
+The players win if Alice's assignment satisfies the chosen equation and if Bob's answer agrees with Alice's value on the queried variable.
 
 === Representation in Lean
 _Code snippets of this section are taken from `LCS/Basic.lean`._
 
 \
 
-We define an `LCSLayout` structure to represent the following data :
+We define an `LCSLayout` structure to represent the following data:
 - the number of variables `s`,
-- The number of equations `r`,
-- The support of each equation, as a family of finite sets `V : fin r -> finset s`.
+- the number of equations `r`,
+- the support of each equation, as a family of finite sets `V : Fin r -> Finset (Fin s)`.
 
 
-This structure does not capture the constants $b_i$ on the right-hand side of the equations, as many constructions are independent of these constants. 
+This structure does not capture the constants $b_i$ on the right-hand side of the equations, since many constructions depend only on the incidence pattern of the variables in each equation.
 
 \
 
@@ -145,7 +157,7 @@ structure LCSLayout where
 
 \
 
-Next, we define an `LCSGame` structure that extends `LCSLayout` by including the constants `b : fin r -> bool`, which represent the right-hand side of the equations in the binary setting.
+Next, we define an `LCSGame` structure that extends `LCSLayout` by including the constants `b : Fin G.r -> Fin 2`, which represent the right-hand side of the equations in the binary setting.
 
 #sourcecode[```lean
 structure LCSGame (G : LCSLayout) where
@@ -153,8 +165,8 @@ structure LCSGame (G : LCSLayout) where
 ```]
 \
 
-Finally, for the group theoretic constructions, we also define an `LinearSystem` structre, as an alternative description of a LCS game.
-This structure consists of a coefficient matrix $A$ and a right hand side vector $b$. 
+Finally, for the group-theoretic constructions, we also define a `LinearSystem` structure as an alternative description of a binary LCS game.
+This structure consists of a coefficient matrix $A$ and a right-hand side vector $b$.
 
 #sourcecode[```lean
 structure LinearSystem where
@@ -163,25 +175,24 @@ structure LinearSystem where
   b : Fin layout.r → Fin 2
 ```]
 
-Any support-based game can be converted into such a system, by taking 
-$A_{i j} = 1$ if $j$ is in the support of the $i$-th equation, and $0$ otherwise.
+Any support-based game can be converted into such a system by taking $A_(i j) = 1$ when variable $j$ appears in equation $i$, and $A_(i j) = 0$ otherwise.
 
 \
 
-The project therefore uses both a support-based (`LCSGame`) and a matrix-based (`LinearSystem`) description of LCS games, depending on which one is more convenient for the task at hand.
+The project therefore uses both a support-based description, via `LCSLayout` and `LCSGame`, and a matrix-based description, via `LinearSystem`, depending on which is more convenient for the construction at hand.
 
 For a concrete example of these definitions, see the case study of the Mermin-Peres Magic Square game in @magic-square.
 
 
 == Quantum Strategy Formalisms
 
-=== Projector Based Strategies
+=== Projector-Based Strategies
 
 === Observable-Based Strategies
 
 === Bridge Between Projector and Observable-Based Strategies
 
-=== Bipartite Strategies (maybe later)
+=== Bipartite Observable Strategies
 
 
 == Winning Conditions and Local Loss 
@@ -190,7 +201,7 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 
 === Sum-of-Squares Decomposition
 
-== EPR-State Argument and Row Identities Extraction
+== EPR-State Argument and Row Identity Extraction
 
 === Bipartite Setting
 
@@ -213,5 +224,3 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 
 
 = Conclusion
-
-
