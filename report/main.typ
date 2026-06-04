@@ -45,28 +45,30 @@
 = Introduction
 
 == Quantum Nonlocal games
-In the world of quantum information theory, non-local games serve as a powerfl framework for understanding the profound phenomenon of quantum entanglement and non-locality. 
-Non-locality refers to the ability of quantum systems to exhibit correclations that defy classical phyiscal laws, specifically the principle of local realism, which dictactes that distant objects cannot influence one another instantaneously.
-In a standard non-local game, two or more cooperatings players, are phyisically seperated and forbidden from communicating. 
-They receive inputs from a referee and must produce outputs that satisfy certain conditions to win the game.
-While Classical strategies for non-local games are limited by local realism, quantum strategies can leverage entanglement to achieve higher winning probabilities, often surpassing classical limits. This setting makes it possible to compare the correlations achievable by classical and quantum resources, providing insights into the fundamental differences between classical and quantum physics.
+In quantum information theory, non-local games provide a powerful framework for studying quantum entanglement and non-locality.
+Non-locality refers to the ability of quantum systems to exhibit correlations that cannot be explained by local hidden-variable models, or equivalently by the principle of local realism.
+In a standard non-local game, two or more cooperating players are physically separated and forbidden from communicating once the game begins.
+They receive inputs from a referee and must produce outputs satisfying a prescribed winning condition.
+While classical strategies for non-local games are limited to correlations achievable by shared randomness, quantum strategies can leverage entanglement to achieve higher winning probabilities, often surpassing classical limits.
+This setting makes it possible to compare the correlations achievable by classical and quantum resources, providing a precise way to study the difference between the two.
 
 == Historical Context and Significance
-The study of such games is rooted in the foundations of quantum mechanics. The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, "spooky action at a distance." 
-In 1964, Bell's theorem later showed that no local hidden variable theory could reproduce all the predictions of quantum, establishing non-locality as a central featrure of quantum theory rather than a philophical curiosity.
-Since then, non-local games have become a standard for expressing and analyzing this phenomenon:
-They form the theoritical backbone for device-independent quantum cryptography, where security guarantees are derived directly from
-the violation of classical bounds in non-local games, without relying on assumptions about the internal workings of the devices used.
+The study of such games is rooted in the foundations of quantum mechanics.
+The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, famously described as "spooky action at a distance."
+In 1964, Bell's theorem showed that no local hidden-variable theory can reproduce all quantum predictions, establishing non-locality as a central feature of quantum theory rather than a purely philosophical curiosity.
+Since then, non-local games have become a standard language for expressing and analyzing this phenomenon.
+They also play an important role in quantum information theory, for instance in device-independent quantum cryptography, where security guarantees are derived from the violation of classical bounds without relying on assumptions about the internal structure of the devices used.
 
 == Linear Constraint System Games
-Within this borad class, Linear Constraint Systems games form a particulary simple and structured family. 
-Instead of arbitrary input-output rules, the winning conditions in an LCS game are determined by a system of linear equations over a finite field (typically modulo 2), where the players' objective is to convince a referee that they possess a valid assignment of variables satisfying these constraints. 
-Typically the first player, conventionally called Alice, is responsible for providing an assignement to the variables of a given equation, while the second player, Bob, is responsible for providing an assignement to a single variable of the same equation.
-Because their underlying structure is firmly rooted in group theory and linear algebra, LCS games offer a highly systematic and mathematically elegant way to map out the exact boundaries of quantum advantage
+Within this broad class, Linear Constraint System (LCS) games form a particularly simple and structured family.
+Instead of arbitrary input-output rules, the winning conditions in an LCS game are determined by a system of linear equations over a finite field, most often in the binary setting over $F_2$.
+In such a game, the first player, conventionally called Alice, is asked for an assignment to the variables appearing in a given equation, while the second player, Bob, is asked for the value of a single variable appearing in that equation.
+The players win if Alice's assignment satisfies the chosen equation and if Bob's answer agrees with Alice's value on the queried variable.
+Because their underlying structure is rooted in linear algebra and group theory, LCS games offer a systematic and mathematically elegant setting in which to study quantum advantage.
 
 === Mermin-Peres Magic Square Game
 
-Canonical examples, such as the Mermin-Peres magic square game, perfectly illustrate the strenth of this framework; they exhibit quantum pseudotelepathy, a scenario where players sharing entanglement can satisfy the constraints to win with 100% certainty, even tough no classical strategy can win perfectly. 
+Canonical examples such as the Mermin-Peres magic square game illustrate the strength of this framework particularly well: they exhibit quantum pseudotelepathy, a phenomenon in which players sharing entanglement can satisfy the constraints with certainty even though no classical strategy can win perfectly.
 
 /*
 == Linear Constraint System Games
