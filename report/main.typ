@@ -14,7 +14,7 @@
 // Exclude all raw block from the count.
 #show: word-count.with(exclude: (raw,))
 
-#show: ieee.with(
+#show:ieee.with(
   title: [Formalising Binary Linear Constraint System Games in Lean 4],
   abstract: [
   This project presents a Lean 4 formalization of binary Linear Constraint System (LCS) games and their quantum strategies. 
@@ -66,7 +66,7 @@ Because their underlying structure is firmly rooted in group theory and linear a
 
 === Mermin-Peres Magic Square Game
 
-Canonical examples, such as the Mermin-Peres magic square game, perfectly illustrate the power of this framework; they showcase "quantum pseudotelepathy," a scenario where quantum players can satisfy the constraints to win with 100% certainty, bridging the gap between abstract algebra and observable quantum phenomena.
+Canonical examples, such as the Mermin-Peres magic square game, perfectly illustrate the strenth of this framework; they exhibit quantum pseudotelepathy, a scenario where players sharing entanglement can satisfy the constraints to win with 100% certainty, even tough no classical strategy can win perfectly. 
 
 /*
 == Linear Constraint System Games
@@ -100,6 +100,78 @@ The scope of the project is intentionally limited to the binary setting. In part
 = Approach
 
 == Linear Constraint System Games Formalization 
+
+We begin by formalising Linear Constraint System games. 
+=== The Mathematical Object
+Mathematically, a LCS game is specified by a a finite family of variables and a finite family of linear equations over these variables of the form :
+$ sum_(j in V_i) x_j = b_i $ over a field $K$.
+
+Here $V_i$ is the set of variables appearing in the $i$-th equation, $x_j$ are the variables, and $b_i$ are the constants on the right-hand side of the equations.
+
+In this project we restrain ourselves to the binary setting, where
+the underlying field is $F_2$.
+This means that the variables $x_j$ take values in $\{0,1\}$, and the equations are evaluated modulo 2.
+
+=== The Game
+In the associated game the referee selects an equation $i$ uniformly at random and sends it to Alice, while Bob receives a variable $j$ that appears in that equation.
+
+Alice must respond with an assignment of values to the variables in $V_i$ that satisfies the equation constraint, while Bob must respond with an assignment to the variable $x_j$ that is consistent with Alice's assignment.
+
+The players win if Alice's assignment satisfies the equation and is consistent with Bob's assignment.
+
+=== Representation in Lean
+_Code snippets of this section are taken from `LCS/Basic.lean`._
+
+\
+
+We define an `LCSLayout` structure to represent the following data :
+- the number of variables `s`,
+- The number of equations `r`,
+- The support of each equation, as a family of finite sets `V : fin r -> finset s`.
+
+
+This structure does not capture the constants $b_i$ on the right-hand side of the equations, as many constructions are independent of these constants. 
+
+\
+
+#sourcecode[```lean
+
+structure LCSLayout where
+  r : ℕ
+  s : ℕ
+  V : Fin r → Finset (Fin s)
+
+```]
+
+\
+
+Next, we define an `LCSGame` structure that extends `LCSLayout` by including the constants `b : fin r -> bool`, which represent the right-hand side of the equations in the binary setting.
+
+#sourcecode[```lean
+structure LCSGame (G : LCSLayout) where
+  b : Fin G.r → Fin 2
+```]
+\
+
+Finally, for the group theoretic constructions, we also define an `LinearSystem` structre, as an alternative description of a LCS game.
+This structure consists of a coefficient matrix $A$ and a right hand side vector $b$. 
+
+#sourcecode[```lean
+structure LinearSystem where
+  layout : LCSLayout
+  A : Fin layout.r → Fin layout.s → Fin 2
+  b : Fin layout.r → Fin 2
+```]
+
+Any support-based game can be converted into such a system, by taking 
+$A_{i j} = 1$ if $j$ is in the support of the $i$-th equation, and $0$ otherwise.
+
+\
+
+The project therefore uses both a support-based (`LCSGame`) and a matrix-based (`LinearSystem`) description of LCS games, depending on which one is more convenient for the task at hand.
+
+For a concrete example of these definitions, see the case study of the Mermin-Peres Magic Square game in @magic-square.
+
 
 == Quantum Strategy Formalisms
 
@@ -135,7 +207,7 @@ The scope of the project is intentionally limited to the binary setting. In part
 
 == Main Verified Theorems
 
-== Magic Square Game Case Study
+== Magic Square Game Case Study <magic-square>
 
 = Limitations and Future Work
 

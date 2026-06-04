@@ -116,7 +116,7 @@
   set list(indent: 10pt, body-indent: 9pt)
 
   // Configure headings.
-  set heading(numbering: none)
+  set heading(numbering: "1.1.1")
 show heading.where(level: 1): set text(font: "Libertinus Sans", weight: "semibold", size: 14pt)
 show heading.where(level: 2): set text(font: "Libertinus Sans", weight: "semibold", size: 11pt)
 show raw: set text(font: "Fira Code", size: 8pt)
