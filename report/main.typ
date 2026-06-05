@@ -190,11 +190,166 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 
 === Projector-Based Strategies
 
+*The Mathematical Object*
+In a quantum strategy, a player's responsse to a question is not modeled as a determistic function from questions to answer.
+Instead, the question determines which measurement the player performs on their share of quantum state, and the answer is the given by the outcome of that measurement.
+For this reason strategies are naturally described in terms of measurement systems, which are families of projective measurements.
+
+In the binary LCS setting, Alice and Bob have different answer types. 
+When Alice is asked an equation $i$, she must provide a full assignment to all variables appearing in that equation.
+Her measurement is therefore indexed by the set of assignments on that equation.
+When Bob is asked a variable $j$, he must provide a single bit, so his measurement is indexed by the two outcomes in $F_2$.
+
+The project works with projective measurements, this means that for each question, the possible answers are indexed by a family of orthogonal self-adjoint idempotent operators summing to the identity, which represent the projectors onto the corresponding outcome subspaces.
+
+*Representation in Lean*
+
+In Lean, projective measurements are encoded by the predicate `IsMeasurementSystem`. 
+For a finite family of operators `f : I -> R`, this predicate expresses that the operators form a projective measurement: They sum to the identity, are self-adjoint, are idempotent, and are pairwise orthogonal.
+
+
+#sourcecode[```lean
+structure IsMeasurementSystem
+  {I : Type*} [Fintype I]
+  (f : I → R) : Prop where
+  sum_one      : ∑ x, f x = 1
+  idempotent   : ∀ x, f x * f x = f x
+  orthogonal   : ∀ x y, x ≠ y → f x * f y = 0
+  self_adjoint : ∀ x, star (f x) = f x
+```]
+
+\
+
+Using this notion, the projector-based strategy formalism is defined by the structure `LCSStrategy`.
+
+#sourcecode[```lean
+structure LCSStrategy
+  (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
+  (G : LCSLayout) where
+  E : ∀ i, (Assignment G i → R)
+  F : Fin G.s → (Fin 2 → R)
+  alice_ms : ∀ i, IsMeasurementSystem (E i)
+  bob_ms   : ∀ j, IsMeasurementSystem (F j)
+  commute  : ∀ i j α β, E i α * F j β = F j β * E i α
+```]
+
+Here `E i` denotes Alice's projective measurement associated with equation $i$; it is the full family of operators indexed by all  assignments `x : Assignment G i`.
+For a specific assignment $x$, the operator `E i x` is the projector onto the event that Alice answers exactly x when asked equation $i$. Similarly, `F j` denotes Bob's binary projective measurement associated with variable $j$, and for a bit `y : Fin 2`, the operator `F j y` is the projector onto the event that Bob answers y when asked variable j. The fields alice_ms and bob_ms assert that these families define projective measurements. Finally, the commutation condition expresses the operator-theoretic separation between Alice and Bob: Alice's and Bob's measurement operators commute for all questions and outcomes.
+
+\
+
+Although this formalism is expressed in terms of projective measurements, the later development also makes systematic use of observables derived from these measurements. Their role is explained after the observable-based formalism has been introduced
+
 === Observable-Based Strategies
+Although the projector-based formalism is the most direct way to describe quantum strategies, it is often more convenient to work with observables, which are self-adjoint operators whose spectral decomposition corresponds to the projective measurements. For this reason, the project also introduces an observable-based formalism.
+
+In this setting, a strategy is described by one observable for each variable on Alice's side, and one observable for each variable on Bob's side.
+They must satisfy the commutation relation dictated by the structure of the game. On Alice's side, observables corresponding to variables appearing in the same equation must commute, so that their productsare well defined independently of the order of multiplication. In addition Alice's observables must commute with all of Bob's observables, reflecting the spatial separation between the players.
+
+Because the present project is restricted to binary outcomes, the observable formalism is also specialized accordingly. Rather than considering arbitrary observables, we work with self-adjoint 
+involutions, which are exactly the operators arising from two-outcome projective measurements. This is encoded in Lean by the predicate IsObservable.
+
+#sourcecode[```lean
+structure IsObservable (O : R) : Prop where
+  involutive   : O * O = 1
+  self_adjoint : star O = O
+```]
+
+
+With this notion of binary observable in place, the project packages the observable description of a strategy into a structure `ObservableStrategyData` : 
+
+#sourcecode[```lean
+
+structure ObservableStrategyData
+  (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
+  (G : LCSLayout) where
+  alice_obs : Fin G.s → R
+  bob_obs : Fin G.s -> R
+  alice_observable : ∀ j, IsObservable (alice_obs j)
+  bob_observable : ∀ j, IsObservable (bob_obs j)
+  sameEquation_comm :
+    ∀ i, Pairwise (fun j k : G.V i => Commute (alice_obs j.1) (alice_obs k.1))
+  alice_bob_commute :
+    ∀ j k, Commute (alice_obs j) (bob_obs k)
+```]
+
 
 === Bridge Between Projector and Observable-Based Strategies
 
+The two formalisms are closely related, and it is possible to translate strategies from one description to the other.
+This bridge is essential for this project as explicit examples are most often described in terms of observables, while the main development such as the loss operator are more naturally expressed in terms of projective measurements.
+
+On Bob's side, the passage from projectors to observables is immediate. Since Bob's measurements are binary, each family `F j : Fin 2 -> R` gives rise to a single observable obtained from the difference of the two projectors. In Lean, this is the definition `Bob_B`.
+
+Alice's side is slightly subtler. For a fixed equation $i$, the family `E i` is indexed by full assignements rather than by binary outcomes. To extract an observables assocaited with a single variable
+$j$  apparing that equation, one first collapses the assingment indexed measurement to a binary measurement that only distinguishes the value of the variables $j$. 
+This is expressed in Lean by the construction `InducedMeasurementSystem (strat.E i) (fun x => x j)`. The observable associated with this induced binary measurement is then defined as `Alice_A strat i j`.
+
+#sourcecode[```lean
+def ObservableOfMeasurementSystem (f : Fin 2 → R) : R :=
+  f 0 - f 1
+
+def Alice_A
+  (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
+  ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
+-- ANCHOR_END: Alice_A
+
+-- ANCHOR: Bob_B
+def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+  ObservableOfMeasurementSystem (strat.F j)
+```]
+
+The project also proves that these derived operators are genuine binary observables. Bob's observable is obtained directly from his binary measurement, while Alice's observable is obtained from the induced binary measurement associated with a single variable in a fixed equation. In both cases, the fact that the underlying family is a measurement system implies that the resulting operator is a self-adjoint involution.
+
+Conversly, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
+Bob's measurement is obetained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commting observables appearing in a common equation.
+This construction is implmented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
+
+#sourcecode[```lean
+noncomputable def ObservableStrategy_To_ProjectorStrategy
+  {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
+  {G : LCSLayout}
+  (S : ObservableStrategyData R G)
+ :
+  LCSStrategy R G :=
+  {
+    E := AliceMeasurementFromObservables S
+    F := BobMeasurementFromObservables S
+    alice_ms := aliceMeasurementFromObservables_isMeasurementSystem S
+    bob_ms := bobMeasurementFromObservables_isMeasurementSystem S
+    commute := aliceMeasurement_bobMeasurement_commute S
+  }
+```]
+
+On Bob's side, each observable gives a binary measurement by taking its two associated spectral projectors, and the corresponding family is proved to form a measurement system. 
+On Alice's side, the measurement attached to an equation is obtained by multiplying the projectors associated with the observables appearing in that equation; the row-wise commutation assumptions ensure that these products are well defined, and the project proves that the resulting family is again a measurement system.
+Finally, the global commutation hypothesis between Alice's and Bob's observables is used to show that every Alice projector commutes with every Bob projector. These results together justify the construction of ObservableStrategy_To_ProjectorStrategy as a valid LCSStrategy. 
+
 === Bipartite Observable Strategies
+
+For the final part of the project, the observable formalism is further specialized to a bipartite setting. This is the setting relevant for the EPR-state argument developed later, where Alice's and Bob's operators act on different tensor factors of a bipartite Hilbert space.
+
+Instead of specifying two separate observable families from the start, the project begins with a single family of observables indexed by the variables of the game. These observables act on a space of the form `Matrix n n ℂ`. From this single family, one obtains Alice's and Bob's observables by lifting them to the two tensor factors: Alice's observable associated with a matrix `M` is `M ⊗ I`, while Bob's observable is `I ⊗ M`. In this way, commutation between Alice's and Bob's operators is automatic, since operators acting on different tensor factors commute.
+
+In Lean, this data is encoded by the structure `BipartiteObservableStrategy`.
+
+#sourcecode[```lean
+structure BipartiteObservableStrategy
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (G : LCSLayout) where
+  obs : Fin G.s → Matrix n n ℂ
+  is_observable : ∀ j, IsObservable (obs j)
+  sameEquation_comm :
+    ∀ i, Pairwise (fun j k : G.V i => Commute (obs j.1) (obs k.1))
+```]
+
+Here `obs j` denotes the basic observable associated with variable `j`. The field `is_observable` asserts that each of these operators is a self-adjoint involution, while `sameEquation_comm` expresses the row-wise commutation required to form products of observables along a common equation.
+
+From such a bipartite observable strategy, the project constructs an ordinary observable strategy by tensor lifting. Alice's observables are obtained by applying the map `M ↦ M ⊗ I`, and Bob's observables by applying `M ↦ I ⊗ M`. This construction is implemented by `toObservableStrategy`, and it provides the entry point from the bipartite setting into the general observable and projector formalisms developed earlier.
+
+This specialization is important because it matches the tensor-product structure of the EPR state used later in the project. In particular, it provides the framework in which local-loss annihilation on the EPR state can be turned into concrete matrix identities and, ultimately, into representations of the solution group.
+
+
 
 
 == Winning Conditions and Local Loss 
