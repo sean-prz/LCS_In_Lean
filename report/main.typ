@@ -1,7 +1,9 @@
 #import "./charged-ieee.typ": ieee
 #import "@preview/codelst:2.0.2": sourcecode
 #import "@preview/wordometer:0.1.5": word-count, total-words
+#import "@preview/physica:0.9.8": ket, bra
 #set page(numbering:"1")
+#let otimes = $times.circle$
 
 #show link: it => text(
   fill: blue,// Light sky blue
@@ -350,19 +352,90 @@ From such a bipartite observable strategy, the project constructs an ordinary ob
 This specialization is important because it matches the tensor-product structure of the EPR state used later in the project. In particular, it provides the framework in which local-loss annihilation on the EPR state can be turned into concrete matrix identities and, ultimately, into representations of the solution group.
 
 
-
-
 == Winning Conditions and Local Loss 
 
-=== Local Winning and Loss Operators
+Once a binary LCS game and a projector-based strategy have been defined, the next step is to formalise the winning condition of the game and to derive the associated  winning and loss operators.
+This is the opint at which the right hand side values $b_i$ of the equation come into play, as the winning condition depends on whether an assignement satisfies the chosen constraint.
 
-=== Sum-of-Squares Decomposition
 
-== EPR-State Argument and Row Identity Extraction
 
-=== Bipartite Setting
+=== Winning and Loss Operators
 
-=== Extraction of Row Identities
+For a fixed equation $i$, the set of winning assingments consists of the assignements whose parity matches $b_i$. This set is used to define the local winning operator for a pair $(i,j)$ of an equation and a variable appearing in that equation. Intuitevly, this operator collects exactly those outcomes for which Alice's assignment satisfies the equation and agress with Bob's answer on variable $j$. 
+
+In `WinningCondition.lean`, the notation `S[i]` is used as a shorthand for `winning_assignments game i`, namely the set of assignments on equation $i$ whose parity matches $b_i$.
+
+#sourcecode[```lean
+def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
+  Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = b[i])
+
+noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=
+  ∑ x ∈ S[i], E[i, x] * F[j, x j]
+
+noncomputable def local_loss_operator (i : Fin G.r) (j : G.V i) : R :=
+  1 - local_winning_operator game strat i j
+```]
+
+The local loss operator is defined as the complement of the local winning operator. It is the central object in the analytic part of the project, since the sum-of-square decomposition is proved for this operator.
+
+
+In addition to these local quantities, the project also defined the global winning and loss operators by averaging the local ones.
+
+#sourcecode[```lean
+noncomputable def winning_operator : R :=
+  ∑ i : Fin G.r, ∑ j : G.V i,
+  let normalization : ℂ := (G.r * (G.V i).card : ℕ)
+  (1 / normalization) • local_winning_operator game strat i j
+
+noncomputable def loss_operator : R :=
+  1 - winning_operator game strat
+```]
+
+
+== EPR Extraction Framework
+
+=== The EPR Vector
+
+At this point, the formalization is specialized from the earlier abstract algebraic setting to finite-dimensional complex matrix algebras.
+More precisely, the relevant operators act on a bipartite space of the form $CC^n otimes CC^n$, represented in Lean by matrices of type `Matrix (n × n) (n × n) ℂ`.
+
+The distinguished vector used in the project is the unnormalized maximally entangled vector
+$ Omega = sum_a e_a otimes e_a $.
+Its importance lies in the symmetry with which it couples the two tensor factors: it allows operators acting on one side of the tensor product to be related to operators acting on the other side.
+
+In Lean, the EPR vector is defined as follows.
+
+#sourcecode[```lean
+noncomputable def eprVec
+    (n : Type*) [Fintype n] [DecidableEq n] : (n × n) → ℂ :=
+  fun ab => if ab.1 = ab.2 then 1 else 0
+
+local notation "Ω" => eprVec n
+```]
+
+This is simply the coordinate description of the vector $Omega$, written in the standard basis of the bipartite space.
+The vector is intentionally left unnormalized, since the later arguments only use annihilation and injectivity properties rather than norm considerations.
+
+=== EPR Identities for Bipartite Operators
+
+The key role of the EPR vector is that it turns relations on the bipartite space into ordinary matrix identities.
+Concretely, if `M` and `N` are complex matrices, then the action of `M ⊗ N` on `Ω` can be computed explicitly, and vanishing of this action is equivalent to a matrix equation involving `M` and `N^T`.
+
+The fundamental identity proved in the project is that $(M otimes N) Omega = 0$ if and only if $M N^T = 0$.
+This gives the basic extraction principle used later in the development.
+
+#sourcecode[```lean
+lemma kronecker_mulVec_epr_eq_zero_iff
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (M N : Matrix n n ℂ) :
+    Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
+      M * Nᵀ = 0
+```]
+
+Several specialized versions of this identity are then derived for the bipartite lift operations introduced earlier.
+These lemmas make it possible to replace operator equalities on the distinguished vector `Ω` by concrete matrix equalities in the underlying `n × n` space.
+
+*This is the mechanism referred to in the project as the EPR extraction argument*, and it forms the bridge between bipartite operator relations and the matrix identities used later in the representation-theoretic part of the development.
 
 == Solution Groups and Matrix Representations
 
@@ -373,7 +446,9 @@ This specialization is important because it matches the tensor-product structure
 
 = Results
 
-== Main Verified Theorems
+== Sum-of-Squares Decomposition
+
+== Row Identities Extraction 
 
 == Magic Square Game Case Study <magic-square>
 
