@@ -105,11 +105,7 @@ lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
     unfold rhs
     rw [smul_mul_assoc, add_mul, one_mul, smul_mul_assoc, hprod, hsign, smul_add,
         smul_smul, smul_smul, ← add_smul]
-  have hsign2 : (1/2 : ℂ) + (1/2 : ℂ) * (-1 : ℂ) ^ (b[i]).val *
-                  (-1 : ℂ) ^ (∑ j : G.V i, (x j : Fin 2)).val
-        = if (∑ j : G.V i, (x j : Fin 2)) = b[i] then 1 else 0 := by
-    exact sign_indicator (b[i]) (∑ j : G.V i, (x j : Fin 2))
-  rw [hsign2]
+  rw [sign_indicator (b[i]) (∑ j : G.V i, (x j : Fin 2))]
   simp [winning_assignments, Finset.mem_filter]
 
 /-- Lemma 4.7.2 From the paper -/
@@ -132,15 +128,10 @@ lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : F
   rcases fin2_eq_zero_or_one y with rfl | rfl
   · change A = _
     simp only [Fin.val_zero, pow_zero, one_smul]
-    have hform : 1 + (A - B) = A + A := by rw [← hpart]; abel
-    rw [hform, smul_add, ← add_smul]
-    norm_num
+    rw [← hpart]; module
   · change B = _
     simp only [Fin.val_one, pow_one]
-    have hform : 1 + (-1 : ℂ) • (A - B) = B + B := by
-      rw [← hpart]; simp only [neg_smul, one_smul]; abel
-    rw [hform, smul_add, ← add_smul]
-    norm_num
+    rw [← hpart]; module
 
 
 
@@ -281,7 +272,7 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
   -- Distribute F * (four-term sum) and normalize negations
   simp only [mul_add, mul_neg, mul_smul_comm]
   -- Collect the 4 pairs using auxiliary identities
-  have h1 : F0 * (1 : R) + F1 * 1 = 1 := by rw [mul_one, mul_one, hone]
+  have h1 : F0 * (1 : R) + F1 * 1 = 1 := by simp [hone]
   have h2 : F0 * Aj + -(F1 * Aj) = B[↑j] * Aj := by
     rw [← sub_eq_add_neg, ← sub_mul, ← hbob]
   have h3 : c • (F0 * RP) + c • (F1 * RP) = c • RP := by
@@ -311,11 +302,8 @@ private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
   let O2 := (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i]
   let O3 := (-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j] * B[j])
   -- Rearange to be able to rewrite in terms of O1, O2, O3
-  rw [mul_smul_comm]
-  rw [← mul_assoc]
-  rw [(bob_commute_row_prod strat i j).eq]
-  rw [mul_assoc]
-  nth_rw 2  [(alice_bob_commute_gen strat i j j).symm.eq]
+  rw [mul_smul_comm, ← mul_assoc, (bob_commute_row_prod strat i j).eq, mul_assoc]
+  nth_rw 2 [(alice_bob_commute_gen strat i j j).symm.eq]
   rw [← mul_assoc]
   -- Perform the rewriting in terms of O1, O2, O3
   change 1 - (1 / 4 : ℂ) • (1 + O1 + O2 + O3) = (1/8 : ℂ) • ((1 - O1)^2 + (1 - O2)^2 + (1 - O3)^2)
@@ -327,15 +315,14 @@ private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
       (bob_is_observable strat j).involutive, (alice_is_observable strat i j).involutive]
   have hO2 : O2 * O2 = 1 := by
     unfold O2
-    rw [smul_mul_assoc, mul_smul_comm, smul_smul]
-    rw [row_prod_sq strat i]
-    rw [sign_fin2_sq (b[i])]
+    rw [smul_mul_assoc, mul_smul_comm, smul_smul, row_prod_sq strat i, sign_fin2_sq (b[i])]
     norm_num
   have hO3 : O3 * O3 = 1 := by
     unfold O3
     rw [smul_mul_assoc, mul_smul_comm, smul_smul]
     rw [sign_fin2_sq (b[i])]
     norm_num
+    -- Goal: RP * A * B * (RP * A * B) = 1
     simp only [← mul_assoc]
     rw [← alice_commute_row_prod strat i j]
     rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i) B[↑j] (Alice_Row_Prod strat i)]
