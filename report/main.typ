@@ -676,5 +676,35 @@ the solution group of the binary linear system associated with the game.
 = Limitations and Future Work
 
 
+== Limitations
+
+The present development has several important limitations.
+
+- *Binary setting only.* \
+  The whole development is restricted to LCS games over $F_2$, and this choice is built in from the
+  beginning through the support-based description of equations, which records only which variables
+  appear and not general coefficients over an arbitrary field. #v(1em)
+
+- *Finite-dimensional matrix setting for the EPR argument.* \
+  The extraction results are proved only after specializing to complex matrices, so the final EPR and
+  representation arguments do not yet apply in a more abstract operator-algebraic or infinite-dimensional setting.
+  #v(1em)
+
+- *No full equivalence theorem between the two strategy formalisms.* \
+  The project constructs and uses the bridge from observable strategies to projector strategies, but it
+  does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way.
+  #v(1em)
+
+- *No direct computation with real or complex operator entries.* \
+  In Lean, real numbers are implemented in a proof-oriented way rather than as an efficient executable numeric type,
+  so matrices with real or complex entries are well suited for exact reasoning but not for effective computation of concrete operator values.
+
+== Future Work
+
+The project can be extended by addressing the limiatations and/or adding more concrete examples. 
+
+More interestingly, a natural next step would be to move toward *robust self-testing* results, by replacing the exact annhilation
+condition on the EPR state with an approximate version, and showing that this implies approximate versions of the row identities, which in turn can be used to show that the strategy is close to an ideal strategy in a suitable sense. This would require developing a robust version of the EPR extraction argument, which is a significant technical challenge but would be a very interesting direction for future work.
 
 = Conclusion
+Overall, the development shows that a substantial part of the operator-theoretic and group-theoretic aspects of binary LCS games can be expressed and verified in Lean, while also providing a foundation for future extensions toward more general and more robust self-testing results.
