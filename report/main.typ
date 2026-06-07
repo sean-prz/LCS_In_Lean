@@ -1,7 +1,7 @@
 #import "./charged-ieee.typ": ieee
 #import "@preview/codelst:2.0.2": sourcecode
 #import "@preview/wordometer:0.1.5": word-count, total-words
-#import "@preview/physica:0.9.8": ket, bra
+#import "@preview/physica:0.9.8": ket, bra, braket
 #set page(numbering:"1")
 #let otimes = $times.circle$
 
@@ -100,7 +100,7 @@ The scope of the project is intentionally limited to the binary setting. In part
 - the formalisation is restricted to LCS games over $F_2$,
 - the solution-group construction is the binary one associated with this setting,
 - and the final representation theorem is proved in the bipartite EPR framework.
-
+#colbreak()
 = Approach
 
 == Structure of the Lean Development
@@ -479,16 +479,202 @@ abbrev SolutionGroup (S : LinearSystem) : Type :=
 Thus the solution group is defined in Lean as the presented group on the generators `SolutionGen S`, quotiented by the set of relators `solutionRelators S` encoding the involution, commutation, centrality, and row-product relations. The project therefore treats the solution group as an explicitly presented algebraic object attached to a binary linear system. This group will later serve as the target of the representation-theoretic part of the development, where matrix identities extracted from the EPR argument are used to verify its defining relations.
 
 
-
+#colbreak()
 = Results
+With the definitions and constructions described in the previous section, we can now formalize the result of interest, all taken from the thesis of Arthur Metha.
 
 == Sum-of-Squares Decomposition
+The first main result is a sum-of-squares decomposition of the local loss operator. The proof in mathematical terms is described in section 4.7 of Metha's thesis. 
+
+$
+L_(i,j)
+&= 1 - sum_(x,y: x in S[i], y = x_j) E_(i,x) F_(j,y) \
+&= 1/8 ( (I - B_j A_j^((i)))^2 \
+&quad + (I - (-1)^(b_i) product_(k in V_i) A_k^((i)))^2 \
+&quad + (I - (-1)^(b_i) product_(k in V_i) A_k^((i)) A_j^((i)) B_j)^2 )
+$
+
+Hence, the local loss is nullified if and only if the three terms in the sum-of-squares are nullified, this is because each will be shown to be positive semidefininte. 
+This decomposition is a key step in the EPR extraction arguement to produces the row identities. 
+
+
+The main challenges in the formalization of this results were ; 
+1. Noncommutative operator algebra.
+  While the proof is mathemtically elementary, Lean needs to be explicit about where multiplication is noncommuttaive and where
+  it is safe to reorder terms. A lot of the work is proving and reusing commutation lemmas like :
+  - Alice observables commute along a row.
+  - Alice and Bob operators commute when needed.
+  - The Row product commutes with relevant local observable.
+2. Mixing scalar actions with operator mutliplication
+  A repeated source of complication was expressions involving both scalar multiplication and operator multiplication $(c dot X) , (X * Y)$. The paper trests these transparently, but in Lena they require careful rewriting with lemmas like `smul_mul` and `mul_smul` to put the scalar factors in the right place.
+3. Turning the paper sums into explicit finite sums in Lean.
+  The proof uses sums over winning assignements and marginal slices of assignements. In Lean that becomes 
+  - Finset.filter, Finset.sum_congr, fiberwise sums.
+  So a significant part of the file is showing that the paper sums can be rewritten in terms of these more explicit constructions, and then manipulating them to get the desired final form.
+\
+
+After all these technicalites are dealt with, the final result is a machine-checked proof of the sum-of-square decomposition : 
+#show raw: set text(7pt)
+#sourcecode[```lean
+
+local notation "A["i", "j"]" => Alice_A strat i j
+local notation "B["j"]" => Bob_B strat j
+local notation "E["i", "x"]" => strat.E i x
+local notation "F["j", "y"]" => strat.F j y
+local notation "b["i"]" => game.b i
+
+
+
+theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
+  local_loss_operator game strat i j =
+    (1/8 : ℂ) • (
+      (1 - B[j] * A[i, j])^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • ∏ₐ[i])^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • (∏ₐ[i] * A[i, j] * B[j]))^2
+    ) 
+
+```]
+This successfully formalizes that given a game and a projector-based strategy for it, the local loss operator can be decomposed as
+a sum of three squares.
 
 == Row Identities Extraction 
+The next big step is to show that local-loss annihilation on the EPR state implies three local
+relations, which can then be extracted into identities on the underlying matrix space.
 
-== Magic Square Game Case Study <magic-square>
+This is a two-step process.
+1. First, the sum-of-squares decomposition shows that if the local loss operator annihilates the
+  EPR state, then each SOS term annihilates $Omega$ individually. Writing
+$ T_1 &= I - B_j A_j^((i)), \ 
+ T_2 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)), \
+ T_3 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)) A_j^((i)) B_j $
+From the SOS decomposition, we get : 
+$ L_(i,j) Omega = 0 arrow.double.long 1/8 (T_1^2 + T_2^2 + T_3^2) Omega = 0, $
+Each $T_k$ is self-adjoint: this follows from the fact that the local Alice and Bob observables are
+self-adjoint, that the Alice observables appearing in the same row commute so that their product is
+again self-adjoint, and that the scalar factor $(-1)^(b_i)$ is real. Taking the Hermitian inner
+product with $Omega$ gives
+$
+  braket(Omega, (T_1^2 + T_2^2 + T_3^2) Omega)
+  = braket(T_1 Omega, T_1 Omega)
+  + braket(T_2 Omega, T_2 Omega)
+  + braket(T_3 Omega, T_3 Omega).
+$
+Each summand is a norm square, hence a nonnegative real number. Since their sum is zero, each one
+must itself be zero, and therefore
+$ T_1 Omega = 0, wide T_2 Omega = 0, wide T_3 Omega = 0. $
+This is the positivity argument formalized in Lean.
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+lemma three_selfAdjoint_squares_mulVec_eq_zero
+    (hT₁ : T₁ᴴ = T₁) (hT₂ : T₂ᴴ = T₂) (hT₃ : T₃ᴴ = T₃)
+    (h :
+      Matrix.mulVec (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) v = 0) :
+    Matrix.mulVec T₁ v = 0 ∧ Matrix.mulVec T₂ v = 0 ∧ Matrix.mulVec T₃ v = 0
+```]
+2. Then, each annihilation relation is rewritten in bipartite form and the EPR identities are used
+  to remove the distinguished vector $Omega$. The general principle is that if an operator can be
+  written as $M otimes N$, then annihilation on $Omega$ is equivalent to an ordinary matrix equation
+  involving $N^T$. In the project, this is encoded by the basic extraction lemma
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+lemma kronecker_mulVec_epr_eq_zero_iff
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (M N : Matrix n n ℂ) :
+    Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
+      M * Nᵀ = 0
+```]
+
+  and by its affine variant
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (M N : Matrix n n ℂ) :
+    Matrix.mulVec (1 - M ⊗ₖ N) (eprVec n) = 0 ↔
+      M * Nᵀ = 1
+```]
+
+  These lemmas are applied to the three SOS terms after expressing Alice's operators as lifts
+  $A otimes I$ and Bob's operators as lifts $I otimes B$.
+
+  For the first term, one rewrites the consistency operator using
+  $(I otimes B_j)(A_j^((i)) otimes I) = A_j^((i)) otimes B_j$:
+
+  $
+    T_1 Omega = 0
+    &arrow.double.long (I - A_j^((i)) otimes B_j) Omega = 0 \
+    &arrow.double.long A_j^((i)) (B_j)^T = I.
+  $
+
+  Since $B_j$ is an observable, it is an involution, so $(B_j)^T (B_j)^T = I$. Multiplying on the
+  right by $(B_j)^T$ gives
+
+  $
+    A_j^((i)) = (B_j)^T.
+  $
+
+  For the second term, the row product lives entirely on Alice's side. Writing
+  $R_i = product_(k in V_i) A_k^((i))$, one gets
+
+  $
+    T_2 Omega = 0
+    &arrow.double.long (I - (-1)^(b_i) (R_i otimes I)) Omega = 0 \
+    &arrow.double.long I - (-1)^(b_i) R_i = 0 \
+    &arrow.double.long R_i = (-1)^(b_i) I.
+  $
+
+  Here the second implication uses the specialized Alice-side injectivity lemma, which removes
+  $Omega$ directly from operators of the form $M otimes I$.
+
+  For the third term, one similarly rewrites the bipartite operator as
+  $(R_i A_j^((i))) otimes B_j$, and obtains
+
+  $
+    T_3 Omega = 0
+    &arrow.double.long (I - (-1)^(b_i) ((R_i A_j^((i))) otimes B_j)) Omega = 0 \
+    &arrow.double.long (-1)^(b_i) R_i A_j^((i)) (B_j)^T = I.
+  $
+
+  In Lean, these three extraction steps are packaged as separate lemmas, for example the
+  consistency relation is stated as
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+lemma consistency_of_epr_annihilates
+    (i : Fin G.r) (j : G.V i)
+    (A B : Matrix n n ℂ)
+    (hCons :
+      Matrix.mulVec
+        (sosConsistencyTerm strat i j)
+        Ω = 0)
+    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
+    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+    (hBobs : IsObservable B) :
+    A = Bᵀ
+```]
+
+  Applying the same mechanism to the other two terms yields the three identities
+$ A_j^((i)) &= B_j^T,  \
+ product_(k in V_i) A_k^((i)) &= (-1)^(b_i) I, \
+ (-1)^(b_i) product_(k in V_i) A_k^((i)) A_j^((i)) B_j^T &= I. $
+Together these give the row identities that are used in the construction of representations of the solution group.
+
+
+== Matrix Representations of the Solution Group
+The final step of this project is to show that these row identities can be used to construct a matrix representation of 
+the solution group of the binary linear system associated with the game.
+
+
+
+
+= Magic Square Game Case Study <magic-square>
+
 
 = Limitations and Future Work
+
 
 
 = Conclusion
