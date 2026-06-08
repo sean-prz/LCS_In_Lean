@@ -288,40 +288,34 @@ variable (n : Type*) [Fintype n] [DecidableEq n]
 variable (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
 
 local notation "Ω" => eprVec n
+local notation "A[" i ", " j "]" => Alice_A strat i j
+local notation "B[" j "]" => Bob_B strat j
+local notation "b[" i "]" => game.b i
+
+/-- Paper-style notation for `Alice_Row_Prod strat i`. -/
+local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
 
 /-- The consistency SOS relation term. -/
 noncomputable def sosConsistencyTerm
-    {m : Type*} [Fintype m] [DecidableEq m]
-    (strat : LCSStrategy (Matrix m m ℂ) G)
-    (i : Fin G.r) (j : G.V i) : Matrix m m ℂ :=
-  1 - Bob_B strat ↑j * Alice_A strat i j
+    (i : Fin G.r) (j : G.V i) : Matrix (n × n) (n × n) ℂ :=
+  1 - B[↑j] * A[i, j]
 
 /-- The row-product SOS relation term. -/
 noncomputable def sosRowTerm
-    {m : Type*} [Fintype m] [DecidableEq m]
-    (game : LCSGame G)
-    (strat : LCSStrategy (Matrix m m ℂ) G)
-    (i : Fin G.r) : Matrix m m ℂ :=
-  1 - (-1 : ℂ) ^ (game.b i).val • Alice_Row_Prod strat i
+    (i : Fin G.r) : Matrix (n × n) (n × n) ℂ :=
+  1 - (-1 : ℂ) ^ b[i].val • ∏ₐ[i]
 
 /-- The product SOS relation term. -/
 noncomputable def sosProductTerm
-    {m : Type*} [Fintype m] [DecidableEq m]
-    (game : LCSGame G)
-    (strat : LCSStrategy (Matrix m m ℂ) G)
-    (i : Fin G.r) (j : G.V i) : Matrix m m ℂ :=
-  1 - (-1 : ℂ) ^ (game.b i).val •
-    (Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j)
+    (i : Fin G.r) (j : G.V i) : Matrix (n × n) (n × n) ℂ :=
+  1 - (-1 : ℂ) ^ b[i].val • (∏ₐ[i] * A[i, j] * B[↑j])
 
 /-- The sum of squares appearing in the local-loss SOS decomposition. -/
 noncomputable def sosSquareSum
-    {m : Type*} [Fintype m] [DecidableEq m]
-    (game : LCSGame G)
-    (strat : LCSStrategy (Matrix m m ℂ) G)
-    (i : Fin G.r) (j : G.V i) : Matrix m m ℂ :=
-  (sosConsistencyTerm strat i j) ^ 2 +
-    (sosRowTerm game strat i) ^ 2 +
-    (sosProductTerm game strat i j) ^ 2
+    (i : Fin G.r) (j : G.V i) : Matrix (n × n) (n × n) ℂ :=
+  (sosConsistencyTerm n strat i j) ^ 2 +
+    (sosRowTerm game n strat i) ^ 2 +
+    (sosProductTerm game n strat i j) ^ 2
 
 section Stage1
 /-!
@@ -343,10 +337,8 @@ where the three $T_k$ are the SOS relation terms from `local_loss_sos`.
 lemma local_loss_kills_epr_sos_sum
     (i : Fin G.r) (j : G.V i)
     (hLoss :
-      Matrix.mulVec (local_loss_operator game strat i j) Ω = 0) :
-    Matrix.mulVec
-      ((1 / 8 : ℂ) • sosSquareSum game strat i j)
-      Ω = 0 := by
+      local_loss_operator game strat i j *ᵥ Ω = 0) :
+    ((1 / 8 : ℂ) • sosSquareSum game n strat i j) *ᵥ Ω = 0 := by
   simpa [local_loss_sos, sosSquareSum, sosConsistencyTerm, sosRowTerm, sosProductTerm] using hLoss
 
 end Stage1
@@ -403,10 +395,8 @@ within-row commutativity.  This is useful for proving that the row SOS term
 $1 - (-1)^{b_i}\operatorname{Row}_i(A)$ is self-adjoint.
 -/
 private lemma alice_row_prod_conjTranspose_eq_self
-    {G : LCSLayout} [Fintype m] [DecidableEq m]
-    (strat : LCSStrategy (Matrix m m ℂ) G)
     (i : Fin G.r) :
-    (Alice_Row_Prod strat i)ᴴ = Alice_Row_Prod strat i := by
+    (∏ₐ[i])ᴴ = ∏ₐ[i] := by
   unfold Alice_Row_Prod
   apply noncommProd_conjTranspose_eq_self
   intro j _
@@ -448,14 +438,12 @@ of the three self-adjointness hypotheses required to turn
 $(T_1^2 + T_2^2 + T_3^2)\Omega = 0$ into $T_1\Omega = 0$.
 -/
 private lemma sos_consistency_term_conjTranspose_eq_self
-    {G : LCSLayout} [Fintype m] [DecidableEq m]
-    (strat : LCSStrategy (Matrix m m ℂ) G)
     (i : Fin G.r) (j : G.V i) :
-    (sosConsistencyTerm strat i j)ᴴ =
-      sosConsistencyTerm strat i j := by
-  have hA : (Alice_A strat i j)ᴴ = Alice_A strat i j := by
+    (sosConsistencyTerm n strat i j)ᴴ =
+      sosConsistencyTerm n strat i j := by
+  have hA : A[i, j]ᴴ = A[i, j] := by
     simpa [star_eq_conjTranspose] using (alice_is_observable strat i j).self_adjoint
-  have hB : (Bob_B strat ↑j)ᴴ = Bob_B strat ↑j := by
+  have hB : B[↑j]ᴴ = B[↑j] := by
     simpa [star_eq_conjTranspose] using (bob_is_observable strat ↑j).self_adjoint
   unfold sosConsistencyTerm
   rw [Matrix.conjTranspose_sub, Matrix.conjTranspose_one, Matrix.conjTranspose_mul, hA, hB]
@@ -471,31 +459,26 @@ commutation rules.  This is the key input for showing that the signed product SO
 $1 - (-1)^{b_i}\operatorname{Row}_i(A)A_{ij}B_j$ is self-adjoint.
 -/
 private lemma sos_product_core_conjTranspose_eq_self
-    {G : LCSLayout} [Fintype m] [DecidableEq m]
-    (strat : LCSStrategy (Matrix m m ℂ) G)
     (i : Fin G.r) (j : G.V i) :
-    (Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j)ᴴ =
-      Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j := by
-  have hRow : (Alice_Row_Prod strat i)ᴴ = Alice_Row_Prod strat i :=
-    alice_row_prod_conjTranspose_eq_self strat i
-  have hA : (Alice_A strat i j)ᴴ = Alice_A strat i j := by
+    (∏ₐ[i] * A[i, j] * B[↑j])ᴴ = ∏ₐ[i] * A[i, j] * B[↑j] := by
+  have hRow : (∏ₐ[i])ᴴ = ∏ₐ[i] := alice_row_prod_conjTranspose_eq_self n strat i
+  have hA : A[i, j]ᴴ = A[i, j] := by
     simpa [star_eq_conjTranspose] using (alice_is_observable strat i j).self_adjoint
-  have hB : (Bob_B strat ↑j)ᴴ = Bob_B strat ↑j := by
+  have hB : B[↑j]ᴴ = B[↑j] := by
     simpa [star_eq_conjTranspose] using (bob_is_observable strat ↑j).self_adjoint
   rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, hRow, hA, hB]
   calc
-    Bob_B strat ↑j * (Alice_A strat i j * Alice_Row_Prod strat i)
-        = Bob_B strat ↑j * (Alice_Row_Prod strat i * Alice_A strat i j) := by
+    B[↑j] * (A[i, j] * ∏ₐ[i]) = B[↑j] * (∏ₐ[i] * A[i, j]) := by
           rw [(alice_commute_row_prod strat i j).eq]
-    _ = (Bob_B strat ↑j * Alice_Row_Prod strat i) * Alice_A strat i j := by
+    _ = (B[↑j] * ∏ₐ[i]) * A[i, j] := by
           rw [Matrix.mul_assoc]
-    _ = (Alice_Row_Prod strat i * Bob_B strat ↑j) * Alice_A strat i j := by
+    _ = (∏ₐ[i] * B[↑j]) * A[i, j] := by
           rw [(bob_commute_row_prod strat i j).eq]
-    _ = Alice_Row_Prod strat i * (Bob_B strat ↑j * Alice_A strat i j) := by
+    _ = ∏ₐ[i] * (B[↑j] * A[i, j]) := by
           rw [Matrix.mul_assoc]
-    _ = Alice_Row_Prod strat i * (Alice_A strat i j * Bob_B strat ↑j) := by
+    _ = ∏ₐ[i] * (A[i, j] * B[↑j]) := by
           rw [(alice_bob_commute_gen strat i j ↑j).eq]
-    _ = Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j := by
+    _ = ∏ₐ[i] * A[i, j] * B[↑j] := by
           rw [Matrix.mul_assoc]
 
 /-- If the scaled SOS square-sum annihilates EPR, then each individual SOS relation term
@@ -513,36 +496,34 @@ matrix identities extracted in Stage 3.
 lemma sos_sum_kills_epr_implies_terms_kill_epr
     (i : Fin G.r) (j : G.V i)
     (h :
-      ((1 / 8 : ℂ) • sosSquareSum game strat i j) *ᵥ Ω = 0) :
-    sosConsistencyTerm strat i j *ᵥ Ω = 0 ∧
-      sosRowTerm game strat i *ᵥ Ω = 0 ∧
-      sosProductTerm game strat i j *ᵥ Ω = 0 := by
-  let T₁ : Matrix (n × n) (n × n) ℂ := sosConsistencyTerm strat i j
-  let T₂ : Matrix (n × n) (n × n) ℂ := sosRowTerm game strat i
-  let T₃ : Matrix (n × n) (n × n) ℂ := sosProductTerm game strat i j
-  have hsum : Matrix.mulVec (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) Ω = 0 := by
+      ((1 / 8 : ℂ) • sosSquareSum game n strat i j) *ᵥ Ω = 0) :
+    sosConsistencyTerm n strat i j *ᵥ Ω = 0 ∧
+      sosRowTerm game n strat i *ᵥ Ω = 0 ∧
+      sosProductTerm game n strat i j *ᵥ Ω = 0 := by
+  let T₁ : Matrix (n × n) (n × n) ℂ := sosConsistencyTerm n strat i j
+  let T₂ : Matrix (n × n) (n × n) ℂ := sosRowTerm game n strat i
+  let T₃ : Matrix (n × n) (n × n) ℂ := sosProductTerm game n strat i j
+  have hsum : (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) *ᵥ Ω = 0 := by
     have hscaled :
-        (1 / 8 : ℂ) • Matrix.mulVec
-          (sosSquareSum game strat i j)
-          Ω = 0 := by
+        (1 / 8 : ℂ) • (sosSquareSum game n strat i j *ᵥ Ω) = 0 := by
       simpa only [Matrix.smul_mulVec] using h
     rcases smul_eq_zero.mp hscaled with hcoef | hzero
     · norm_num at hcoef
     · simpa [T₁, T₂, T₃, sosSquareSum] using hzero
   have hT₁ : T₁ᴴ = T₁ := by
-    simpa [T₁] using sos_consistency_term_conjTranspose_eq_self strat i j
+    simpa [T₁] using sos_consistency_term_conjTranspose_eq_self n strat i j
   have hT₂ : T₂ᴴ = T₂ := by
     simpa [T₂, sosRowTerm] using one_sub_smul_conjTranspose_eq_self
-      ((-1 : ℂ) ^ (game.b i).val)
-      (Alice_Row_Prod strat i)
+      ((-1 : ℂ) ^ b[i].val)
+      ∏ₐ[i]
       (sign_star_eq_self game i)
-      (alice_row_prod_conjTranspose_eq_self strat i)
+      (alice_row_prod_conjTranspose_eq_self n strat i)
   have hT₃ : T₃ᴴ = T₃ := by
     simpa [T₃, sosProductTerm] using one_sub_smul_conjTranspose_eq_self
-      ((-1 : ℂ) ^ (game.b i).val)
-      (Alice_Row_Prod strat i * Alice_A strat i j * Bob_B strat ↑j)
+      ((-1 : ℂ) ^ b[i].val)
+      (∏ₐ[i] * A[i, j] * B[↑j])
       (sign_star_eq_self game i)
-      (sos_product_core_conjTranspose_eq_self strat i j)
+      (sos_product_core_conjTranspose_eq_self n strat i j)
   simpa [T₁, T₂, T₃] using
     three_selfAdjoint_squares_mulVec_eq_zero T₁ T₂ T₃ Ω hT₁ hT₂ hT₃ hsum
 
@@ -568,15 +549,13 @@ lemma consistency_of_epr_annihilates
     (i : Fin G.r) (j : G.V i)
     (A B : Matrix n n ℂ)
     (hCons :
-      Matrix.mulVec
-        (sosConsistencyTerm strat i j)
-        Ω = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
+      sosConsistencyTerm n strat i j *ᵥ Ω = 0)
+    (hAlice : A[i, j] = bipartiteAliceLift A)
+    (hBob : B[↑j] = bipartiteBobLift B)
     (hBobs : IsObservable B) :
     A = Bᵀ := by
   have hCons' :
-      Matrix.mulVec (1 - A ⊗ₖ B) Ω = 0 := by
+      (1 - A ⊗ₖ B) *ᵥ Ω = 0 := by
     simpa [hAlice, hBob, sosConsistencyTerm, bipartiteBobLift_mul_bipartiteAliceLift] using hCons
   have hAB : A * Bᵀ = 1 :=
     (one_sub_kronecker_mulVec_epr_eq_zero_iff n A B).mp hCons'
@@ -598,15 +577,13 @@ lemma row_relation_of_epr_annihilates
     (i : Fin G.r)
     (Row : Matrix n n ℂ)
     (hRow :
-      Matrix.mulVec
-        (sosRowTerm game strat i)
-        Ω = 0)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
-    Row = (-1 : ℂ) ^ (game.b i).val • 1 := by
-  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
+      sosRowTerm game n strat i *ᵥ Ω = 0)
+    (hRowLift : ∏ₐ[i] = bipartiteAliceLift Row) :
+    Row = (-1 : ℂ) ^ b[i].val • 1 := by
+  let c : ℂ := (-1 : ℂ) ^ b[i].val
   have hLocal : 1 - c • Row = 0 := by
     have hRow' :
-        Matrix.mulVec (1 - c • bipartiteAliceLift Row) Ω = 0 := by
+        (1 - c • bipartiteAliceLift Row) *ᵥ Ω = 0 := by
       simpa [c, hRowLift, sosRowTerm] using hRow
     exact (alice_lift_one_sub_smul_mulVec_epr_eq_zero_iff n c Row).mp hRow'
   have hcRow : c • Row = 1 := (sub_eq_zero.mp hLocal).symm
@@ -627,16 +604,14 @@ lemma product_relation_of_epr_annihilates
     (i : Fin G.r) (j : G.V i)
     (A B Row : Matrix n n ℂ)
     (hProd :
-      Matrix.mulVec
-        (sosProductTerm game strat i j)
-        Ω = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row) :
-    (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
-  let c : ℂ := (-1 : ℂ) ^ (game.b i).val
+      sosProductTerm game n strat i j *ᵥ Ω = 0)
+    (hAlice : A[i, j] = bipartiteAliceLift A)
+    (hBob : B[↑j] = bipartiteBobLift B)
+    (hRowLift : ∏ₐ[i] = bipartiteAliceLift Row) :
+    (-1 : ℂ) ^ b[i].val • (Row * A * Bᵀ) = 1 := by
+  let c : ℂ := (-1 : ℂ) ^ b[i].val
   have hProd' :
-      Matrix.mulVec (1 - c • ((Row * A) ⊗ₖ B)) Ω = 0 := by
+      (1 - c • ((Row * A) ⊗ₖ B)) *ᵥ Ω = 0 := by
     simpa [c, hAlice, hBob, hRowLift, sosProductTerm, bipartiteAliceLift_mul,
       bipartiteAliceLift_mul_bipartiteBobLift, Matrix.mul_assoc] using hProd
   have hLocal :
@@ -659,14 +634,14 @@ lemma local_matrix_identities_of_sos_terms_annihilate_epr
     (i : Fin G.r) (j : G.V i)
     (A B Row : Matrix n n ℂ)
     (hCons :
-      sosConsistencyTerm strat i j *ᵥ Ω = 0)
+      sosConsistencyTerm n strat i j *ᵥ Ω = 0)
     (hRow :
-      sosRowTerm game strat i *ᵥ Ω = 0)
+      sosRowTerm game n strat i *ᵥ Ω = 0)
     (hProd :
-      sosProductTerm game strat i j *ᵥ Ω = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
+      sosProductTerm game n strat i j *ᵥ Ω = 0)
+    (hAlice : A[i, j] = bipartiteAliceLift A)
+    (hBob : B[↑j] = bipartiteBobLift B)
+    (hRowLift : ∏ₐ[i] = bipartiteAliceLift Row)
     (hBobs : IsObservable B) :
     A = Bᵀ ∧
       Row = (-1 : ℂ) ^ (game.b i).val • 1 ∧
@@ -691,20 +666,16 @@ lemma local_matrix_identities_of_local_loss_annihilate_epr
     (i : Fin G.r) (j : G.V i)
     (A B Row : Matrix n n ℂ)
     (hLoss :
-      Matrix.mulVec
-        (local_loss_operator game strat i j)
-        Ω = 0)
-    (hAlice : Alice_A strat i j = bipartiteAliceLift A)
-    (hBob : Bob_B strat ↑j = bipartiteBobLift B)
-    (hRowLift : Alice_Row_Prod strat i = bipartiteAliceLift Row)
+      local_loss_operator game strat i j *ᵥ Ω = 0)
+    (hAlice : A[i, j] = bipartiteAliceLift A)
+    (hBob : B[↑j] = bipartiteBobLift B)
+    (hRowLift : ∏ₐ[i] = bipartiteAliceLift Row)
     (hBobs : IsObservable B) :
     A = Bᵀ ∧
       Row = (-1 : ℂ) ^ (game.b i).val • 1 ∧
       (-1 : ℂ) ^ (game.b i).val • (Row * A * Bᵀ) = 1 := by
   have hSos :
-      Matrix.mulVec
-        ((1 / 8 : ℂ) • sosSquareSum game strat i j)
-        Ω = 0 :=
+      ((1 / 8 : ℂ) • sosSquareSum game n strat i j) *ᵥ Ω = 0 :=
     local_loss_kills_epr_sos_sum game n strat i j hLoss
   rcases sos_sum_kills_epr_implies_terms_kill_epr game n strat i j hSos with
     ⟨hCons, hRow, hProd⟩
