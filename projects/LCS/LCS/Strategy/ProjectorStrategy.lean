@@ -48,47 +48,57 @@ def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
 -- ANCHOR_END: Bob_B
 
+section WithStrategy
 
-lemma bob_is_observable (strat : LCSStrategy R G) (j : Fin G.s) :
-  IsObservable (Bob_B strat j) :=
+variable (strat : LCSStrategy R G)
+
+local notation "A[" i ", " j "]" => Alice_A strat i j
+local notation "B[" j "]" => Bob_B strat j
+local notation "E[" i ", " x "]" => strat.E i x
+local notation "F[" j ", " y "]" => strat.F j y
+
+
+lemma bob_is_observable (j : Fin G.s) :
+  IsObservable B[j] :=
   is_observable_of_measurement_system (strat.F j) (strat.bob_ms j)
 
-lemma alice_is_observable (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) :
-  IsObservable (Alice_A strat i j) :=
+lemma alice_is_observable (i : Fin G.r) (j : G.V i) :
+  IsObservable A[i, j] :=
   is_observable_of_measurement_system _
     (induced_measurement_system_is_measurement_system _ (strat.alice_ms i) _)
 
 
-lemma alice_observables_commute (strat : LCSStrategy R G) (i : Fin G.r) (j j' : G.V i) :
-  Commute (Alice_A strat i j) (Alice_A strat i j') := by
+lemma alice_observables_commute (i : Fin G.r) (j j' : G.V i) :
+  Commute A[i, j] A[i, j'] := by
   let comm := measurement_commute_sum (strat.alice_ms i)
   exact Commute.sub_left (Commute.sub_right (comm _ _) (comm _ _))
     (Commute.sub_right (comm _ _) (comm _ _))
 
-lemma alice_bob_commute_gen (strat : LCSStrategy R G) (i : Fin G.r) (k : G.V i)
+lemma alice_bob_commute_gen (i : Fin G.r) (k : G.V i)
     (j_var : Fin G.s) :
-    Commute (Alice_A strat i k) (Bob_B strat j_var) := by
+    Commute A[i, k] B[j_var] := by
   unfold Alice_A Bob_B ObservableOfMeasurementSystem InducedMeasurementSystem
   apply Commute.sub_left <;> apply Commute.sub_right
   all_goals {
     apply Commute.sum_left; intro x _; apply strat.commute }
 
-lemma alice_A_mul_projector (strat : LCSStrategy R G) (i : Fin G.r)
+lemma alice_A_mul_projector (i : Fin G.r)
   (j : G.V i) (x : Assignment G i) :
-  Alice_A strat i j * strat.E i x = ((-1 : ℂ) ^ (x j).val) • strat.E i x := by
+  A[i, j] * E[i, x] = ((-1 : ℂ) ^ (x j).val) • E[i, x] := by
   classical
   unfold Alice_A ObservableOfMeasurementSystem InducedMeasurementSystem
-  rw [sub_mul, measurement_sum_mul_projector (strat.alice_ms i), measurement_sum_mul_projector (strat.alice_ms i)]
+  rw [sub_mul, measurement_sum_mul_projector (strat.alice_ms i),
+    measurement_sum_mul_projector (strat.alice_ms i)]
   match h : x j with
   | 0 => simp [h]
   | 1 => simp [h]
 
-lemma alice_partial_prod_mul_projector (strat : LCSStrategy R G) (i : Fin G.r)
+lemma alice_partial_prod_mul_projector (i : Fin G.r)
   (s : Finset (G.V i)) (x : Assignment G i)
   (comm :
-    (s : Set (G.V i)).Pairwise (fun j j' => Commute (Alice_A strat i j) (Alice_A strat i j'))) :
-  s.noncommProd (fun j => Alice_A strat i j) comm * strat.E i x =
-    (s.prod fun j => (-1 : ℂ) ^ (x j).val) • strat.E i x := by
+    (s : Set (G.V i)).Pairwise (fun j j' => Commute A[i, j] A[i, j'])) :
+  s.noncommProd (fun j => A[i, j]) comm * E[i, x] =
+    (s.prod fun j => (-1 : ℂ) ^ (x j).val) • E[i, x] := by
   classical
   induction s using Finset.cons_induction_on with
   | empty =>
@@ -99,27 +109,30 @@ lemma alice_partial_prod_mul_projector (strat : LCSStrategy R G) (i : Fin G.r)
         simp [smul_smul, mul_comm]
 
 /-- The product of Alice's observables for all variables in equation `i`. -/
-noncomputable def Alice_Row_Prod (strat : LCSStrategy R G) (i : Fin G.r) : R :=
-  (G.V i).attach.noncommProd (fun j => Alice_A strat i j) (fun j _ j' _ _ => alice_observables_commute strat i j j')
+noncomputable def Alice_Row_Prod (i : Fin G.r) : R :=
+  (G.V i).attach.noncommProd (fun j => A[i, j])
+    (fun j _ j' _ _ => alice_observables_commute strat i j j')
 
-lemma bob_commute_row_prod (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) :
-    Commute (Bob_B strat ↑j) (Alice_Row_Prod strat i) := by
+/-- Paper-style notation for `Alice_Row_Prod strat i`. -/
+local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
+
+lemma bob_commute_row_prod (i : Fin G.r) (j : G.V i) :
+    Commute B[↑j] ∏ₐ[i] := by
   unfold Alice_Row_Prod
   apply Finset.noncommProd_commute
   intro k _
   exact (alice_bob_commute_gen strat i k ↑j).symm
 
-lemma alice_commute_row_prod (strat : LCSStrategy R G) (i : Fin G.r)
+lemma alice_commute_row_prod (i : Fin G.r)
     (j : G.V i) :
-    Commute (Alice_A strat i j)
-      (Alice_Row_Prod strat i) := by
+    Commute A[i, j] ∏ₐ[i] := by
   unfold Alice_Row_Prod
   apply Finset.noncommProd_commute
   intro k _
   exact alice_observables_commute strat i j k
 
-lemma bob_measurement_recover (strat : LCSStrategy R G) (j : Fin G.s) :
-    strat.F j 0 - strat.F j 1 = Bob_B strat j ∧ strat.F j 0 + strat.F j 1 = 1 := by
+lemma bob_measurement_recover (j : Fin G.s) :
+    F[j, 0] - F[j, 1] = B[j] ∧ F[j, 0] + F[j, 1] = 1 := by
   constructor
   · change _ = ObservableOfMeasurementSystem (strat.F j)
     simp [ObservableOfMeasurementSystem]
@@ -127,8 +140,8 @@ lemma bob_measurement_recover (strat : LCSStrategy R G) (j : Fin G.s) :
     rw [Fin.sum_univ_two] at h
     exact h
 
-lemma bob_measurement_eq_projector (strat : LCSStrategy R G) (j : Fin G.s) (y : Fin 2) :
-  strat.F j y = ObservableToProjector (Bob_B strat j) y := by
+lemma bob_measurement_eq_projector (j : Fin G.s) (y : Fin 2) :
+  F[j, y] = ObservableToProjector B[j] y := by
   classical
   unfold Bob_B ObservableOfMeasurementSystem ObservableToProjector observableSign
   have hsum := (strat.bob_ms j).sum_one
@@ -158,3 +171,5 @@ lemma bob_measurement_eq_projector (strat : LCSStrategy R G) (j : Fin G.s) (y : 
         rw [add_smul]
       _ = strat.F j 1 := by
         norm_num
+
+end WithStrategy
