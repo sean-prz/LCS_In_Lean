@@ -1,5 +1,6 @@
 import LCS.EPR
 import LCS.SolutionGroup
+import Mathlib.Algebra.Star.Unitary
 
 /-!
 # Representations of Solution Groups
@@ -8,7 +9,7 @@ This module constructs matrix representations of an LCS solution group from
 observable matrices satisfying the analytic identities extracted by the
 EPR/local-loss pipeline.
 
-The representation sends the solution-group generators to units:
+The representation sends the solution-group generators to unitary matrices:
 $$
   x_j \mapsto \operatorname{obs}_j,\qquad J \mapsto -I.
 $$
@@ -16,14 +17,14 @@ The main point is to prove that this assignment respects every relator in the
 solution-group presentation, so that it descends to a homomorphism
 $$
   \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
-    \to (\operatorname{Matrix}_n(\mathbb C))^\times .
+    \to \operatorname{U}(n) .
 $$
 
 The file is organized in three layers.
 
-* Matrix-unit packaging:
-  `involutiveMatrixUnit`, `observableMatrixUnit`, and `negOneMatrixUnit` turn
-  involutive matrices into units, so observable matrices and $-I$ can be used
+* Unitary packaging:
+  `involutiveMatrixUnitary`, `observableMatrixUnitary`, and `negOneMatrixUnitary` turn
+  observables and $-I$ into unitary matrices, so they can be used
   as group-valued generator images.
 * Generic presented-group construction:
   `solutionGroupRepresentation` packages the observable generator image,
@@ -45,85 +46,84 @@ open scoped BigOperators
 namespace SolutionGroup
 
 /-!
-## Matrix units
+## Unitary Matrices
 
-The target group of a representation is `(Matrix n n ℂ)ˣ`, so observable
-matrices must first be packaged as units.  Since an observable is involutive,
-its inverse is itself.  The distinguished solution-group generator `J` is
-represented by the unit `-I`.
+The target group of a representation is `unitary (Matrix n n ℂ)`, so observable
+matrices must first be packaged as unitary elements.  Since an observable is
+self-adjoint and involutive, it is unitary.  The distinguished solution-group
+generator `J` is represented by the unitary matrix `-I`.
 -/
 
-section MatrixUnits
+section MatrixUnitaries
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- A square matrix whose square is `1` as a unit. -/
-noncomputable def involutiveMatrixUnit
-    (M : Matrix n n ℂ) (hM : M * M = 1) : (Matrix n n ℂ)ˣ where
-  val := M
-  inv := M
-  val_inv := hM
-  inv_val := hM
+/-- A self-adjoint involution as a unitary matrix. -/
+noncomputable def involutiveMatrixUnitary
+    (M : Matrix n n ℂ) (hM : M * M = 1) (hMstar : star M = M) : unitary (Matrix n n ℂ) :=
+  ⟨M, by
+    rw [Unitary.mem_iff]
+    constructor <;> rw [hMstar] <;> exact hM⟩
 
-/-- An observable matrix as a unit, using its involutivity. -/
-noncomputable def observableMatrixUnit
-    (M : Matrix n n ℂ) (hM : IsObservable M) : (Matrix n n ℂ)ˣ :=
-  involutiveMatrixUnit M hM.involutive
+/-- An observable matrix as a unitary matrix. -/
+noncomputable def observableMatrixUnitary
+    (M : Matrix n n ℂ) (hM : IsObservable M) : unitary (Matrix n n ℂ) :=
+  involutiveMatrixUnitary M hM.involutive hM.self_adjoint
 
-/-- The scalar matrix `-I` as a unit. -/
-noncomputable def negOneMatrixUnit : (Matrix n n ℂ)ˣ :=
-  involutiveMatrixUnit ((-1 : ℂ) • (1 : Matrix n n ℂ)) (by
+/-- The scalar matrix `-I` as a unitary matrix. -/
+noncomputable def negOneMatrixUnitary : unitary (Matrix n n ℂ) :=
+  involutiveMatrixUnitary ((-1 : ℂ) • (1 : Matrix n n ℂ)) (by
     rw [smul_mul_smul]
-    simp)
+    simp) (by simp)
 
-/-- The underlying matrix of `involutiveMatrixUnit M hM` is $M$:
+/-- The underlying matrix of `involutiveMatrixUnitary M hM hMstar` is $M$:
 $$
-  \operatorname{val}(\operatorname{involutiveMatrixUnit}(M)) = M.
+  \operatorname{val}(\operatorname{involutiveMatrixUnitary}(M)) = M.
 $$
 This simp lemma lets unit-valued generator images reduce back to their matrix
 values during relator and row-product calculations.
 -/
-@[simp] lemma involutiveMatrixUnit_val
-    (M : Matrix n n ℂ) (hM : M * M = 1) :
-    (involutiveMatrixUnit M hM : Matrix n n ℂ) = M :=
+@[simp] lemma involutiveMatrixUnitary_val
+    (M : Matrix n n ℂ) (hM : M * M = 1) (hMstar : star M = M) :
+    (involutiveMatrixUnitary M hM hMstar : Matrix n n ℂ) = M :=
   rfl
 
-/-- The underlying matrix of `observableMatrixUnit M hM` is $M$:
+/-- The underlying matrix of `observableMatrixUnitary M hM` is $M$:
 $$
-  \operatorname{val}(\operatorname{observableMatrixUnit}(M)) = M.
+  \operatorname{val}(\operatorname{observableMatrixUnitary}(M)) = M.
 $$
 This simp lemma keeps generator-image computations at the matrix level after an
-observable has been packaged as a unit.
+observable has been packaged as a unitary matrix.
 -/
-@[simp] lemma observableMatrixUnit_val
+@[simp] lemma observableMatrixUnitary_val
     (M : Matrix n n ℂ) (hM : IsObservable M) :
-    (observableMatrixUnit M hM : Matrix n n ℂ) = M :=
+    (observableMatrixUnitary M hM : Matrix n n ℂ) = M :=
   rfl
 
-/-- An involutive matrix unit squares to the identity unit:
+/-- A packaged observable squares to the identity in the unitary group:
 $$
-  \operatorname{involutiveMatrixUnit}(M)^2 = 1.
+  \operatorname{involutiveMatrixUnitary}(M)^2 = 1.
 $$
 This discharges the $x_j^2 = 1$ and $J^2 = 1$ style relators after matrices are
 turned into units.
 -/
-@[simp] lemma involutiveMatrixUnit_sq
-    (M : Matrix n n ℂ) (hM : M * M = 1) :
-    involutiveMatrixUnit M hM ^ 2 = 1 := by
-  apply Units.ext
-  simpa [pow_two, involutiveMatrixUnit] using hM
+@[simp] lemma involutiveMatrixUnitary_sq
+    (M : Matrix n n ℂ) (hM : M * M = 1) (hMstar : star M = M) :
+    involutiveMatrixUnitary M hM hMstar ^ 2 = 1 := by
+  apply Subtype.ext
+  simpa [pow_two, involutiveMatrixUnitary] using hM
 
-/-- An observable matrix unit squares to $1$:
+/-- An observable matrix unitary squares to $1$:
 $$
-  \operatorname{observableMatrixUnit}(M)^2 = 1.
+  \operatorname{observableMatrixUnitary}(M)^2 = 1.
 $$
 This is the representation-side proof of the variable involution relators
 $x_j^2 = 1$.
 -/
-@[simp] lemma observableMatrixUnit_sq
+@[simp] lemma observableMatrixUnitary_sq
     (M : Matrix n n ℂ) (hM : IsObservable M) :
-    observableMatrixUnit M hM ^ 2 = 1 := by
-  simp [observableMatrixUnit]
+    observableMatrixUnitary M hM ^ 2 = 1 := by
+  simp [observableMatrixUnitary]
 
 /-- The unit representing $J$ squares to $1$:
 $$
@@ -132,15 +132,15 @@ $$
 This is the representation-side proof of the distinguished involution relator
 $J^2 = 1$.
 -/
-@[simp] lemma negOneMatrixUnit_sq :
-    negOneMatrixUnit (n := n) ^ 2 = 1 := by
-  simp [negOneMatrixUnit]
+@[simp] lemma negOneMatrixUnitary_sq :
+    negOneMatrixUnitary (n := n) ^ 2 = 1 := by
+  simp [negOneMatrixUnitary]
 
-@[simp] lemma negOneMatrixUnit_pow_fin2_val
+@[simp] lemma negOneMatrixUnitary_pow_fin2_val
     (b : Fin 2) :
-    ((negOneMatrixUnit (n := n) ^ b.val : (Matrix n n ℂ)ˣ) : Matrix n n ℂ) =
+    ((negOneMatrixUnitary (n := n) ^ b.val : unitary (Matrix n n ℂ)) : Matrix n n ℂ) =
       (-1 : ℂ) ^ b.val • (1 : Matrix n n ℂ) := by
-  rcases fin2_eq_zero_or_one b with rfl | rfl <;> simp [negOneMatrixUnit]
+  rcases fin2_eq_zero_or_one b with rfl | rfl <;> simp [negOneMatrixUnitary]
 
 /-- Alice lift commutes with finite noncommutative products:
 $$
@@ -166,7 +166,7 @@ lemma bipartiteAliceLift_noncommProd
       rw [Finset.noncommProd_cons, Finset.noncommProd_cons]
       rw [← bipartiteAliceLift_mul, ih]
 
-end MatrixUnits
+end MatrixUnitaries
 
 /-!
 ## Generic presented-group construction
@@ -185,7 +185,7 @@ section PresentedGroupConstruction
 variable {S : LinearSystem}
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- The intended image of the solution-group generators in matrix units.
+/-- The intended image of the solution-group generators in unitary matrices.
 
 This is the generator-level assignment that all later constructors try to
 descend through the quotient defining `SolutionGroup S`:
@@ -198,22 +198,24 @@ J     ↦ -I
 noncomputable def solutionGroupGeneratorImage
     (obs : Fin S.layout.s → Matrix n n ℂ)
     (obs_is_observable : ∀ j, IsObservable (obs j)) :
-    SolutionGen S → (Matrix n n ℂ)ˣ
-  | .var j => observableMatrixUnit (obs j) (obs_is_observable j)
-  | .J => negOneMatrixUnit
+    SolutionGen S → unitary (Matrix n n ℂ)
+  | .var j => observableMatrixUnitary (obs j) (obs_is_observable j)
+  | .J => negOneMatrixUnitary
 
-/-- Commuting matrices give commuting observable matrix units:
+/-- Commuting matrices give commuting packaged unitary observables:
 $$
   MN = NM \Longrightarrow \widehat M\,\widehat N = \widehat N\,\widehat M.
 $$
 This lifts same-equation commutation from matrices to units, which is the form
 required by the relators in `SolutionGroup S`.
 -/
-lemma observableMatrixUnit_commute_of_commute
+lemma observableMatrixUnitary_commute_of_commute
     {M N : Matrix n n ℂ} {hM : IsObservable M} {hN : IsObservable N}
     (h : Commute M N) :
-    Commute (observableMatrixUnit M hM) (observableMatrixUnit N hN) := by
-  apply Units.ext
+    Commute (observableMatrixUnitary M hM) (observableMatrixUnitary N hN) := by
+  change observableMatrixUnitary M hM * observableMatrixUnitary N hN =
+      observableMatrixUnitary N hN * observableMatrixUnitary M hM
+  apply Subtype.ext
   exact h.eq
 
 /-- The distinguished image of $J$, namely $-I$, commutes with every matrix unit:
@@ -222,11 +224,12 @@ $$
 $$
 This proves the centrality relators involving $J$ in the target unit group.
 -/
-lemma commute_negOneMatrixUnit
-    (U : (Matrix n n ℂ)ˣ) :
-    Commute U negOneMatrixUnit := by
-  apply Units.ext
-  simp [negOneMatrixUnit, involutiveMatrixUnit]
+lemma commute_negOneMatrixUnitary
+    (U : unitary (Matrix n n ℂ)) :
+    Commute U negOneMatrixUnitary := by
+  change U * negOneMatrixUnitary = negOneMatrixUnitary * U
+  apply Subtype.ext
+  simp [negOneMatrixUnitary, involutiveMatrixUnitary]
 
 /-- Construct a representation of `SolutionGroup S` from observable generator
 images, same-equation commutation, and the equation-relator proofs. -/
@@ -236,7 +239,7 @@ noncomputable def solutionGroupRepresentation
     (hsame : ∀ {j k}, sameEquation S j k → Commute (obs j) (obs k))
     (hequation : ∀ i, FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable)
       (equationRelator S i) = 1) :
-    SolutionGroup S →* (Matrix n n ℂ)ˣ :=
+    SolutionGroup S →* unitary (Matrix n n ℂ) :=
   have hrel :
       ∀ r ∈ solutionRelators S,
         FreeGroup.lift (solutionGroupGeneratorImage obs obs_is_observable) r = 1 := by
@@ -248,14 +251,14 @@ noncomputable def solutionGroupRepresentation
       simp [involutionRel, genJ, solutionGroupGeneratorImage]
     · rcases hcentral with ⟨j, rfl⟩
       have h : Commute (solutionGroupGeneratorImage obs obs_is_observable (.var j))
-                       (negOneMatrixUnit (n := n)) :=
-        commute_negOneMatrixUnit _
+                       (negOneMatrixUnitary (n := n)) :=
+         commute_negOneMatrixUnitary _
       simpa [commuteRel, genVar, genJ, solutionGroupGeneratorImage, mul_assoc] using
         mul_inv_eq_one.mpr h.eq
     · rcases hcomm with ⟨j, k, _, hsameEq, rfl⟩
-      have h : Commute (observableMatrixUnit (obs j) (obs_is_observable j))
-                       (observableMatrixUnit (obs k) (obs_is_observable k)) :=
-        observableMatrixUnit_commute_of_commute (hsame hsameEq)
+      have h : Commute (observableMatrixUnitary (obs j) (obs_is_observable j))
+                       (observableMatrixUnitary (obs k) (obs_is_observable k)) :=
+          observableMatrixUnitary_commute_of_commute (hsame hsameEq)
       simpa [commuteRel, genVar, solutionGroupGeneratorImage, mul_assoc] using
         mul_inv_eq_one.mpr h.eq
     · rcases heq with ⟨i, rfl⟩
@@ -271,7 +274,7 @@ noncomputable def solutionGroupRepresentation
     (j : Fin S.layout.s) :
     solutionGroupRepresentation obs obs_is_observable hsame hequation
         (SolutionGroup.var (S := S) j) =
-      observableMatrixUnit (obs j) (obs_is_observable j) := by
+      observableMatrixUnitary (obs j) (obs_is_observable j) := by
   simp [solutionGroupRepresentation, SolutionGroup.var,
     solutionGroupGeneratorImage]
 
@@ -283,7 +286,7 @@ noncomputable def solutionGroupRepresentation
       (equationRelator S i) = 1) :
     solutionGroupRepresentation obs obs_is_observable hsame hequation
         (SolutionGroup.J (S := S)) =
-      negOneMatrixUnit := by
+      negOneMatrixUnitary := by
   simp [solutionGroupRepresentation, SolutionGroup.J,
     solutionGroupGeneratorImage]
 
@@ -445,7 +448,7 @@ private lemma lift_genVar_list_prod_val
         (solutionGroupGeneratorImage (S := game.toLinearSystem)
           obs obs_is_observable)
         (l.map (genVar (S := game.toLinearSystem))).prod :
-      (Matrix n n ℂ)ˣ) : Matrix n n ℂ) =
+      unitary (Matrix n n ℂ)) : Matrix n n ℂ) =
         (l.map obs).prod := by
   induction l with
   | nil =>
@@ -468,7 +471,7 @@ private lemma lift_equationWord_toLinearSystem_val
     ((FreeGroup.lift
         (solutionGroupGeneratorImage (S := game.toLinearSystem)
           obs obs_is_observable)
-      (equationWord game.toLinearSystem i) : (Matrix n n ℂ)ˣ) :
+      (equationWord game.toLinearSystem i) : unitary (Matrix n n ℂ)) :
       Matrix n n ℂ) =
         rowObservableProduct obs i := by
   classical
@@ -506,9 +509,10 @@ lemma lift_equationRelator_of_rowIdentity
           (solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable)
           (equationWord game.toLinearSystem i) =
         solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable .J ^ (game.b i).val := by
-    apply Units.ext
-    change _ = (((negOneMatrixUnit (n := n)) ^ (game.b i).val : (Matrix n n ℂ)ˣ) : Matrix n n ℂ)
-    rw [hword, hrow, negOneMatrixUnit_pow_fin2_val]
+    apply Subtype.ext
+    rw [hword, hrow]
+    simpa [solutionGroupGeneratorImage] using
+      (negOneMatrixUnitary_pow_fin2_val (n := n) (b := game.b i)).symm
   have hbLinear : game.toLinearSystem.b i = game.b i := rfl
   simp [equationRelator, genJ, hwordUnit, hbLinear]
 
@@ -548,7 +552,7 @@ noncomputable def solutionGroupRepresentationOfRows
     (hrow :
       ∀ i, rowObservableProduct obs i =
         (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ)) :
-    SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ :=
+    SolutionGroup game.toLinearSystem →* unitary (Matrix n n ℂ) :=
   solutionGroupRepresentation
     (S := game.toLinearSystem) obs obs_is_observable
     (sameEquation_comm_of_row_comm game obs sameEquation_comm)
@@ -596,7 +600,7 @@ lemma rowObservableProduct_eq_sign_of_local_loss
 /-- End-to-end representation constructor from the EPR/local-loss hypothesis:
 $$
   \operatorname{SolutionGroup}(\operatorname{game.toLinearSystem})
-    \to (\operatorname{Matrix}_n(\mathbb C))^\times,
+    \to \operatorname{U}(n),
   \qquad x_j \mapsto \operatorname{obs}_j,\quad J \mapsto -I.
 $$
 This is the main constructor in the file.  It extracts each row identity from
@@ -612,7 +616,7 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
         Matrix.mulVec
           (local_loss_operator game strat.toProjectorStrategy i j)
           (eprVec n) = 0) :
-    SolutionGroup game.toLinearSystem →* (Matrix n n ℂ)ˣ :=
+    SolutionGroup game.toLinearSystem →* unitary (Matrix n n ℂ) :=
   solutionGroupRepresentationOfRows game
     strat.obs strat.is_observable strat.sameEquation_comm
     (rowObservableProduct_eq_sign_of_local_loss game strat hNonempty hLoss)
