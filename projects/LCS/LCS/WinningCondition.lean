@@ -30,6 +30,9 @@ local notation "E[" i ", " x "]" => strat.E i x
 local notation "F[" j ", " y "]" => strat.F j y
 local notation "b[" i "]" => game.b i
 
+/-- Paper-style notation for `Alice_Row_Prod strat i`. -/
+local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
+
 section LocalOperators
 /-! ## Local Operators
 This section defines the winning assignments for a constraint and the associated local winning
@@ -42,11 +45,9 @@ def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = b[i])
 -- ANCHOR_END: winning_assignments
 
-local notation "S[" i "]" => winning_assignments game i
-
-/-- The local winning probability for a single edge (i, j). -/
+/-- The local winning operator for a single edge `(i, j)`. -/
 noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=
-  ∑ x ∈ S[i], E[i, x] * F[j, x j]
+  ∑ x ∈ winning_assignments game i, E[i, x] * F[j, x j]
 
 /-- The local loss operator for a single edge (i, j). -/
 noncomputable def local_loss_operator (i : Fin G.r) (j : G.V i) : R :=
@@ -62,17 +63,13 @@ section WinningProjectorIdentities
 Two local projector identities used in the sum-of-squares derivation.
 -/
 
-/-- Lemma 4.7.1 From the paper -/
+/-- Lemma 4.7.1: the sum of winning projectors equals the signed row-product expression. -/
 lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
   (∑ x ∈ S[i], E[i, x]) =
-  (1/2 : ℂ) • (1 + (-1 : ℂ)^(b[i]).val •
-  ((G.V i).attach.noncommProd
-    (fun j => A[i, j])
-    (fun j _ j' _ _ => alice_observables_commute strat i j j'))) := by
+  (1/2 : ℂ) • (1 + (-1 : ℂ)^(b[i]).val • ∏ₐ[i]) := by
   classical
   have hsum_one := (strat.alice_ms i).sum_one
-  let prodA : R := (G.V i).attach.noncommProd
-    (fun j => A[i, j]) (fun j _ j' _ _ => alice_observables_commute strat i j j')
+  let prodA : R := ∏ₐ[i]
   let rhs : R := (1/2 : ℂ) • (1 + (-1 : ℂ)^(b[i]).val • prodA)
   -- The key step: show per-projector equality, then sum
   suffices h : ∀ x : Assignment G i,
@@ -108,7 +105,7 @@ lemma sum_winning_projectors_eq_row_observable (i : Fin G.r) :
   rw [sign_indicator (b[i]) (∑ j : G.V i, (x j : Fin 2))]
   simp [winning_assignments, Finset.mem_filter]
 
-/-- Lemma 4.7.2 From the paper -/
+/-- Lemma 4.7.2: the marginal projector sum equals the signed local observable expression. -/
 lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : Fin 2) :
   (∑ x ∈ Finset.univ.filter (fun x : Assignment G i => x j = y), E[i, x]) =
     (1 / 2 : ℂ) • (1 + (-1 : ℂ) ^ y.val • A[i, j]) := by
@@ -136,10 +133,6 @@ lemma sum_marginal_projectors_eq_half_one_add_A (i : Fin G.r) (j : G.V i) (y : F
 
 
 end WinningProjectorIdentities
-
-/-- Paper-style notation for `Alice_Row_Prod strat i`. -/
-local notation "∏ₐ[" i "]" => Alice_Row_Prod strat i
-
 
 -- Helper: Alice row product is involutive (RP² = 1)
 private lemma row_prod_sq (i : Fin G.r) :
@@ -262,7 +255,7 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
              Fin.val_one, pow_one, neg_smul, neg_mul]
   -- B[j] = F[j, 0] - F[j, 1]  and F[j, 0] + F[j, 1] = 1
   have ⟨hbob_inv, hone⟩ := bob_measurement_recover strat ↑j
-  have hbob : B[j] = strat.F (↑j) 0 - strat.F (↑j) 1 := hbob_inv.symm
+  have hbob : B[j] = strat.F j 0 - strat.F j 1 := hbob_inv.symm
   -- Abbreviate for readability
   set F0 := F[j, 0]
   set F1 := F[j, 1]
@@ -273,12 +266,12 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
   simp only [mul_add, mul_neg, mul_smul_comm]
   -- Collect the 4 pairs using auxiliary identities
   have h1 : F0 * (1 : R) + F1 * 1 = 1 := by simp [hone]
-  have h2 : F0 * Aj + -(F1 * Aj) = B[↑j] * Aj := by
+  have h2 : F0 * Aj + -(F1 * Aj) = B[j] * Aj := by
     rw [← sub_eq_add_neg, ← sub_mul, ← hbob]
   have h3 : c • (F0 * RP) + c • (F1 * RP) = c • RP := by
     rw [← smul_add, ← add_mul, hone, one_mul]
   have h4 : c • (F0 * (RP * Aj)) + -(c • (F1 * (RP * Aj))) =
-      c • (B[↑j] * (RP * Aj)) := by
+      c • (B[j] * (RP * Aj)) := by
     rw [← sub_eq_add_neg, ← smul_sub, ← sub_mul, ← hbob]
   -- Rearrange the 8 terms into the 4 pairs and apply the identities
   calc F0 * 1 + F0 * Aj + c • (F0 * RP) + c • (F0 * (RP * Aj)) +
@@ -286,10 +279,9 @@ private lemma local_loss_sos_step4 (i : Fin G.r) (j : G.V i) :
       = (F0 * 1 + F1 * 1) + (F0 * Aj + -(F1 * Aj)) +
         (c • (F0 * RP) + c • (F1 * RP)) +
         (c • (F0 * (RP * Aj)) + -(c • (F1 * (RP * Aj)))) := by abel
-    _ = 1 + B[↑j] * Aj + c • RP + c • (B[↑j] * (RP * Aj)) := by
+    _ = 1 + B[j] * Aj + c • RP + c • (B[j] * (RP * Aj)) := by
         rw [h1, h2, h3, h4]
 
--- Step 5: final algebraic simplification to SOS form
 private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
     1 - (1 / 4 : ℂ) • (1 + B[j] * A[i, j] + (-1 : ℂ) ^ (b[i]).val • ∏ₐ[i] +
       B[j] * ((-1 : ℂ) ^ (b[i]).val • (∏ₐ[i] * A[i, j]))) =
@@ -325,10 +317,10 @@ private lemma local_loss_sos_step5 (i : Fin G.r) (j : G.V i) :
     -- Goal: RP * A * B * (RP * A * B) = 1
     simp only [← mul_assoc]
     rw [← alice_commute_row_prod strat i j]
-    rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i) B[↑j] (Alice_Row_Prod strat i)]
+    rw [mul_assoc (A[i,j] * ∏ₐ[i]) B[j] ∏ₐ[i]]
     rw [(bob_commute_row_prod strat i j).eq]
     rw [← mul_assoc ]
-    rw [mul_assoc (A[i,j] * Alice_Row_Prod strat i * Alice_Row_Prod strat i * B[↑j]) A[i,j] B[↑j]]
+    rw [mul_assoc (A[i,j] * ∏ₐ[i] * ∏ₐ[i] * B[j]) A[i,j] B[j]]
     rw [alice_bob_commute_gen strat i j j]
     rw [← mul_assoc]
     simp only [row_prod_sq, mul_one, mul_assoc,
@@ -363,7 +355,7 @@ The overall winning and loss operators are obtained by averaging the local quant
 question graph of the game.
 -/
 
-/-- The total Winning Operator `v` is the average of local winning probabilities. -/
+/-- The total winning operator `v` is the average of the local winning operators. -/
 noncomputable def winning_operator : R :=
   ∑ i : Fin G.r, ∑ j : G.V i,
   let normalization : ℂ := (G.r * (G.V i).card : ℕ)
