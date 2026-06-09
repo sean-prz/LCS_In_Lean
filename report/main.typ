@@ -100,6 +100,13 @@ The scope of the project is intentionally limited to the binary setting. In part
 - the formalisation is restricted to LCS games over $F_2$,
 - the solution-group construction is the binary one associated with this setting,
 - and the final representation theorem is proved in the bipartite EPR framework.
+
+=== Repository and Documentation 
+The project source code is publicly available on #link("github.com")[github].
+To make it easier to navigate the project, documentation API in the standard lean format is hosted on  #link("github.com")[sean.perazzolo.ch/LCS/documentation].
+
+
+
 #colbreak()
 = Approach
 
@@ -114,6 +121,11 @@ The strategy layer is developed in `LCS/Strategy`, with separate modules for pro
 The main proof-oriented part of the project is then divided between `LCS/WinningCondition.lean`, which defines the winning and loss operators and proves the sum-of-squares decomposition of the local loss operator, `LCS/EPR.lean`, which extracts matrix identities from local-loss annihilation on the EPR state, and `LCS/SolutionGroup.lean` together with `LCS/SolutionGroup/Representation.lean`, which define the binary solution group and construct its matrix representations.
 
 Finally, the abstract framework is instantiated in `LCS/Games/MagicSquare`, which develops the Mermin-Peres Magic Square game as the main case study.
+
+
+== Building the Documentation
+This project documentation follows the standard of Lean, #link("github.com")[doc-gen4], which build from the source lean file documentation, by rendering the comments above lemmas or section, displaying  math and hiding the proof details. This is the same workflow as mathlib. 
+
 
 == Linear Constraint System Games Formalization 
 
