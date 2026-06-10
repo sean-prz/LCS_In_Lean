@@ -102,9 +102,14 @@ The scope of the project is intentionally limited to the binary setting. In part
 - and the final representation theorem is proved in the bipartite EPR framework.
 
 === Repository and Documentation 
-The project source code is publicly available on #link("github.com")[github].
-To make it easier to navigate the project, documentation API in the standard lean format is hosted on  #link("github.com")[sean.perazzolo.ch/LCS/documentation].
+*Source* \
+The project source code is publicly available on github, accessible via \ #link("https://sean.perazzolo.ch/lcs/source")[sean.perazzolo.ch/LCS/source].
+#v(1em)
+*Documentation* \
+In addition, to make the project easier to naviagte, API dcoumentation is available at \ #link("https://sean.perazzolo.ch/lcs/documentation")[sean.perazzolo.ch/LCS/documentation]
 
+*Report* \
+A copy of this report is hosted on the project website at #link("https://sean.perazzolo.ch/lcs/report")[sean.perazzolo.ch/LCS/report].
 
 
 #colbreak()
@@ -433,11 +438,11 @@ noncomputable def loss_operator : R :=
 
 === The EPR Vector
 
-At this point, the formalization is specialized from the earlier abstract algebraic setting to finite-dimensional complex matrix algebras.
+At this point, *the formalization is specialized from the earlier abstract algebraic setting to finite-dimensional complex matrix algebras*.
 More precisely, the relevant operators act on a bipartite space of the form $CC^n otimes CC^n$, represented in Lean by matrices of type `Matrix (n × n) (n × n) ℂ`.
 
-The distinguished vector used in the project is the unnormalized maximally entangled vector
-$ ket(Omega) = sum_a e_a otimes e_a $.
+The distinguished vector used in the project is the unnormalized maximally entangled vector.
+$ ket(Omega) = sum_a e_a otimes e_a $
 Its importance lies in the symmetry with which it couples the two tensor factors: it allows operators acting on one side of the tensor product to be related to operators acting on the other side.
 
 In Lean, the EPR vector is defined as follows.
@@ -467,6 +472,17 @@ lemma kronecker_mulVec_epr_eq_zero_iff
     (M N : Matrix n n ℂ) :
     Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
       M * Nᵀ = 0
+```]
+
+The project also proves the corresponding affine variant, which is the form used when extracting identities from operators of the form $1 - M otimes N$.
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
+    (n : Type*) [Fintype n] [DecidableEq n]
+    (M N : Matrix n n ℂ) :
+    Matrix.mulVec (1 - M ⊗ₖ N) (eprVec n) = 0 ↔
+      M * Nᵀ = 1
 ```]
 
 Several specialized versions of this identity are then derived for the bipartite lift operations introduced earlier.
@@ -600,32 +616,7 @@ lemma three_selfAdjoint_squares_mulVec_eq_zero
       Matrix.mulVec (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) v = 0) :
     Matrix.mulVec T₁ v = 0 ∧ Matrix.mulVec T₂ v = 0 ∧ Matrix.mulVec T₃ v = 0
 ```]
-2. Then, each annihilation relation is rewritten in bipartite form and the EPR identities are used
-  to remove the distinguished vector $ket(Omega)$. The general principle is that if an operator can be
-  written as $M otimes N$, then annihilation on $ket(Omega)$ is equivalent to an ordinary matrix equation
-  involving $N^T$. In the project, this is encoded by the basic extraction lemma
-
-#show raw: set text(7pt)
-#sourcecode[```lean
-lemma kronecker_mulVec_epr_eq_zero_iff
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (M N : Matrix n n ℂ) :
-    Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
-      M * Nᵀ = 0
-```]
-
-  and by its affine variant
-
-#show raw: set text(7pt)
-#sourcecode[```lean
-lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
-    (n : Type*) [Fintype n] [DecidableEq n]
-    (M N : Matrix n n ℂ) :
-    Matrix.mulVec (1 - M ⊗ₖ N) (eprVec n) = 0 ↔
-      M * Nᵀ = 1
-```]
-
-  These lemmas are applied to the three SOS terms after expressing Alice's operators as lifts
+2. Then, using the extraction lemmas introduced in the EPR framework, each annihilation relation is rewritten in bipartite form and converted into an ordinary matrix identity. These lemmas are applied to the three SOS terms after expressing Alice's operators as lifts
   $A otimes I$ and Bob's operators as lifts $I otimes B$.
 
   For example, for the first term, one rewrites the consistency operator using

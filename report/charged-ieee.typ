@@ -195,7 +195,7 @@ show raw: set text(font: "Fira Code", size: 8pt)
   // Display abstract and index terms.
   if abstract != none {
 
-    heading("Abstract")
+    heading("Abstract", numbering: none)
     [#h(weak: true, 0pt)#abstract]
     
     if index-terms != () {
