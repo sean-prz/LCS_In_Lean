@@ -437,7 +437,7 @@ At this point, the formalization is specialized from the earlier abstract algebr
 More precisely, the relevant operators act on a bipartite space of the form $CC^n otimes CC^n$, represented in Lean by matrices of type `Matrix (n × n) (n × n) ℂ`.
 
 The distinguished vector used in the project is the unnormalized maximally entangled vector
-$ Omega = sum_a e_a otimes e_a $.
+$ ket(Omega) = sum_a e_a otimes e_a $.
 Its importance lies in the symmetry with which it couples the two tensor factors: it allows operators acting on one side of the tensor product to be related to operators acting on the other side.
 
 In Lean, the EPR vector is defined as follows.
@@ -450,15 +450,15 @@ noncomputable def eprVec
 local notation "Ω" => eprVec n
 ```]
 
-This is simply the coordinate description of the vector $Omega$, written in the standard basis of the bipartite space.
+This is simply the coordinate description of the vector $ket(Omega)$, written in the standard basis of the bipartite space.
 The vector is intentionally left unnormalized, since the later arguments only use annihilation and injectivity properties rather than norm considerations.
 
 === EPR Identities for Bipartite Operators
 
 The key role of the EPR vector is that it turns relations on the bipartite space into ordinary matrix identities.
-Concretely, if `M` and `N` are complex matrices, then the action of `M ⊗ N` on `Ω` can be computed explicitly, and vanishing of this action is equivalent to a matrix equation involving `M` and `N^T`.
+Concretely, if `M` and `N` are complex matrices, then the action of `M ⊗ N` on $ket(Omega)$ can be computed explicitly, and vanishing of this action is equivalent to a matrix equation involving `M` and `N^T`.
 
-The fundamental identity proved in the project is that $(M otimes N) Omega = 0$ if and only if $M N^T = 0$.
+The fundamental identity proved in the project is that $(M otimes N) ket(Omega) = 0$ if and only if $M N^T = 0$.
 This gives the basic extraction principle used later in the development.
 
 #sourcecode[```lean
@@ -470,7 +470,7 @@ lemma kronecker_mulVec_epr_eq_zero_iff
 ```]
 
 Several specialized versions of this identity are then derived for the bipartite lift operations introduced earlier.
-These lemmas make it possible to replace operator equalities on the distinguished vector `Ω` by concrete matrix equalities in the underlying `n × n` space.
+These lemmas make it possible to replace operator equalities on the distinguished vector $ket(Omega)$ by concrete matrix equalities in the underlying `n × n` space.
 
 *This is the mechanism referred to in the project as the EPR extraction argument*, and it forms the bridge between bipartite operator relations and the matrix identities used later in the representation-theoretic part of the development.
 
@@ -571,16 +571,16 @@ relations, which can then be extracted into identities on the underlying matrix 
 
 This is a two-step process.
 1. First, using the sum-of-squares decomposition, we show that if the local loss operator annihilates the
-  EPR state, then each SOS term annihilates $Omega$ individually. Writing
+  EPR state, then each SOS term annihilates $ket(Omega)$ individually. Writing
 $ T_1 &= I - B_j A_j^((i)), \ 
  T_2 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)), \
  T_3 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)) A_j^((i)) B_j $
 From the SOS decomposition, we get : 
-$ L_(i,j) Omega = 0 arrow.double.long 1/8 (T_1^2 + T_2^2 + T_3^2) Omega = 0, $
+$ L_(i,j) ket(Omega) = 0 arrow.double.long 1/8 (T_1^2 + T_2^2 + T_3^2) ket(Omega) = 0, $
 Each $T_k$ is self-adjoint: this follows from the fact that the local Alice and Bob observables are
 self-adjoint, that the Alice observables appearing in the same row commute so that their product is
 again self-adjoint, and that the scalar factor $(-1)^(b_i)$ is real. Taking the Hermitian inner
-product with $Omega$ gives
+product with $ket(Omega)$ gives
 $
   braket(Omega, (T_1^2 + T_2^2 + T_3^2) Omega) \
   &= braket(T_1 Omega, T_1 Omega) \
@@ -589,7 +589,7 @@ $
 $
 Each summand is a norm square, hence a nonnegative real number. Since their sum is zero, each one
 must itself be zero, and therefore
-$ T_1 Omega = 0, wide T_2 Omega = 0, wide T_3 Omega = 0. $
+$ T_1 ket(Omega) = 0, wide T_2 ket(Omega) = 0, wide T_3 ket(Omega) = 0. $
 This is the positivity argument formalized in Lean.
 
 #show raw: set text(7pt)
@@ -601,8 +601,8 @@ lemma three_selfAdjoint_squares_mulVec_eq_zero
     Matrix.mulVec T₁ v = 0 ∧ Matrix.mulVec T₂ v = 0 ∧ Matrix.mulVec T₃ v = 0
 ```]
 2. Then, each annihilation relation is rewritten in bipartite form and the EPR identities are used
-  to remove the distinguished vector $Omega$. The general principle is that if an operator can be
-  written as $M otimes N$, then annihilation on $Omega$ is equivalent to an ordinary matrix equation
+  to remove the distinguished vector $ket(Omega)$. The general principle is that if an operator can be
+  written as $M otimes N$, then annihilation on $ket(Omega)$ is equivalent to an ordinary matrix equation
   involving $N^T$. In the project, this is encoded by the basic extraction lemma
 
 #show raw: set text(7pt)
@@ -628,25 +628,23 @@ lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
   These lemmas are applied to the three SOS terms after expressing Alice's operators as lifts
   $A otimes I$ and Bob's operators as lifts $I otimes B$.
 
-  For the first term, one rewrites the consistency operator using
+  For example, for the first term, one rewrites the consistency operator using
   $(I otimes B_j)(A_j^((i)) otimes I) = A_j^((i)) otimes B_j$:
 
   $
-    T_1 Omega = 0
-    &arrow.double.long (I - A_j^((i)) otimes B_j) Omega = 0 \
+    T_1 ket(Omega) = 0
+    &arrow.double.long (I - A_j^((i)) otimes B_j) ket(Omega) = 0 \
     &arrow.double.long A_j^((i)) (B_j)^T = I.
   $
 
-  Since $B_j$ is an observable, it is an involution, so $(B_j)^T (B_j)^T = I$. Multiplying on the
-  right by $(B_j)^T$ gives
+  Since $B_j$ is an observable, it is an involution, multiplying on the
+  right by $(B_j)^T$ finally gives
 
   $
     A_j^((i)) = (B_j)^T.
   $
 
-  In Lean, these three extraction steps are packaged as separate lemmas, for example the
-  consistency relation is stated as
-
+  In Lean, these three extraction steps are packaged as separate lemmas, for the above relation the statement is as follows: 
 #show raw: set text(7pt)
 #sourcecode[```lean
 lemma consistency_of_epr_annihilates
