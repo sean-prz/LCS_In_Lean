@@ -4,6 +4,12 @@
 #import "@preview/physica:0.9.8": ket, bra, braket
 #set page(numbering:"1")
 #let otimes = $times.circle$
+#let codeblock(size: 7pt, breakable: false, above: 1.0em, below: 1.5em, body) = {
+  block(breakable: breakable, above: above, below: below)[
+    #show raw: set text(size: size)
+    #sourcecode(body)
+  ]
+}
 
 #show link: it => text(
   fill: blue,// Light sky blue
@@ -163,9 +169,8 @@ This support-based presentation records, for each equation, the set of variables
 
 This structure does not capture the constants $b_i$ on the right-hand side of the equations, since many constructions depend only on the incidence pattern of the variables in each equation.
 
-\
 
-#sourcecode[```lean
+#codeblock[```lean
 
 structure LCSLayout where
   r : ℕ
@@ -174,20 +179,18 @@ structure LCSLayout where
 
 ```]
 
-\
 
 Next, we define an `LCSGame` structure that extends `LCSLayout` by including the constants `b : Fin G.r -> Fin 2`, which represent the right-hand side of the equations in the binary setting.
 
-#sourcecode[```lean
+#codeblock[```lean
 structure LCSGame (G : LCSLayout) where
   b : Fin G.r → Fin 2
 ```]
-\
 
 Finally, for the group-theoretic constructions, we also define a `LinearSystem` structure as an alternative description of a binary LCS game.
 This structure consists of a coefficient matrix $A$ and a right-hand side vector $b$.
 
-#sourcecode[```lean
+#codeblock[```lean
 structure LinearSystem where
   layout : LCSLayout
   A : Fin layout.r → Fin layout.s → Fin 2
@@ -225,7 +228,7 @@ In Lean, projective measurements are encoded by the predicate `IsMeasurementSyst
 For a finite family of operators `f : I -> R`, this predicate expresses that the operators form a projective measurement: They sum to the identity, are self-adjoint, are idempotent, and are pairwise orthogonal.
 
 
-#sourcecode[```lean
+#codeblock[```lean
 structure IsMeasurementSystem
   {I : Type*} [Fintype I]
   (f : I → R) : Prop where
@@ -235,11 +238,10 @@ structure IsMeasurementSystem
   self_adjoint : ∀ x, star (f x) = f x
 ```]
 
-\
 
 Using this notion, the projector-based strategy formalism is defined by the structure `LCSStrategy`.
 
-#sourcecode[```lean
+#codeblock[```lean
 structure LCSStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   (G : LCSLayout) where
@@ -266,7 +268,7 @@ They must satisfy the commutation relation dictated by the structure of the game
 Because the present project is restricted to binary outcomes, the observable formalism is also specialized accordingly. Rather than considering arbitrary observables, we work with self-adjoint 
 involutions, which are exactly the operators arising from two-outcome projective measurements. This is encoded in Lean by the predicate IsObservable.
 
-#sourcecode[```lean
+#codeblock[```lean
 structure IsObservable (O : R) : Prop where
   involutive   : O * O = 1
   self_adjoint : star O = O
@@ -275,7 +277,7 @@ structure IsObservable (O : R) : Prop where
 
 With this notion of binary observable in place, the project packages the observable description of a strategy into a structure `ObservableStrategyData` : 
 
-#sourcecode[```lean
+#codeblock[```lean
 
 structure ObservableStrategyData
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
@@ -302,7 +304,7 @@ Alice's side is slightly subtler. For a fixed equation $i$, the family `E i` is 
 $j$  apparing that equation, one first collapses the assingment indexed measurement to a binary measurement that only distinguishes the value of the variables $j$. 
 This is expressed in Lean by the construction `InducedMeasurementSystem (strat.E i) (fun x => x j)`. The observable associated with this induced binary measurement is then defined as `Alice_A strat i j`.
 
-#sourcecode[```lean
+#codeblock[```lean
 def ObservableOfMeasurementSystem (f : Fin 2 → R) : R :=
   f 0 - f 1
 
@@ -321,9 +323,7 @@ The project also proves that these derived operators are genuine binary observab
 Conversly, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
 Bob's measurement is obetained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commting observables appearing in a common equation.
 This construction is implmented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
-#block(breakable: false)[
-#show raw: set text(6.5pt)
-#sourcecode[```lean
+#codeblock(size: 6.5pt)[```lean
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   {G : LCSLayout}
@@ -339,7 +339,6 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
     commute := aliceMeasurement_bobMeasurement_commute S
   }
 ```]
-]
 
 On Bob's side, each observable gives a binary measurement by taking its two associated spectral projectors, and the corresponding family is proved to form a measurement system. 
 On Alice's side, the measurement attached to an equation is obtained by multiplying the projectors associated with the observables appearing in that equation; the row-wise commutation assumptions ensure that these products are well defined, and the project proves that the resulting family is again a measurement system.
@@ -353,7 +352,7 @@ Instead of specifying two separate observable families from the start, the proje
 
 In Lean, this data is encoded by the structure `BipartiteObservableStrategy`.
 
-#sourcecode[```lean
+#codeblock[```lean
 structure BipartiteObservableStrategy
     (n : Type*) [Fintype n] [DecidableEq n]
     (G : LCSLayout) where
@@ -373,8 +372,7 @@ This specialization is important because it matches the tensor-product structure
 
 From this point on, several sections use the local notation introduced in the Lean development for the operators attached to a projector-based strategy `strat` and a game `game`. This improves readability by allowing us to write concrete operator identities without having to refer to the underlying strategy and game structures at every step. The notation is as follows:
 
-#show raw: set text(7pt)
-#sourcecode[```lean
+#codeblock(size:6.5pt)[```lean
 local notation "A["i", "j"]" => Alice_A strat i j
 local notation "B["j"]" => Bob_B strat j
 local notation "E["i", "x"]" => strat.E i x
@@ -407,7 +405,7 @@ For a fixed equation $i$, the set of winning assingments consists of the assigne
 
 In `WinningCondition.lean`, the notation `S[i]` is used as a shorthand for `winning_assignments game i`, namely the set of assignments on equation $i$ whose parity matches $b_i$.
 
-#sourcecode[```lean
+#codeblock[```lean
 def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = b[i])
 
@@ -423,7 +421,7 @@ The local loss operator is defined as the complement of the local winning operat
 
 In addition to these local quantities, the project also defined the global winning and loss operators by averaging the local ones.
 
-#sourcecode[```lean
+#codeblock[```lean
 noncomputable def winning_operator : R :=
   ∑ i : Fin G.r, ∑ j : G.V i,
   let normalization : ℂ := (G.r * (G.V i).card : ℕ)
@@ -447,7 +445,7 @@ Its importance lies in the symmetry with which it couples the two tensor factors
 
 In Lean, the EPR vector is defined as follows.
 
-#sourcecode[```lean
+#codeblock[```lean
 noncomputable def eprVec
     (n : Type*) [Fintype n] [DecidableEq n] : (n × n) → ℂ :=
   fun ab => if ab.1 = ab.2 then 1 else 0
@@ -466,7 +464,7 @@ Concretely, if `M` and `N` are complex matrices, then the action of `M ⊗ N` on
 The fundamental identity proved in the project is that $(M otimes N) ket(Omega) = 0$ if and only if $M N^T = 0$.
 This gives the basic extraction principle used later in the development.
 
-#sourcecode[```lean
+#codeblock[```lean
 lemma kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
@@ -477,7 +475,7 @@ lemma kronecker_mulVec_epr_eq_zero_iff
 The project also proves the corresponding affine variant, which is the form used when extracting identities from operators of the form $1 - M otimes N$.
 
 #show raw: set text(7pt)
-#sourcecode[```lean
+#codeblock[```lean
 lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
@@ -510,7 +508,7 @@ In Lean, the solution group is defined from the structure `LinearSystem`, which 
 
 At this stage, the project works with `LinearSystem` rather than directly with `LCSGame`. This is because the solution-group presentation is most naturally phrased in terms of explicit coefficients and equation supports extracted from a coefficient matrix. In particular, the commuting and row-product relations are defined by reading off which variables occur in each equation from the matrix `A`, while the right-hand side vector `b` determines the exponent of the distinguished generator `J`.
 
-#sourcecode[```lean
+#codeblock[```lean
 inductive SolutionGen (S : LinearSystem) where
   | var : Fin S.layout.s → SolutionGen S
   | J : SolutionGen S
@@ -553,7 +551,7 @@ This decomposition is a key step in the EPR extraction arguement to produces the
 
 In Lean, this decomposition is formalized by the following theorem:
 #show raw: set text(7pt)
-#sourcecode[```lean
+#codeblock[```lean
 theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
   local_loss_operator game strat i j =
     (1/8 : ℂ) • (
@@ -609,7 +607,7 @@ $ T_1 ket(Omega) = 0, wide T_2 ket(Omega) = 0, wide T_3 ket(Omega) = 0. $
 This is the positivity argument formalized in Lean.
 
 #show raw: set text(7pt)
-#sourcecode[```lean
+#codeblock[```lean
 lemma three_selfAdjoint_squares_mulVec_eq_zero
     (hT₁ : T₁ᴴ = T₁) (hT₂ : T₂ᴴ = T₂) (hT₃ : T₃ᴴ = T₃)
     (h :
@@ -637,7 +635,7 @@ lemma three_selfAdjoint_squares_mulVec_eq_zero
 
   In Lean, these three extraction steps are packaged as separate lemmas, for the above relation the statement is as follows: 
 #show raw: set text(7pt)
-#sourcecode[```lean
+#codeblock[```lean
 lemma consistency_of_epr_annihilates
     (i : Fin G.r) (j : G.V i)
     (A B : Matrix n n ℂ)
