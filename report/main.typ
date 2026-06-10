@@ -112,15 +112,15 @@ To make it easier to navigate the project, documentation API in the standard lea
 
 == Structure of the Lean Development
 
-The formalization is organized into a small collection of modules following the main stages of the development. 
+The formalization is organized as follows : 
 
-The foundational definitions are introduced in `LCS/Basic.lean`, which defines layouts, games, and explicit binary linear systems. 
+- The foundational definitions are introduced in `LCS/Basic.lean`, which defines layouts, games, and explicit binary linear systems. 
 
-The strategy layer is developed in `LCS/Strategy`, with separate modules for projector-based strategies, observable-based strategies, and the bridge between them. 
+- The strategy layer is developed in `LCS/Strategy`, with separate modules for projector-based strategies, observable-based strategies, and the bridge between them. 
 
-The main proof-oriented part of the project is then divided between `LCS/WinningCondition.lean`, which defines the winning and loss operators and proves the sum-of-squares decomposition of the local loss operator, `LCS/EPR.lean`, which extracts matrix identities from local-loss annihilation on the EPR state, and `LCS/SolutionGroup.lean` together with `LCS/SolutionGroup/Representation.lean`, which define the binary solution group and construct its matrix representations.
+- The main proof-oriented part of the project is then divided between `LCS/WinningCondition.lean`, which defines the winning and loss operators and proves the sum-of-squares decomposition of the local loss operator, `LCS/EPR.lean`, which extracts matrix identities from local-loss annihilation on the EPR state, and `LCS/SolutionGroup.lean` together with `LCS/SolutionGroup/Representation.lean`, which define the binary solution group and construct its matrix representations.
 
-Finally, the abstract framework is instantiated in `LCS/Games/MagicSquare`, which develops the Mermin-Peres Magic Square game as the main case study.
+-  Finally, the abstract framework is instantiated in `LCS/Games/MagicSquare`, which develops the Mermin-Peres Magic Square game as the main case study.
 
 
 == Building the Documentation
@@ -132,13 +132,12 @@ This project documentation follows the standard of Lean, #link("github.com")[doc
 We begin by formalising Linear Constraint System games. 
 
 === The Mathematical Object
-More generally, a linear constraint system over a field $K$ consists of a finite family of variables $x_1, dots, x_s$ together with a finite family of $r$ equations
+A linear constraint system over a field $K$ consists of a finite family of variables $x_1, dots, x_s$ together with a finite family of $r$ equations
 $ sum_(j=1)^s A_(i j) x_j = b_i $,
 where $A_(i j), b_i in K$.
 
 In this project, we restrict to the binary setting over $F_2$.
 In this case, variables take values in $\{0,1\}$ and the equations are evaluated modulo $2$.
-The support-based presentation used throughout the development records, for each equation, the set of variables that occur in it; equivalently, this is the binary case where the coefficients are implicitly equal to $1$ on the support of the equation.
 
 === The Game
 In the associated game, the referee selects an equation $i$ and sends it to Alice, while Bob receives a variable $j$ that appears in that equation.
@@ -156,6 +155,8 @@ We define an `LCSLayout` structure to represent the following data:
 - the number of variables `s`,
 - the number of equations `r`,
 - the support of each equation, as a family of finite sets `V : Fin r -> Finset (Fin s)`.
+
+This support-based presentation records, for each equation, the set of variables that occur in it. In the binary setting, this amounts to taking the coefficients to be implicitly equal to $1$ on the support of the equation, which is why the layout can be described just by these finite sets.
 
 
 This structure does not capture the constants $b_i$ on the right-hand side of the equations, since many constructions depend only on the incidence pattern of the variables in each equation.
@@ -363,6 +364,30 @@ From such a bipartite observable strategy, the project constructs an ordinary ob
 
 This specialization is important because it matches the tensor-product structure of the EPR state used later in the project. In particular, it provides the framework in which local-loss annihilation on the EPR state can be turned into concrete matrix identities and, ultimately, into representations of the solution group.
 
+== Notation Used in the Sequel
+
+From this point on, several sections use the local notation introduced in the Lean development for the operators attached to a projector-based strategy `strat` and a game `game`. This improves readability by allowing us to write concrete operator identities without having to refer to the underlying strategy and game structures at every step. The notation is as follows:
+
+#show raw: set text(7pt)
+#sourcecode[```lean
+local notation "A["i", "j"]" => Alice_A strat i j
+local notation "B["j"]" => Bob_B strat j
+local notation "E["i", "x"]" => strat.E i x
+local notation "F["j", "y"]" => strat.F j y
+local notation "b["i"]" => game.b i
+local notation "∏ₐ["i"]" => Alice_Row_Prod strat i
+```]
+
+- `A[i, j]` denotes the derived Alice observable `Alice_A strat i j`, attached to equation `i` and to a variable `j` appearing in that equation.
+- `B[j]` denotes the derived Bob observable `Bob_B strat j`, attached to variable `j`.
+- `E[i, x]` denotes the projector `strat.E i x` corresponding to Alice answering the assignment `x` on equation `i`.
+- `F[j, y]` denotes the projector `strat.F j y` corresponding to Bob answering the bit `y` on variable `j`.
+- `b[i]` denotes the right-hand side bit `game.b i` of equation `i`.
+
+We also use the notation `∏ₐ[i]` for the product of Alice's derived observables along row `i`, implemented in Lean as `Alice_Row_Prod strat i`. Concretely, this reproduces the row product
+$ product_(k in V_i) A_k^((i)) $,
+that is, the product of the observables attached to all variables appearing in equation `i`.
+
 
 == Winning Conditions and Local Loss 
 
@@ -510,6 +535,22 @@ Hence, the local loss is nullified if and only if the three terms in the sum-of-
 This decomposition is a key step in the EPR extraction arguement to produces the row identities. 
 
 
+In Lean, this decomposition is formalized by the following theorem:
+#show raw: set text(7pt)
+#sourcecode[```lean
+theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
+  local_loss_operator game strat i j =
+    (1/8 : ℂ) • (
+      (1 - B[j] * A[i, j])^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • ∏ₐ[i])^2 +
+      (1 - (-1 : ℂ)^(b[i]).val • (∏ₐ[i] * A[i, j] * B[j]))^2
+    ) 
+
+```]
+This successfully formalizes that given a game and a projector-based strategy for it, the local loss operator can be decomposed as
+a sum of three squares.
+
+
 The main challenges in the formalization of this results were ; 
 1. Noncommutative operator algebra.
   While the proof is mathemtically elementary, Lean needs to be explicit about where multiplication is noncommuttaive and where
@@ -523,38 +564,13 @@ The main challenges in the formalization of this results were ;
   The proof uses sums over winning assignements and marginal slices of assignements. In Lean that becomes 
   - Finset.filter, Finset.sum_congr, fiberwise sums.
   So a significant part of the file is showing that the paper sums can be rewritten in terms of these more explicit constructions, and then manipulating them to get the desired final form.
-\
-
-After all these technicalites are dealt with, the final result is a machine-checked proof of the sum-of-square decomposition : 
-#show raw: set text(7pt)
-#sourcecode[```lean
-
-local notation "A["i", "j"]" => Alice_A strat i j
-local notation "B["j"]" => Bob_B strat j
-local notation "E["i", "x"]" => strat.E i x
-local notation "F["j", "y"]" => strat.F j y
-local notation "b["i"]" => game.b i
-
-
-
-theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
-  local_loss_operator game strat i j =
-    (1/8 : ℂ) • (
-      (1 - B[j] * A[i, j])^2 +
-      (1 - (-1 : ℂ)^(b[i]).val • ∏ₐ[i])^2 +
-      (1 - (-1 : ℂ)^(b[i]).val • (∏ₐ[i] * A[i, j] * B[j]))^2
-    ) 
-
-```]
-This successfully formalizes that given a game and a projector-based strategy for it, the local loss operator can be decomposed as
-a sum of three squares.
 
 == Row Identities Extraction 
 The next big step is to show that local-loss annihilation on the EPR state implies three local
 relations, which can then be extracted into identities on the underlying matrix space.
 
 This is a two-step process.
-1. First, the sum-of-squares decomposition shows that if the local loss operator annihilates the
+1. First, using the sum-of-squares decomposition, we show that if the local loss operator annihilates the
   EPR state, then each SOS term annihilates $Omega$ individually. Writing
 $ T_1 &= I - B_j A_j^((i)), \ 
  T_2 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)), \
@@ -566,10 +582,10 @@ self-adjoint, that the Alice observables appearing in the same row commute so th
 again self-adjoint, and that the scalar factor $(-1)^(b_i)$ is real. Taking the Hermitian inner
 product with $Omega$ gives
 $
-  braket(Omega, (T_1^2 + T_2^2 + T_3^2) Omega)
-  = braket(T_1 Omega, T_1 Omega)
-  + braket(T_2 Omega, T_2 Omega)
-  + braket(T_3 Omega, T_3 Omega).
+  braket(Omega, (T_1^2 + T_2^2 + T_3^2) Omega) \
+  &= braket(T_1 Omega, T_1 Omega) \
+  &+ braket(T_2 Omega, T_2 Omega) \
+  &+ braket(T_3 Omega, T_3 Omega).
 $
 Each summand is a norm square, hence a nonnegative real number. Since their sum is zero, each one
 must itself be zero, and therefore
@@ -626,28 +642,6 @@ lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
 
   $
     A_j^((i)) = (B_j)^T.
-  $
-
-  For the second term, the row product lives entirely on Alice's side. Writing
-  $R_i = product_(k in V_i) A_k^((i))$, one gets
-
-  $
-    T_2 Omega = 0
-    &arrow.double.long (I - (-1)^(b_i) (R_i otimes I)) Omega = 0 \
-    &arrow.double.long I - (-1)^(b_i) R_i = 0 \
-    &arrow.double.long R_i = (-1)^(b_i) I.
-  $
-
-  Here the second implication uses the specialized Alice-side injectivity lemma, which removes
-  $Omega$ directly from operators of the form $M otimes I$.
-
-  For the third term, one similarly rewrites the bipartite operator as
-  $(R_i A_j^((i))) otimes B_j$, and obtains
-
-  $
-    T_3 Omega = 0
-    &arrow.double.long (I - (-1)^(b_i) ((R_i A_j^((i))) otimes B_j)) Omega = 0 \
-    &arrow.double.long (-1)^(b_i) R_i A_j^((i)) (B_j)^T = I.
   $
 
   In Lean, these three extraction steps are packaged as separate lemmas, for example the
