@@ -96,10 +96,6 @@ This project makes the following contributions to the formalization of binary Li
 - It formalises an EPR-state argument that extracts row identities from local-loss annihilation in the bipartite setting.
 - It defines the solution group of a binary linear system and constructs matrix representations of this group from the previously derived row identities.
 - It instantiates the general framework on the Mermin-Peres Magic Square game as the main case study.
-The scope of the project is intentionally limited to the binary setting. In particular:
-- the formalisation is restricted to LCS games over $F_2$,
-- the solution-group construction is the binary one associated with this setting,
-- and the final representation theorem is proved in the bipartite EPR framework.
 
 === Repository and Documentation 
 *Source* \
@@ -107,6 +103,7 @@ The project source code is publicly available on github, accessible via \ #link(
 #v(1em)
 *Documentation* \
 In addition, to make the project easier to naviagte, API dcoumentation is available at \ #link("https://sean.perazzolo.ch/lcs/documentation")[sean.perazzolo.ch/LCS/documentation]
+#v(1em)
 
 *Report* \
 A copy of this report is hosted on the project website at #link("https://sean.perazzolo.ch/lcs/report")[sean.perazzolo.ch/LCS/report].
@@ -324,22 +321,25 @@ The project also proves that these derived operators are genuine binary observab
 Conversly, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
 Bob's measurement is obetained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commting observables appearing in a common equation.
 This construction is implmented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
-
+#block(breakable: false)[
+#show raw: set text(6.5pt)
 #sourcecode[```lean
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   {G : LCSLayout}
   (S : ObservableStrategyData R G)
  :
-  LCSStrategy R G :=
-  {
+  LCSStrategy R G := {
     E := AliceMeasurementFromObservables S
     F := BobMeasurementFromObservables S
-    alice_ms := aliceMeasurementFromObservables_isMeasurementSystem S
-    bob_ms := bobMeasurementFromObservables_isMeasurementSystem S
+    alice_ms := 
+  aliceMeasurementFromObservables_isMeasurementSystem S
+    bob_ms := 
+  bobMeasurementFromObservables_isMeasurementSystem S
     commute := aliceMeasurement_bobMeasurement_commute S
   }
 ```]
+]
 
 On Bob's side, each observable gives a binary measurement by taking its two associated spectral projectors, and the corresponding family is proved to form a measurement system. 
 On Alice's side, the measurement attached to an equation is obtained by multiplying the projectors associated with the observables appearing in that equation; the row-wise commutation assumptions ensure that these products are well defined, and the project proves that the resulting family is again a measurement system.
