@@ -15,7 +15,7 @@ BASE_DIR=$(pwd)
 # then
 	# 2. Generate the interactive source
 # 	echo "Generating Interactive Source"
-# 	cd "$BASE_DIR/projects/LCS"
+# 	cd "$BASE_DIR/src"
 # 	lake build LCS:literate
 # 	lake exe verso-html .lake/build/literate ../../docs/source
 # else 
@@ -30,7 +30,7 @@ read -p "Do you want to build doc4  [y/N]: " doc_response
 if [[ "$doc_response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
 	echo "Building doc4"
-	cd "$BASE_DIR/projects/LCS/docbuild"
+	cd "$BASE_DIR/src/docbuild"
 	lake build LCS:docs
 	cp -r .lake/build/doc "$BASE_DIR/postprocess_docs/source"
 	cd "$BASE_DIR/postprocess_docs"
@@ -46,8 +46,8 @@ mv status.pdf "$BASE_DIR/docs/status.pdf"
 
 
 # Cleanup (remove source files)
-rm -rf "$BASE_DIR/postprocess_docs/source"/*
-rm -rf "$BASE_DIR/projects/LCS/docbuild/.lake/build/doc"*
+rm -rf "$BASE_DIR/postprocess_docs/source/doc"/*
+rm -rf "$BASE_DIR/src/docbuild/.lake/build/doc"*
 
 # 5. Serve the docs
 read -p "Do you want to serve the docs at http://localhost:8004? [y/N]: " serve_response

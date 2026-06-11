@@ -146,7 +146,7 @@ show raw: set text(font: "Fira Code", size: 8pt)
       {
         set align(center)
         set text(size: 14pt, font: "Libertinus Serif", weight: "bold")
-        "Research Project at ...?"
+        "Research Project at QCC"
       }
 
       // Display the authors list.
