@@ -884,7 +884,7 @@ The present development has several important limitations.
 
 - *No full equivalence theorem between the two strategy formalisms.* \
   The project constructs and uses the bridge from observable strategies to projector strategies, but it
-  does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way.
+  does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way. One concrete obstruction is that the observables recovered from a projector strategy on Alice's side are naturally indexed by a pair $(i,j)$ of an equation and a variable in that equation, whereas `ObservableStrategyData` is formulated with a single observable for each variable. 
   #v(1em)
 
 - *The current bipartite observable interface is too specialized for the full EPR converse story.* \
