@@ -23,7 +23,6 @@ open scoped BigOperators
 
 variable {R : Type*} [Ring R] [StarRing R]
 
--- ANCHOR: IsMeasurementSystem
 structure IsMeasurementSystem
   {I : Type*} [Fintype I]
   (f : I → R) : Prop where
@@ -31,7 +30,6 @@ structure IsMeasurementSystem
   idempotent   : ∀ x, f x * f x = f x
   orthogonal   : ∀ x y, x ≠ y → f x * f y = 0
   self_adjoint : ∀ x, star (f x) = f x
--- ANCHOR_END: IsMeasurementSystem
 
 
 noncomputable def InducedMeasurementSystem {I J : Type*} [Fintype I] [Fintype J]

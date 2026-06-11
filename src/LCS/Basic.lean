@@ -29,23 +29,17 @@ open scoped BigOperators
 variable {R : Type*} [Ring R] [StarRing R]
 
 
--- ANCHOR: LCSLayout
 structure LCSLayout where
   r : ℕ
   s : ℕ
   V : Fin r → Finset (Fin s)
--- ANCHOR_END: LCSLayout
 
--- ANCHOR: Assignment
 abbrev Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
   (G.V i) → Fin 2
--- ANCHOR_END: Assignment
 
 
--- ANCHOR: LCSGame
 structure LCSGame (G : LCSLayout) where
   b : Fin G.r → Fin 2
--- ANCHOR_END: LCSGame
 
 /-- A full binary linear system with explicit coefficient matrix and right-hand side. -/
 structure LinearSystem where

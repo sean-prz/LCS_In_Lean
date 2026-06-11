@@ -40,10 +40,8 @@ and loss operators.
 -/
 
 /-- The assignments satisfying equation `i` in the game `game`. -/
--- ANCHOR: winning_assignments
 def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
   Finset.univ.filter (fun α => (∑ j : G.V i, (α j : Fin 2)) = b[i])
--- ANCHOR_END: winning_assignments
 
 /-- The local winning operator for a single edge `(i, j)`. -/
 noncomputable def local_winning_operator (i : Fin G.r) (j : G.V i) : R :=

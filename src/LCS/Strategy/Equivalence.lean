@@ -424,7 +424,6 @@ lemma aliceObservable_mul_aliceMeasurementFromObservables
 
 /-- The observable strategy data induces a projector-valued LCS strategy by taking, for each
 observable, its associated two-outcome spectral projectors. -/
--- ANCHOR: ObservableStrategy_To_ProjectorStrategy
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   {G : LCSLayout}
@@ -438,7 +437,6 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
     bob_ms := bobMeasurementFromObservables_isMeasurementSystem S
     commute := aliceMeasurement_bobMeasurement_commute S
   }
--- ANCHOR_END: ObservableStrategy_To_ProjectorStrategy
 
 lemma alice_A_observableStrategy
     (S : ObservableStrategyData R G)

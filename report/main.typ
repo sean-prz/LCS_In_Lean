@@ -311,9 +311,7 @@ def ObservableOfMeasurementSystem (f : Fin 2 → R) : R :=
 def Alice_A
   (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
--- ANCHOR_END: Alice_A
 
--- ANCHOR: Bob_B
 def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
 ```]

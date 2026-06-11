@@ -26,7 +26,6 @@ variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
 variable {G : LCSLayout}
 set_option linter.unusedSectionVars false
 
--- ANCHOR: LCSStrategy
 structure LCSStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   (G : LCSLayout) where
@@ -35,18 +34,13 @@ structure LCSStrategy
   alice_ms : ∀ i, IsMeasurementSystem (E i)
   bob_ms   : ∀ j, IsMeasurementSystem (F j)
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
--- ANCHOR_END: LCSStrategy
 
--- ANCHOR: Alice_A
 noncomputable def Alice_A
   (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
--- ANCHOR_END: Alice_A
 
--- ANCHOR: Bob_B
 def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
--- ANCHOR_END: Bob_B
 
 section WithStrategy
 
