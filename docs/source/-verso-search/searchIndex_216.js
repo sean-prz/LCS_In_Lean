@@ -1,1 +1,0 @@
-window.docContents[216].resolve({"/LCS/WinningCondition/#winning_operator":{"contents":"The total Winning Operator v is the average of local winning probabilities.","context":"","header":"winning_operator","id":"/LCS/WinningCondition/#winning_operator"}});

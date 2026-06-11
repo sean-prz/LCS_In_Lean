@@ -1,1 +1,0 @@
-window.docContents[204].resolve({"/LCS/Strategy/ObservableToProjector/#idempotent_observableToProjector":{"contents":"If $O$ is an observable, then each $\\mathrm{ObservableToProjector}(O,a)$ is idempotent,\nso it is a projector.","context":"","header":"idempotent_observableToProjector","id":"/LCS/Strategy/ObservableToProjector/#idempotent_observableToProjector"}});

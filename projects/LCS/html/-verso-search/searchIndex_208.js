@@ -1,1 +1,0 @@
-window.docContents[208].resolve({"/LCS/#mod-doc-LCS-1-0":{"contents":"## Linear Constraint System (LCS) Games\n\nThis library formalizes the theory of LCS games, quantum strategies,\nand the winning condition derivation for perfect strategies.","context":"","header":"LCS","id":"/LCS/#mod-doc-LCS-1-0"}});

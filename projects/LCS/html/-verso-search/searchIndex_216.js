@@ -1,1 +1,0 @@
-window.docContents[216].resolve({"/LCS/WinningCondition/#winning_operator":{"contents":"The Winning Operator v for a given Strategy and Game.","context":"","header":"winning_operator","id":"/LCS/WinningCondition/#winning_operator"}});

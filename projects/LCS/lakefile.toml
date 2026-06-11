@@ -18,7 +18,3 @@ rev = "v4.28.0"
 name = "LCS"
 
 
-[[require]]
-name = "verso"
-git = "https://github.com/leanprover/verso.git"
-rev = "v4.28.0"
