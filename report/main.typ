@@ -659,9 +659,210 @@ The final step of this project is to show that these row identities can be used 
 the solution group of the binary linear system associated with the game.
 
 
-
+#text(red)[*TODO*]
 
 = Magic Square Game Case Study <magic-square>
+
+
+The Mermin-Peres Magic Square game is the main concrete example developed in this project. It is a particularly natural case study for binary LCS games: the rules are simple to state, the contradiction for classical assignments is easy to understand, and the quantum strategy can be written as an explicit $3 times 3$ grid of Pauli observables. For this reason it is often regarded as one of the most intuitive examples of quantum pseudotelepathy.
+
+== The Game
+
+The game is built from a $3 times 3$ array of binary variables.
+The referee may ask for one of the three rows or one of the three columns, so there are six possible equation questions in total.
+Alice receives one of these six questions and must provide values for the three cells lying in that row or column.
+Bob receives one cell contained in Alice's question and must provide the value of that single cell.
+
+The winning condition is the same as for any binary LCS game, and it has two parts. 
+First, Alice's assignment must satisfy the parity rule attached to the row or column she was asked about.
+Second, Bob's answer must agree with Alice's value on the overlapping cell.
+
+The parity rules of this game are following: 
+all three row equations have even parity, the first two column equations have even parity, and the final column has odd parity.
+Equivalently, if the variables are denoted by
+$
+x_1, x_2, ..., x_9 in F_2,
+$
+then the six equations are
+$
+x_1 + x_2 + x_3 &= 0, \
+x_4 + x_5 + x_6 &= 0, \
+x_7 + x_8 + x_9 &= 0, \
+x_1 + x_4 + x_7 &= 0, \
+x_2 + x_5 + x_8 &= 0, \
+x_3 + x_6 + x_9 &= 1.
+$
+
+This game exhibits the concept of pseudotelepathy.
+To see why no perfect classical strategy exists, observe first that any deterministic perfect classical strategy would have to define a single global value for each cell of the square.
+Bob answers one cell at a time, so his strategy fixes a bit for each variable, and perfect consistency forces Alice to use exactly those same values whenever that variable appears in a row or column question.
+Thus a perfect classical strategy would induce a global assignment satisfying all six parity equations simultaneously.
+
+But this is impossible.
+If one sums the three row equations over $F_2$, each variable appears exactly once and the total right-hand side is $0$.
+If one instead sums the three column equations, one obtains the same left-hand side, since the same nine variables appear exactly once again, but now the total right-hand side is $1$.
+Hence the same quantity would have to be equal to both $0$ and $1$, a contradiction.
+Therefore no deterministic classical strategy can win perfectly, and hence no classical strategy can win perfectly at all.
+Nevertheless, quantum players sharing entanglement can satisfy the game conditions perfectly.
+
+
+== The Observable Grid
+
+The standard quantum strategy for the magic square is given by a $3 times 3$ grid of commuting two-qubit observables:
+$
+mat(
+X otimes I, quad I otimes X, quad X otimes X;
+I otimes Y, quad Y otimes I, quad Y otimes Y;
+X otimes Y, quad Y otimes X, quad Z otimes Z
+).
+$
+
+Each entry is a self-adjoint involution, hence a binary observable with eigenvalues $±1$.
+The crucial structural facts are:
+
+- the three observables in each row commute pairwise,
+- the three observables in each column commute pairwise,
+- the product along each row is $I$,
+- the product along the first two columns is $I$,
+- the product along the final column is $-I$.
+
+These identities match the parity pattern of the game exactly.
+Because the observables in each row or column commute, they can be measured simultaneously.
+Moreover, the product constraint has the correct sign in each case: a row or column whose parity bit is `0` has product $I$, while the final column, whose parity bit is `1`, has product $-I$.
+In this way, the classical parity equations are replaced by operator identities with the same sign pattern.
+
+== The Support-Based Description in Lean
+
+In the formalization, the game is first encoded in the support-based language introduced earlier.
+The layout records only which variables occur in each equation, while the right-hand side vector records the parity bits.
+
+For the magic square, the layout has $6$ equations and $9$ variables.
+The support function lists the three cells occurring in each row and each column.
+In Lean this is written as follows.
+
+#codeblock[```lean
+def magic_square_layout : LCSLayout := {
+  r := 6
+  s := 9
+  V := fun i =>
+    match i with
+    | 0 => {0, 1, 2}
+    | 1 => {3, 4, 5}
+    | 2 => {6, 7, 8}
+    | 3 => {0, 3, 6}
+    | 4 => {1, 4, 7}
+    | 5 => {2, 5, 8}
+}
+```]
+
+The corresponding game is obtained by specifying the right-hand side bits.
+Only the final column has odd parity, so only the last equation is assigned the value `1`.
+
+#codeblock[```lean
+def magic_square_game : LCSGame magic_square_layout := {
+  b := fun i => if i = ⟨5, by decide⟩ then 1 else 0
+}
+```]
+
+This is a good example of why the support-based description is convenient.
+At this stage one only needs to specify the incidence pattern of the variables and the parity bit attached to each constraint.
+The resulting object is already enough to state the game and to instantiate the general strategy and winning-condition framework.
+
+== Formalizing the Grid Strategy
+
+The observable grid itself is encoded as a function from the nine variable indices to $4 times 4$ matrices, obtained as Kronecker products of the Pauli matrices and the identity.
+
+#codeblock[```lean
+def magic_square_grid : Fin 9 → mat4
+  | 0 => X  ⊗ₖ I2
+  | 1 => I2 ⊗ₖ X
+  | 2 => X  ⊗ₖ X
+  | 3 => I2 ⊗ₖ Y
+  | 4 => Y  ⊗ₖ I2
+  | 5 => Y  ⊗ₖ Y
+  | 6 => X  ⊗ₖ Y
+  | 7 => Y  ⊗ₖ X
+  | 8 => Z  ⊗ₖ Z
+```]
+
+To turn this grid into a strategy, one must verify that it satisfies the structural conditions required by the observable formalism.
+The first condition is that each grid entry is an observable, that is, a self-adjoint involution.
+This is proved in Lean by reducing each case to the corresponding facts for the Pauli matrices and using the compatibility of the Kronecker product with these properties.
+
+The second condition is that, for every equation of the game, the observables lying in that equation commute pairwise.
+For the magic square this means proving pairwise commutation along each row and each column.
+The proof uses the familiar Pauli commutation and anticommutation relations, packaged through elementary lemmas about Kronecker products.
+Once these six commutativity checks are established, they are assembled into a uniform statement saying that the observables associated with any equation of the layout commute pairwise.
+
+The resulting theorem-level object is the strategy
+
+#codeblock[```lean
+noncomputable def Strat_merminPeres :
+    BipartiteObservableStrategy (Fin 2 × Fin 2) magic_square_layout where
+  obs := magic_square_grid
+  is_observable := magic_square_is_observable
+  sameEquation_comm := MP_sameEquation_comm
+```]
+
+The important point is that the case study does not only postulate the standard magic-square strategy.
+It proves in Lean that the observable grid satisfies the exact algebraic hypotheses required by the abstract formalism.
+This makes the magic square a genuine verified example of the general definitions introduced earlier.
+
+== From the Game to the Associated Linear System
+
+Although the game is described initially in support form, the later group-theoretic part of the development works with an explicit binary linear system.
+For this reason, the support-based game is converted to a `LinearSystem` using the generic map introduced in `LCSGame.toLinearSystem`.
+
+For the magic square this yields the explicit system whose coefficient matrix has one row for each row or column support, and whose right-hand side vector records the parity pattern.
+In the codebase this is defined by
+
+#codeblock[```lean
+def magic_square_system : LinearSystem :=
+  magic_square_game.toLinearSystem
+```]
+
+Thus the same concrete example appears in two complementary forms:
+
+- as an `LCSGame`, convenient for the strategy and winning-condition constructions,
+- as a `LinearSystem`, convenient for the solution-group construction.
+
+This passage from support data to an explicit coefficient matrix is one of the points where the abstract framework becomes concrete enough to inspect computationally.
+
+== The Solution Group for the Magic Square
+
+Once the explicit binary linear system has been recovered, the generic solution-group construction can be instantiated directly.
+The magic-square solution group is simply the solution group attached to `magic_square_system`.
+
+#codeblock[```lean
+abbrev MPSolutionGroup := SolutionGroup magic_square_system
+```]
+
+The accompanying module `LCS/Games/MagicSquare/SolutionGroup.lean` then extracts inspectable data from this system:
+the coefficient rows, the right-hand side vector, the supports of the equations, and the resulting list of relators in presentation form.
+This does not yet prove any new analytic property of the concrete strategy, but it shows that the abstract algebraic machinery developed earlier can be applied to a canonical and highly nontrivial example.
+
+In this sense, the magic square plays two roles in the project.
+First, it provides a concrete observable strategy whose validity can be checked directly in Lean.
+Second, it provides a concrete binary linear system and hence a concrete solution group to which the general representation-theoretic constructions apply.
+
+== What the Case Study Shows
+
+The present formalization of the Mermin-Peres game therefore establishes the following points.
+
+- The game itself is encoded explicitly as a binary LCS game.
+- The standard Pauli-grid construction is encoded explicitly as a family of observables.
+- Lean verifies that this grid satisfies the observable conditions and the same-equation commutation requirements needed to define a valid strategy.
+- The support-based game is converted to an explicit binary linear system.
+- The associated solution group is instantiated and made inspectable in the concrete magic-square case.
+
+===  What the development does not yet provide \  
+The case study lacks a theorem stating that this particular concrete strategy is a perfect strategy for the magic square game. \
+  More precisely, the project contains a general result showing that if a suitable strategy annihilates the EPR state through the local loss operators, then one can extract row identities and construct a representation of the associated solution group.
+  However, this EPR-annihilation hypothesis is not proved for the present concrete packaging of the magic-square strategy.
+Thus the case study currently verifies the strategy data and the associated algebraic structures, while stopping short of a complete formal proof of perfect play for this concrete example.
+
+Even with this limitation, the magic square remains a useful and informative case study.
+It demonstrates that the abstract framework developed in the project is expressive enough to capture the most familiar example of quantum pseudotelepathy, and it provides a concrete benchmark against which the strategy, EPR, and solution-group layers of the formalization can be understood.
 
 
 = Limitations and Future Work
@@ -684,6 +885,10 @@ The present development has several important limitations.
 - *No full equivalence theorem between the two strategy formalisms.* \
   The project constructs and uses the bridge from observable strategies to projector strategies, but it
   does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way.
+  #v(1em)
+
+- *The current bipartite observable interface is too specialized for the full EPR converse story.* \
+  The `BipartiteObservableStrategy` wrapper used in the EPR part of the development starts from a single family of observables and lifts it symmetrically to the two tensor factors. This is sufficient for packaging valid bipartite strategies and for the conditional row-identity and representation results proved in the project. However, the EPR extraction argument naturally produces transpose-related local observables, and the current interface does not yet formalise the more general two-family setup needed to reconstruct perfect strategies from solution-group representations or to instantiate the full perfect-play pipeline for the concrete Magic Square strategy. 
   #v(1em)
 
 - *No direct computation with real or complex operator entries.* \
