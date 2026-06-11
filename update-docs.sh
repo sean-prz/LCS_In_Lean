@@ -27,7 +27,6 @@ cp "$BASE_DIR/postprocess_docs/source/CNAME" "$BASE_DIR/docs/CNAME"
 
 # 4. Cleanup (remove source files)
 rm -rf "$BASE_DIR/postprocess_docs/source/doc"/*
-rm -rf "$BASE_DIR/src/docbuild/.lake/build/doc"*
 
 # 5. Serve the docs
 read -p "Do you want to serve the docs at http://localhost:8004? [y/N]: " serve_response

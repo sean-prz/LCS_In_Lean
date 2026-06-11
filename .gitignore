@@ -2,4 +2,5 @@ projects/.DS_Store
 .DS_Store
 .vscode
 .agents
-projects/LCS/docbuild/.lake/build
+src/.lake/
+src/docbuild/.lake/
