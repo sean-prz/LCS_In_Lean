@@ -655,11 +655,97 @@ Together these give the row identities that are used in the construction of repr
 
 
 == Matrix Representations of the Solution Group
-The final step of this project is to show that these row identities can be used to construct a matrix representation of 
-the solution group of the binary linear system associated with the game.
+The final step of this project is to show that these row identities can be used to construct a matrix representation of
+the solution group of the binary linear system associated with the game, given a perfect quantum strategy for the game.
 
+=== The Construction
 
-#text(red)[*TODO*]
+Suppose a bipartite observable strategy with observables $O_1, dots, O_s$ achieves perfect play, so that the local loss operators annihilate the EPR state for every equation and every support element.
+By the extraction argument of the previous subsection, this yields the row identities
+$ product_(j in "supp"(i)) O_j = (-1)^(b_i) I, wide forall i. $
+
+The representation is then defined by mapping the generators of the solution group to concrete unitary matrices:
+- each variable generator $g_j$ is sent to the corresponding observable $O_j$,
+- the distinguished central generator $J$ is sent to the scalar matrix $-I$.
+
+This assignment respects all four families of defining relations:
++ _Involutions._ Each observable satisfies $O_j^2 = I$ by definition, and $(-I)^2 = I$.
++ _Centrality._ The scalar matrix $-I$ commutes with every matrix.
++ _Same-equation commutation._ Observables appearing in a common equation commute, which is a hypothesis of the observable strategy formalism.
++ _Equation relators._ The row identity $product_(j in "supp"(i)) O_j = (-1)^(b_i) I$ is exactly the relation $product g_j = J^(b_i)$ under the assignment $g_j arrow.bar O_j$, $J arrow.bar -I$.
+
+Since every relator in the presentation maps to the identity under this assignment, the universal property of the presented group guarantees that the assignment extends uniquely to a group homomorphism
+$ Gamma arrow.long U(n, CC). $
+
+=== Formalization in Lean
+
+The first step is to define the generator-level assignment. Each solution-group generator is mapped to a concrete element of the unitary group `unitary (Matrix n n ℂ)`: variable generators are sent to their packaged observables, and `J` is sent to the scalar matrix $-I$.
+
+#codeblock(size: 6.5pt)[```lean
+noncomputable def solutionGroupGeneratorImage
+    (obs : Fin S.layout.s → Matrix n n ℂ)
+    (obs_is_observable :
+      ∀ j, IsObservable (obs j)) :
+    SolutionGen S → unitary (Matrix n n ℂ)
+  | .var j =>
+      observableMatrixUnitary (obs j)
+        (obs_is_observable j)
+  | .J => negOneMatrixUnitary
+```]
+
+This map is then lifted to the free group on the generators via `FreeGroup.lift`, and the representation is obtained by showing that every relator in the solution group maps to the identity under this lift.
+The generic representation constructor takes as input a family of observables, proofs that they satisfy the same-equation commutation requirement, and proofs that each equation relator maps to the identity in the unitary group.
+It then applies Mathlib's `PresentedGroup.toGroup` to produce the group homomorphism.
+
+#codeblock(size: 6.5pt)[```lean
+noncomputable def solutionGroupRepresentation
+    (obs : Fin S.layout.s → Matrix n n ℂ)
+    (obs_is_observable : ∀ j, IsObservable (obs j))
+    (hsame : ∀ {j k}, sameEquation S j k
+      → Commute (obs j) (obs k))
+    (hequation : ∀ i, FreeGroup.lift
+      (solutionGroupGeneratorImage obs obs_is_observable)
+      (equationRelator S i) = 1) :
+    SolutionGroup S →* unitary (Matrix n n ℂ) :=
+  PresentedGroup.toGroup (lift_relators_eq_one ...)
+```]
+
+The hypothesis `hequation` requires that the lift of each equation relator evaluates to the identity in the unitary group.
+Internally, the proof dispatches the remaining three relator families (involutions, centrality, and commutation) automatically, since these follow from the observable axioms and the commutation hypothesis.
+
+The project then provides a second, higher-level constructor that chains the entire pipeline from local-loss annihilation on the EPR state.
+Starting from the hypothesis that the local loss operator annihilates the EPR vector for every equation $i$ and every support element $j$, the construction first extracts the row identities via `rowObservableProduct_eq_sign_of_local_loss`, and then passes these identities to the generic representation constructor above.
+
+#codeblock(size: 6.5pt)[```lean
+noncomputable def solutionGroupRepresentationOfEPRLoss
+    (strat : BipartiteObservableStrategy n G)
+    (hNonempty : ∀ i, Nonempty (G.V i))
+    (hLoss : ∀ i (j : G.V i),
+      Matrix.mulVec
+        (local_loss_operator game
+          strat.toProjectorStrategy i j)
+        (eprVec n) = 0) :
+    SolutionGroup game.toLinearSystem
+      →* unitary (Matrix n n ℂ)
+```]
+
+This is the main end-to-end result of the project.
+It shows that any bipartite observable strategy achieving perfect play on a binary LCS game gives rise to a unitary representation of the associated solution group.
+The representation lands in the unitary group (rather than just the general linear group) because observables are by definition self-adjoint involutions, and the scalar matrix $-I$ is trivially unitary.
+
+=== Main Formalization Challenge
+
+The file `Representation.lean` is roughly 600 lines long, which may seem surprising given that the mathematical argument is short: define the generator map, check the relators, invoke the universal property.
+The bulk of the formalization is devoted to bridging between two different descriptions of the same algebraic object.
+
+On the group-theoretic side, the equation relator for row $i$ is a word in the free group on the generators `SolutionGen S`, constructed from the explicit equation support of the linear system.
+On the analytic side, the row identity extracted from the EPR argument is a matrix equation involving the ordered product of observables indexed by the game's row support.
+These two descriptions refer to the same underlying product, but they arise from different data structures: the relator is built from the `LinearSystem`'s coefficient matrix (via `eqSupport` and `equationWord`), while the row observable product is built from the `LCSGame`'s row support (via `orderedSupportProduct`).
+
+The key bridge lemma `lift_equationRelator_of_rowIdentity` closes this gap. It shows that evaluating the free-group lift of the equation relator under the generator map yields the same matrix as the row observable product, so that the matrix identity $product_(j in "supp"(i)) O_j = (-1)^(b_i) I$ can be used directly to verify the relator.
+Proving this requires a chain of intermediate steps: converting the game's support set to the linear system's equation support, showing that the sorted list product agrees with the `Finset.noncommProd` used in the strategy layer, and carefully tracking the passage between the free-group word evaluation and the matrix product.
+This kind of alignment work, connecting two representations of the same mathematical object through Lean's type system, accounts for the majority of the file's length.
+
 
 = Magic Square Game Case Study <magic-square>
 
