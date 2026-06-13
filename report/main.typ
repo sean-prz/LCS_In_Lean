@@ -78,18 +78,6 @@ Because their underlying structure is rooted in linear algebra and group theory,
 
 Canonical examples such as the Mermin-Peres magic square game illustrate the strength of this framework particularly well: they exhibit quantum pseudotelepathy, a phenomenon in which players sharing entanglement can satisfy the constraints with certainty even though no classical strategy can win perfectly.
 
-/*
-== Linear Constraint System Games
-
-=== What is a Linear Constraint System Game?
-
-=== Why are Linear Constraint System Games interesting?
-
-
-== Quantum Strategies for Linear Constraint System Games
-
-== Mermin Peres Magic Square Game
-*/
 
 == Contributions and Scope
 This project makes the following contributions to the formalisation of binary Linear Constraint System games in Lean 4:
@@ -132,7 +120,8 @@ The formalisation is organised as follows :
 
 
 == Building the Documentation
-This project documentation follows the standard of Lean, #link("github.com")[doc-gen4], which build from the source lean file documentation, by rendering the comments above lemmas or section, displaying  math and hiding the proof details. This is the same workflow as mathlib. 
+This project documentation is built with  #link("https://github.com/leanprover/doc-gen4")[doc-gen4], the standard Lean documentation tool.
+It renders the doc-comments attached to lemmas and sections, rendering the mathematical content while hiding the proof details. This is the same tool used for the official mathlib documentation.
 
 
 == Linear Constraint System Games Formalisation 
@@ -588,7 +577,7 @@ $ T_1 &= I - B_j A_j^((i)), \
  T_2 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)), \
  T_3 &= I - (-1)^(b_i) product_(k in V_i) A_k^((i)) A_j^((i)) B_j $
 From the SOS decomposition, we get : 
-$ L_(i,j) ket(Omega) = 0 arrow.double.long 1/8 (T_1^2 + T_2^2 + T_3^2) ket(Omega) = 0, $
+$ L_(i,j) ket(Omega) = 0 ==> 1/8 (T_1^2 + T_2^2 + T_3^2) ket(Omega) = 0, $
 Each $T_k$ is self-adjoint: this follows from the fact that the local Alice and Bob observables are
 self-adjoint, that the Alice observables appearing in the same row commute so that their product is
 again self-adjoint, and that the scalar factor $(-1)^(b_i)$ is real. Taking the Hermitian inner
@@ -601,7 +590,7 @@ $
 $
 Each summand is a norm square, hence a nonnegative real number. Since their sum is zero, each one
 must itself be zero, and therefore
-$ T_1 ket(Omega) = 0, wide T_2 ket(Omega) = 0, wide T_3 ket(Omega) = 0. $
+$ T_1 ket(Omega) = 0, wide  T_2 ket(Omega) = 0, wide T_3 ket(Omega) = 0. $
 This is the positivity argument formalised in Lean.
 
 #show raw: set text(7pt)
@@ -620,8 +609,8 @@ lemma three_selfAdjoint_squares_mulVec_eq_zero
 
   $
     T_1 ket(Omega) = 0
-    &arrow.double.long (I - A_j^((i)) otimes B_j) ket(Omega) = 0 \
-    &arrow.double.long A_j^((i)) (B_j)^T = I.
+    &==> (I - A_j^((i)) otimes B_j) ket(Omega) = 0 \
+    &==> A_j^((i)) (B_j)^T = I.
   $
 
   Since $B_j$ is an observable, it is an involution, multiplying on the
@@ -767,7 +756,7 @@ The parity rules of this game are following:
 all three row equations have even parity, the first two column equations have even parity, and the final column has odd parity.
 Equivalently, if the variables are denoted by
 $
-x_1, x_2, ..., x_9 in F_2,
+x_1, x_2, dots, x_9 in F_2,
 $
 then the six equations are
 $
