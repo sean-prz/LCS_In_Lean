@@ -11,7 +11,7 @@ and provides a valid quantum strategy for it using observables.
 
 It verifies the commutativity requirements
 (both local within equations and global bipartite commutativity)
-necessary to define a valid `ObservableStrategyData`.
+necessary to define a valid `ObservableStrategy`.
 -/
 
 section Types

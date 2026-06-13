@@ -22,7 +22,7 @@ set_option linter.unusedSectionVars false
 
 variable {G : LCSLayout} (game : LCSGame G)
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
-variable (strat : LCSStrategy R G)
+variable (strat : ProjectorStrategy R G)
 
 local notation "A[" i ", " j "]" => Alice_A strat i j
 local notation "B[" j "]" => Bob_B strat j

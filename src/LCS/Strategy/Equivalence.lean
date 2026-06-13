@@ -11,7 +11,7 @@ This module establishes the equivalence between the two main formalisms for LCS 
    $E_{i,x}, F_{j,y}$ satisfying similar commutation and consistency constraints.
 
 The main construction in this file is `ObservableStrategy_To_ProjectorStrategy`,
-which converts an `ObservableStrategyData` into an `LCSStrategy`. It proves that:
+which converts an `ObservableStrategy` into an `ProjectorStrategy`. It proves that:
 - The induced Alice measurements $E_{i,x}$ (defined as products of projectors) and Bob
   measurements $F_{j,y}$ (derived from Bob's observables) form valid measurement systems.
 - Alice and Bob's measurements commute as required by the LCS game structure.
@@ -28,13 +28,13 @@ variable {G : LCSLayout}
 /-- Bob's two-outcome measurement obtained from his observable via
 $P_y = (1/2)(1 + (-1)^y B_j)$. -/
 noncomputable def BobMeasurementFromObservables
-  (S : ObservableStrategyData R G) :
+  (S : ObservableStrategy R G) :
   Fin G.s → Fin 2 → R :=
   fun j y => ObservableToProjector (S.bob_obs j) y
 
 /-- For each question $j$, Bob's observable-induced projectors form a measurement system. -/
 lemma bobMeasurementFromObservables_isMeasurementSystem
-  (S : ObservableStrategyData R G) (j : Fin G.s) :
+  (S : ObservableStrategy R G) (j : Fin G.s) :
   IsMeasurementSystem (BobMeasurementFromObservables S j) where
   sum_one := by
     rw [Fin.sum_univ_two]
@@ -56,7 +56,7 @@ lemma bobMeasurementFromObservables_isMeasurementSystem
 /-- Projectors built from Alice observables belonging to the same equation commute,
 because the underlying observables commute. -/
 lemma projector_commute_in_equation
-  (S : ObservableStrategyData R G)
+  (S : ObservableStrategy R G)
   (i : Fin G.r) (j k : G.V i) (a b : Fin 2) :
     Commute (ObservableToProjector (S.alice_obs j.1) a)
       (ObservableToProjector (S.alice_obs k.1) b) := by
@@ -68,7 +68,7 @@ lemma projector_commute_in_equation
 /-- Alice's projector for an assignment $x$ is the product
 $E_{i,x} = \prod_{j \in V_i} (1/2)(1 + (-1)^{x_j} A_j)$. -/
 noncomputable def AliceMeasurementFromObservables
-  (S : ObservableStrategyData R G) :
+  (S : ObservableStrategy R G) :
   ∀ i, Assignment G i → R :=
   fun i assignment =>
     (Finset.univ : Finset (G.V i)).noncommProd
@@ -80,7 +80,7 @@ noncomputable def AliceMeasurementFromObservables
 /-- Partial joint measurement over a finite subset $s \subseteq V_i$.
 This is used to prove the normalization of Alice's full measurement by induction on $s$. -/
 noncomputable def JointOn
-  (S : ObservableStrategyData R G) (i : Fin G.r)
+  (S : ObservableStrategy R G) (i : Fin G.r)
   (s : Finset (G.V i)) (assignment : ∀ j ∈ s, Fin 2) : R :=
   s.noncommProd
     (fun j =>
@@ -96,7 +96,7 @@ noncomputable def JointOn
 
 /-- Summing the partial joint projectors over all assignments on $s = V_i$ gives $1$. -/
 lemma jointOn_sum_one
-  (S : ObservableStrategyData R G) :
+  (S : ObservableStrategy R G) :
   ∀ i, (∑ assignment : ∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2,
       JointOn S i (Finset.univ : Finset (G.V i)) assignment) = 1 := by
   classical
@@ -158,7 +158,7 @@ lemma jointOn_sum_one
 
 /-- Alice's full assignment-indexed projectors sum to $1$. -/
 lemma aliceMeasurementFromObservables_sum_one
-  (S : ObservableStrategyData R G) (i : Fin G.r) :
+  (S : ObservableStrategy R G) (i : Fin G.r) :
   (∑ assignment : Assignment G i, AliceMeasurementFromObservables S i assignment) = 1 := by
   classical
   let e : Assignment G i ≃ (∀ j ∈ (Finset.univ : Finset (G.V i)), Fin 2) := {
@@ -202,7 +202,7 @@ private lemma projector_orthogonal_of_ne
 
 /-- The partial Alice measurement over $s$ is idempotent. -/
 private lemma alice_partial_idempotent
-  (S : ObservableStrategyData R G) (i : Fin G.r)
+  (S : ObservableStrategy R G) (i : Fin G.r)
   (s : Finset (G.V i)) (assignment : Assignment G i) :
   let f : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (assignment j)
   (s.noncommProd f (by
@@ -233,7 +233,7 @@ private lemma alice_partial_idempotent
 
 /-- The partial Alice measurement over $s$ is self-adjoint. -/
 private lemma alice_partial_selfAdjoint
-  (S : ObservableStrategyData R G) (i : Fin G.r)
+  (S : ObservableStrategy R G) (i : Fin G.r)
   (s : Finset (G.V i)) (assignment : Assignment G i) :
   let f : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (assignment j)
   star (s.noncommProd f (by
@@ -268,7 +268,7 @@ private lemma alice_partial_selfAdjoint
 /-- If two assignments differ at some $j₀ \in s$, then the corresponding partial Alice
 projectors are orthogonal. -/
 private lemma alice_partial_orthogonal
-  (S : ObservableStrategyData R G) (i : Fin G.r)
+  (S : ObservableStrategy R G) (i : Fin G.r)
   (s : Finset (G.V i)) (α β : Assignment G i) (j0 : G.V i) (hj0 : j0 ∈ s)
   (hneq : α j0 ≠ β j0) :
   let fα : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (α j)
@@ -314,7 +314,7 @@ private lemma alice_partial_orthogonal
 
 /-- For each equation $i$, the assignment-indexed family of Alice projectors is a measurement system. -/
 lemma aliceMeasurementFromObservables_isMeasurementSystem
-  (S : ObservableStrategyData R G) (i : Fin G.r) :
+  (S : ObservableStrategy R G) (i : Fin G.r) :
   IsMeasurementSystem (AliceMeasurementFromObservables S i) := by
   classical
   refine ⟨aliceMeasurementFromObservables_sum_one S i, ?_, ?_, ?_⟩
@@ -338,7 +338,7 @@ lemma aliceMeasurementFromObservables_isMeasurementSystem
 /-- Every Alice projector commutes with every Bob projector, because each Alice observable
 commutes with each Bob observable and commutation is preserved by the projector construction. -/
 lemma aliceMeasurement_bobMeasurement_commute
-  (S : ObservableStrategyData R G)
+  (S : ObservableStrategy R G)
   (i : Fin G.r) (j : Fin G.s) (α : Assignment G i) (β : Fin 2) :
   AliceMeasurementFromObservables S i α * BobMeasurementFromObservables S j β =
     BobMeasurementFromObservables S j β * AliceMeasurementFromObservables S i α := by
@@ -359,7 +359,7 @@ lemma aliceMeasurement_bobMeasurement_commute
   simpa [AliceMeasurementFromObservables, BobMeasurementFromObservables] using hcomm_prod.eq.symm
 
 lemma aliceObservable_mul_aliceMeasurementFromObservables
-    (S : ObservableStrategyData R G)
+    (S : ObservableStrategy R G)
     (i : Fin G.r) (j : G.V i) (assignment : Assignment G i) :
     S.alice_obs j.1 * AliceMeasurementFromObservables S i assignment =
       ((-1 : ℂ) ^ (assignment j).val) •
@@ -427,9 +427,9 @@ observable, its associated two-outcome spectral projectors. -/
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   {G : LCSLayout}
-  (S : ObservableStrategyData R G)
+  (S : ObservableStrategy R G)
  :
-  LCSStrategy R G :=
+  ProjectorStrategy R G :=
   {
     E := AliceMeasurementFromObservables S
     F := BobMeasurementFromObservables S
@@ -439,7 +439,7 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
   }
 
 lemma alice_A_observableStrategy
-    (S : ObservableStrategyData R G)
+    (S : ObservableStrategy R G)
     (i : Fin G.r) (j : G.V i) :
     Alice_A (ObservableStrategy_To_ProjectorStrategy S) i j = S.alice_obs j.1 := by
   classical
@@ -453,7 +453,7 @@ lemma alice_A_observableStrategy
 /-- The Bob observable recovered from the projector strategy is the original
 observable supplied to the observable strategy. -/
 lemma bob_B_observableStrategy
-    (S : ObservableStrategyData R G)
+    (S : ObservableStrategy R G)
     (j : Fin G.s) :
     Bob_B (ObservableStrategy_To_ProjectorStrategy S) j = S.bob_obs j := by
   change ObservableOfMeasurementSystem (BobMeasurementFromObservables S j) =
@@ -469,7 +469,7 @@ namespace BipartiteObservableStrategy
 noncomputable def toProjectorStrategy
     {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
     (strat : BipartiteObservableStrategy n G) :
-    LCSStrategy (Matrix (n × n) (n × n) ℂ) G :=
+    ProjectorStrategy (Matrix (n × n) (n × n) ℂ) G :=
   ObservableStrategy_To_ProjectorStrategy strat.toObservableStrategy
 
 @[simp] lemma alice_A_bipartite

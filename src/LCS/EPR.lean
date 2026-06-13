@@ -285,7 +285,7 @@ square-sum, and the three extraction stages: loss kills `Ω`, the SOS terms kill
 variable {G : LCSLayout}
 variable (game : LCSGame G)
 variable (n : Type*) [Fintype n] [DecidableEq n]
-variable (strat : LCSStrategy (Matrix (n × n) (n × n) ℂ) G)
+variable (strat : ProjectorStrategy (Matrix (n × n) (n × n) ℂ) G)
 
 local notation "Ω" => eprVec n
 local notation "A[" i ", " j "]" => Alice_A strat i j

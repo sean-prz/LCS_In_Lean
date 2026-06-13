@@ -10,7 +10,7 @@ game using the observable formalism. In this formalism, players choose observabl
 (self-adjoint involutive operators) instead of projectors.
 
 ## Key Definitions
-- `ObservableStrategyData`: The data representing an observable strategy, including:
+- `ObservableStrategy`: The data representing an observable strategy, including:
   - `alice_obs`, `bob_obs`: The observables for Alice and Bob.
   - `sameEquation_comm`: The local commutativity of Alice's observables within an equation.
   - `alice_bob_commute`: The global commutativity between Alice's and Bob's observables.
@@ -19,7 +19,7 @@ game using the observable formalism. In this formalism, players choose observabl
 open scoped BigOperators
 
 
-structure ObservableStrategyData
+structure ObservableStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   (G : LCSLayout) where
   alice_obs : Fin G.s → R
@@ -92,7 +92,7 @@ namespace BipartiteObservableStrategy
 noncomputable def toObservableStrategy
     {n : Type*} [Fintype n] [DecidableEq n] {G : LCSLayout}
     (strat : BipartiteObservableStrategy n G) :
-    ObservableStrategyData (Matrix (n × n) (n × n) ℂ) G where
+    ObservableStrategy (Matrix (n × n) (n × n) ℂ) G where
   alice_obs := fun j => bipartiteAliceLift (strat.obs j)
   bob_obs := fun j => bipartiteBobLift (strat.obs j)
   alice_observable := fun j => bipartiteAliceLift_observable (strat.is_observable j)

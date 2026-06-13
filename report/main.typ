@@ -232,10 +232,10 @@ structure IsMeasurementSystem
 ```]
 
 
-Using this notion, the projector-based strategy formalism is defined by the structure `LCSStrategy`.
+Using this notion, the projector-based strategy formalism is defined by the structure `ProjectorStrategy`.
 
 #codeblock[```lean
-structure LCSStrategy
+structure ProjectorStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   (G : LCSLayout) where
   E : ∀ i, (Assignment G i → R)
@@ -268,11 +268,11 @@ structure IsObservable (O : R) : Prop where
 ```]
 
 
-With this notion of binary observable in place, the project packages the observable description of a strategy into a structure `ObservableStrategyData` : 
+With this notion of binary observable in place, the project packages the observable description of a strategy into a structure `ObservableStrategy` : 
 
 #codeblock[```lean
 
-structure ObservableStrategyData
+structure ObservableStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   (G : LCSLayout) where
   alice_obs : Fin G.s → R
@@ -302,10 +302,10 @@ def ObservableOfMeasurementSystem (f : Fin 2 → R) : R :=
   f 0 - f 1
 
 def Alice_A
-  (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
+  (strat : ProjectorStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
 
-def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+def Bob_B (strat : ProjectorStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
 ```]
 
@@ -318,9 +318,9 @@ This construction is implemented in Lean by `ObservableStrategy_To_ProjectorStra
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
   {G : LCSLayout}
-  (S : ObservableStrategyData R G)
+  (S : ObservableStrategy R G)
  :
-  LCSStrategy R G := {
+  ProjectorStrategy R G := {
     E := AliceMeasurementFromObservables S
     F := BobMeasurementFromObservables S
     alice_ms := 
@@ -333,7 +333,7 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
 
 On Bob's side, each observable gives a binary measurement by taking its two associated spectral projectors, and the corresponding family is proved to form a measurement system. 
 On Alice's side, the measurement attached to an equation is obtained by multiplying the projectors associated with the observables appearing in that equation; the row-wise commutation assumptions ensure that these products are well defined, and the project proves that the resulting family is again a measurement system.
-Finally, the global commutation hypothesis between Alice's and Bob's observables is used to show that every Alice projector commutes with every Bob projector. These results together justify the construction of ObservableStrategy_To_ProjectorStrategy as a valid LCSStrategy. 
+Finally, the global commutation hypothesis between Alice's and Bob's observables is used to show that every Alice projector commutes with every Bob projector. These results together justify the construction of ObservableStrategy_To_ProjectorStrategy as a valid ProjectorStrategy. 
 
 === Bipartite Observable Strategies
 
@@ -958,7 +958,7 @@ The present development has several important limitations.
 
 - *No full equivalence theorem between the two strategy formalisms.* \
   The project constructs and uses the bridge from observable strategies to projector strategies, but it
-  does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way. One concrete obstruction is that the observables recovered from a projector strategy on Alice's side are naturally indexed by a pair $(i,j)$ of an equation and a variable in that equation, whereas `ObservableStrategyData` is formulated with a single observable for each variable. 
+  does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way. One concrete obstruction is that the observables recovered from a projector strategy on Alice's side are naturally indexed by a pair $(i,j)$ of an equation and a variable in that equation, whereas `ObservableStrategy` is formulated with a single observable for each variable. 
   #v(1em)
 
 - *The current bipartite observable interface is too specialised for the full EPR converse story.* \

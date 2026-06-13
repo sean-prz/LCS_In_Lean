@@ -12,7 +12,7 @@ projector measurement systems. In this formalism, players' strategies are
 represented by families of projectors $\{E_{i,x}\}$ and $\{F_{j,y}\}$.
 
 ## Key Definitions
-- `LCSStrategy`: The core structure representing a projector-based strategy.
+- `ProjectorStrategy`: The core structure representing a projector-based strategy.
 - `Alice_A`, `Bob_B`: Derived observables extracted from the projector measurements.
 
 ## Key Lemmas
@@ -26,7 +26,7 @@ variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
 variable {G : LCSLayout}
 set_option linter.unusedSectionVars false
 
-structure LCSStrategy
+structure ProjectorStrategy
   (R : Type*) [Ring R] [StarRing R] [Algebra ℂ R]
   (G : LCSLayout) where
   E : ∀ i, (Assignment G i → R)
@@ -36,15 +36,15 @@ structure LCSStrategy
   commute  : ∀ i j α β, E i α * F j β = F j β * E i α
 
 noncomputable def Alice_A
-  (strat : LCSStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
+  (strat : ProjectorStrategy R G) (i : Fin G.r) (j : G.V i) : R :=
   ObservableOfMeasurementSystem (InducedMeasurementSystem (strat.E i) (fun x => x j))
 
-def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
+def Bob_B (strat : ProjectorStrategy R G) (j : Fin G.s) : R :=
   ObservableOfMeasurementSystem (strat.F j)
 
 section WithStrategy
 
-variable (strat : LCSStrategy R G)
+variable (strat : ProjectorStrategy R G)
 
 local notation "A[" i ", " j "]" => Alice_A strat i j
 local notation "B[" j "]" => Bob_B strat j
