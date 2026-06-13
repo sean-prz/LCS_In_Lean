@@ -25,11 +25,11 @@
 #show:ieee.with(
   title: [Formalising Binary Linear Constraint System Games in Lean 4],
   abstract: [
-  This project presents a Lean 4 formalization of binary Linear Constraint System (LCS) games and their quantum strategies. 
+  This project presents a Lean 4 formalisation of binary Linear Constraint System (LCS) games and their quantum strategies. 
   It provides the core definitions for LCS games over $F_2$, together with two complementary quantum strategy formalisms: a projector-based formalism, where strategies are described by projective measurement systems for the players, and an observable-based formalism, where strategies are described by self-adjoint involutive operators satisfying the relevant commutation relations. 
   The development also includes a bridge between these two formalisms, allowing strategies to be translated from one description to the other.
 
-  On the analytic side, the formalization develops local winning and local loss operators for binary LCS games and proves a sum-of-squares decomposition of the local loss operator. This is then combined with an EPR-state argument to extract row identities for observables arising from bipartite strategies.
+  On the analytic side, the formalisation develops local winning and local loss operators for binary LCS games and proves a sum-of-squares decomposition of the local loss operator. This is then combined with an EPR-state argument to extract row identities for observables arising from bipartite strategies.
   On the algebraic side, the project defines the solution group of a binary linear system and shows how these row identities induce a matrix representation of the corresponding solution group. 
 
   The Mermin-Peres Magic Square game serves as the main case study, illustrating how the abstract framework can be instantiated by an explicit quantum strategy.
@@ -64,7 +64,7 @@ This setting makes it possible to compare the correlations achievable by classic
 The study of such games is rooted in the foundations of quantum mechanics.
 The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, famously described as "spooky action at a distance."
 In 1964, Bell's theorem showed that no local hidden-variable theory can reproduce all quantum predictions, establishing non-locality as a central feature of quantum theory rather than a purely philosophical curiosity.
-Since then, non-local games have become a standard language for expressing and analyzing this phenomenon.
+Since then, non-local games have become a standard language for expressing and analysing this phenomenon.
 They also play an important role in quantum information theory, for instance in device-independent quantum cryptography, where security guarantees are derived from the violation of classical bounds without relying on assumptions about the internal structure of the devices used.
 
 == Linear Constraint System Games
@@ -92,7 +92,7 @@ Canonical examples such as the Mermin-Peres magic square game illustrate the str
 */
 
 == Contributions and Scope
-This project makes the following contributions to the formalization of binary Linear Constraint System games in Lean 4:
+This project makes the following contributions to the formalisation of binary Linear Constraint System games in Lean 4:
 
 - It formalises the core definitions of binary Linear Constraint System games, including layouts, assignments, games, and explicit binary linear systems over $F_2$.
 - It develops two quantum strategy formalisms:
@@ -108,7 +108,7 @@ This project makes the following contributions to the formalization of binary Li
 The project source code is publicly available on github, accessible via \ #link("https://sean.perazzolo.ch/lcs/source")[sean.perazzolo.ch/LCS/source].
 #v(1em)
 *Documentation* \
-In addition, to make the project easier to naviagte, API dcoumentation is available at \ #link("https://sean.perazzolo.ch/lcs/documentation")[sean.perazzolo.ch/LCS/documentation]
+In addition, to make the project easier to navigate, API documentation is available at \ #link("https://sean.perazzolo.ch/lcs/documentation")[sean.perazzolo.ch/LCS/documentation]
 #v(1em)
 
 *Report* \
@@ -120,7 +120,7 @@ A copy of this report is hosted on the project website at #link("https://sean.pe
 
 == Structure of the Lean Development
 
-The formalization is organized as follows : 
+The formalisation is organised as follows : 
 
 - The foundational definitions are introduced in `LCS/Basic.lean`, which defines layouts, games, and explicit binary linear systems. 
 
@@ -135,7 +135,7 @@ The formalization is organized as follows :
 This project documentation follows the standard of Lean, #link("github.com")[doc-gen4], which build from the source lean file documentation, by rendering the comments above lemmas or section, displaying  math and hiding the proof details. This is the same workflow as mathlib. 
 
 
-== Linear Constraint System Games Formalization 
+== Linear Constraint System Games Formalisation 
 
 We begin by formalising Linear Constraint System games. 
 
@@ -211,7 +211,7 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 === Projector-Based Strategies
 
 *The Mathematical Object*
-In a quantum strategy, a player's responsse to a question is not modeled as a determistic function from questions to answer.
+In a quantum strategy, a player's response to a question is not modelled as a deterministic function from questions to answer.
 Instead, the question determines which measurement the player performs on their share of quantum state, and the answer is the given by the outcome of that measurement.
 For this reason strategies are naturally described in terms of measurement systems, which are families of projective measurements.
 
@@ -263,9 +263,9 @@ Although this formalism is expressed in terms of projective measurements, the la
 Although the projector-based formalism is the most direct way to describe quantum strategies, it is often more convenient to work with observables, which are self-adjoint operators whose spectral decomposition corresponds to the projective measurements. For this reason, the project also introduces an observable-based formalism.
 
 In this setting, a strategy is described by one observable for each variable on Alice's side, and one observable for each variable on Bob's side.
-They must satisfy the commutation relation dictated by the structure of the game. On Alice's side, observables corresponding to variables appearing in the same equation must commute, so that their productsare well defined independently of the order of multiplication. In addition Alice's observables must commute with all of Bob's observables, reflecting the spatial separation between the players.
+They must satisfy the commutation relation dictated by the structure of the game. On Alice's side, observables corresponding to variables appearing in the same equation must commute, so that their products are well defined independently of the order of multiplication. In addition Alice's observables must commute with all of Bob's observables, reflecting the spatial separation between the players.
 
-Because the present project is restricted to binary outcomes, the observable formalism is also specialized accordingly. Rather than considering arbitrary observables, we work with self-adjoint 
+Because the present project is restricted to binary outcomes, the observable formalism is also specialised accordingly. Rather than considering arbitrary observables, we work with self-adjoint 
 involutions, which are exactly the operators arising from two-outcome projective measurements. This is encoded in Lean by the predicate IsObservable.
 
 #codeblock[```lean
@@ -300,8 +300,8 @@ This bridge is essential for this project as explicit examples are most often de
 
 On Bob's side, the passage from projectors to observables is immediate. Since Bob's measurements are binary, each family `F j : Fin 2 -> R` gives rise to a single observable obtained from the difference of the two projectors. In Lean, this is the definition `Bob_B`.
 
-Alice's side is slightly subtler. For a fixed equation $i$, the family `E i` is indexed by full assignements rather than by binary outcomes. To extract an observables assocaited with a single variable
-$j$  apparing that equation, one first collapses the assingment indexed measurement to a binary measurement that only distinguishes the value of the variables $j$. 
+Alice's side is slightly subtler. For a fixed equation $i$, the family `E i` is indexed by full assignments rather than by binary outcomes. To extract an observable associated with a single variable
+$j$ appearing in that equation, one first collapses the assignment-indexed measurement to a binary measurement that only distinguishes the value of the variable $j$. 
 This is expressed in Lean by the construction `InducedMeasurementSystem (strat.E i) (fun x => x j)`. The observable associated with this induced binary measurement is then defined as `Alice_A strat i j`.
 
 #codeblock[```lean
@@ -318,9 +318,9 @@ def Bob_B (strat : LCSStrategy R G) (j : Fin G.s) : R :=
 
 The project also proves that these derived operators are genuine binary observables. Bob's observable is obtained directly from his binary measurement, while Alice's observable is obtained from the induced binary measurement associated with a single variable in a fixed equation. In both cases, the fact that the underlying family is a measurement system implies that the resulting operator is a self-adjoint involution.
 
-Conversly, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
-Bob's measurement is obetained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commting observables appearing in a common equation.
-This construction is implmented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
+Conversely, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
+Bob's measurement is obtained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commuting observables appearing in a common equation.
+This construction is implemented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
 #codeblock(size: 6.5pt)[```lean
 noncomputable def ObservableStrategy_To_ProjectorStrategy
   {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
@@ -344,7 +344,7 @@ Finally, the global commutation hypothesis between Alice's and Bob's observables
 
 === Bipartite Observable Strategies
 
-For the final part of the project, the observable formalism is further specialized to a bipartite setting. This is the setting relevant for the EPR-state argument developed later, where Alice's and Bob's operators act on different tensor factors of a bipartite Hilbert space.
+For the final part of the project, the observable formalism is further specialised to a bipartite setting. This is the setting relevant for the EPR-state argument developed later, where Alice's and Bob's operators act on different tensor factors of a bipartite Hilbert space.
 
 Instead of specifying two separate observable families from the start, the project begins with a single family of observables indexed by the variables of the game. These observables act on a space of the form `Matrix n n ℂ`. From this single family, one obtains Alice's and Bob's observables by lifting them to the two tensor factors: Alice's observable associated with a matrix `M` is `M ⊗ I`, while Bob's observable is `I ⊗ M`. In this way, commutation between Alice's and Bob's operators is automatic, since operators acting on different tensor factors commute.
 
@@ -364,7 +364,7 @@ Here `obs j` denotes the basic observable associated with variable `j`. The fiel
 
 From such a bipartite observable strategy, the project constructs an ordinary observable strategy by tensor lifting. Alice's observables are obtained by applying the map `M ↦ M ⊗ I`, and Bob's observables by applying `M ↦ I ⊗ M`. This construction is implemented by `toObservableStrategy`, and it provides the entry point from the bipartite setting into the general observable and projector formalisms developed earlier.
 
-This specialization is important because it matches the tensor-product structure of the EPR state used later in the project. In particular, it provides the framework in which local-loss annihilation on the EPR state can be turned into concrete matrix identities and, ultimately, into representations of the solution group.
+This specialisation is important because it matches the tensor-product structure of the EPR state used later in the project. In particular, it provides the framework in which local-loss annihilation on the EPR state can be turned into concrete matrix identities and, ultimately, into representations of the solution group.
 
 == Notation Used in the Sequel
 
@@ -392,14 +392,14 @@ that is, the product of the observables attached to all variables appearing in e
 
 == Winning Conditions and Local Loss 
 
-Once a binary LCS game and a projector-based strategy have been defined, the next step is to formalise the winning condition of the game and to derive the associated  winning and loss operators.
-This is the opint at which the right hand side values $b_i$ of the equation come into play, as the winning condition depends on whether an assignement satisfies the chosen constraint.
+Once a binary LCS game and a projector-based strategy have been defined, the next step is to formalise the winning condition of the game and to derive the associated winning and loss operators.
+This is the point at which the right-hand side values $b_i$ of the equations come into play, as the winning condition depends on whether an assignement satisfies the chosen constraint.
 
 
 
 === Winning and Loss Operators
 
-For a fixed equation $i$, the set of winning assingments consists of the assignements whose parity matches $b_i$. This set is used to define the local winning operator for a pair $(i,j)$ of an equation and a variable appearing in that equation. Intuitevly, this operator collects exactly those outcomes for which Alice's assignment satisfies the equation and agress with Bob's answer on variable $j$. 
+For a fixed equation $i$, the set of winning assignments consists of the assignments whose parity matches $b_i$. This set is used to define the local winning operator for a pair $(i,j)$ of an equation and a variable appearing in that equation. Intuitively, this operator collects exactly those outcomes for which Alice's assignment satisfies the equation and agrees with Bob's answer on variable $j$. 
 
 In `WinningCondition.lean`, the notation `S[i]` is used as a shorthand for `winning_assignments game i`, namely the set of assignments on equation $i$ whose parity matches $b_i$.
 
@@ -434,10 +434,10 @@ noncomputable def loss_operator : R :=
 
 === The EPR Vector
 
-At this point, *the formalization is specialized from the earlier abstract algebraic setting to finite-dimensional complex matrix algebras*.
+At this point, *the formalisation is specialised from the earlier abstract algebraic setting to finite-dimensional complex matrix algebras*.
 More precisely, the relevant operators act on a bipartite space of the form $CC^n otimes CC^n$, represented in Lean by matrices of type `Matrix (n × n) (n × n) ℂ`.
 
-The distinguished vector used in the project is the unnormalized maximally entangled vector.
+The distinguished vector used in the project is the unnormalised maximally entangled vector.
 $ ket(Omega) = sum_a e_a otimes e_a $
 Its importance lies in the symmetry with which it couples the two tensor factors: it allows operators acting on one side of the tensor product to be related to operators acting on the other side.
 
@@ -452,7 +452,7 @@ local notation "Ω" => eprVec n
 ```]
 
 This is simply the coordinate description of the vector $ket(Omega)$, written in the standard basis of the bipartite space.
-The vector is intentionally left unnormalized, since the later arguments only use annihilation and injectivity properties rather than norm considerations.
+The vector is intentionally left unnormalised, since the later arguments only use annihilation and injectivity properties rather than norm considerations.
 
 === EPR Identities for Bipartite Operators
 
@@ -481,7 +481,7 @@ lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
       M * Nᵀ = 1
 ```]
 
-Several specialized versions of this identity are then derived for the bipartite lift operations introduced earlier.
+Several specialised versions of this identity are then derived for the bipartite lift operations introduced earlier.
 These lemmas make it possible to replace operator equalities on the distinguished vector $ket(Omega)$ by concrete matrix equalities in the underlying `n × n` space.
 
 *This is the mechanism referred to in the project as the EPR extraction argument*, and it forms the bridge between bipartite operator relations and the matrix identities used later in the representation-theoretic part of the development.
@@ -530,10 +530,10 @@ Thus the solution group is defined in Lean as the presented group on the generat
 
 #colbreak()
 = Results
-With the definitions and constructions described in the previous section, we can now formalize the result of interest, all taken from the thesis of Arthur Metha.
+With the definitions and constructions described in the previous section, we can now formalise the result of interest, all taken from the thesis of Arthur Mehta.
 
 == Sum-of-Squares Decomposition
-The first main result is a sum-of-squares decomposition of the local loss operator. The proof in mathematical terms is described in section 4.7 of Metha's thesis. 
+The first main result is a sum-of-squares decomposition of the local loss operator. The proof in mathematical terms is described in section 4.7 of Mehta's thesis. 
 
 $
 L_(i,j)
@@ -544,10 +544,10 @@ L_(i,j)
 $
 
 Hence, the local loss is nullified if and only if the three terms in the sum-of-squares are nullified, this is because each will be shown to be positive semidefininte. 
-This decomposition is a key step in the EPR extraction arguement to produces the row identities. 
+This decomposition is a key step in the EPR extraction argument to produce the row identities. 
 
 
-In Lean, this decomposition is formalized by the following theorem:
+In Lean, this decomposition is formalised by the following theorem:
 #show raw: set text(7pt)
 #codeblock[```lean
 theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
@@ -559,21 +559,21 @@ theorem local_loss_sos (i : Fin G.r) (j : G.V i) :
     ) 
 
 ```]
-This successfully formalizes that given a game and a projector-based strategy for it, the local loss operator can be decomposed as
+This successfully formalises that given a game and a projector-based strategy for it, the local loss operator can be decomposed as
 a sum of three squares.
 
 
-The main challenges in the formalization of this results were ; 
+The main challenges in the formalisation of this results were ; 
 1. Noncommutative operator algebra.
-  While the proof is mathemtically elementary, Lean needs to be explicit about where multiplication is noncommuttaive and where
+  While the proof is mathematically elementary, Lean needs to be explicit about where multiplication is noncommutative and where
   it is safe to reorder terms. A lot of the work is proving and reusing commutation lemmas like :
   - Alice observables commute along a row.
   - Alice and Bob operators commute when needed.
   - The Row product commutes with relevant local observable.
-2. Mixing scalar actions with operator mutliplication
-  A repeated source of complication was expressions involving both scalar multiplication and operator multiplication $(c dot X) , (X * Y)$. The paper trests these transparently, but in Lena they require careful rewriting with lemmas like `smul_mul` and `mul_smul` to put the scalar factors in the right place.
+2. Mixing scalar actions with operator multiplication
+  A repeated source of complication was expressions involving both scalar multiplication and operator multiplication $(c dot X) , (X * Y)$. The paper treats these transparently, but in Lean they require careful rewriting with lemmas like `smul_mul` and `mul_smul` to put the scalar factors in the right place.
 3. Turning the paper sums into explicit finite sums in Lean.
-  The proof uses sums over winning assignements and marginal slices of assignements. In Lean that becomes 
+  The proof uses sums over winning assignments and marginal slices of assignments. In Lean that becomes 
   - Finset.filter, Finset.sum_congr, fiberwise sums.
   So a significant part of the file is showing that the paper sums can be rewritten in terms of these more explicit constructions, and then manipulating them to get the desired final form.
 
@@ -602,7 +602,7 @@ $
 Each summand is a norm square, hence a nonnegative real number. Since their sum is zero, each one
 must itself be zero, and therefore
 $ T_1 ket(Omega) = 0, wide T_2 ket(Omega) = 0, wide T_3 ket(Omega) = 0. $
-This is the positivity argument formalized in Lean.
+This is the positivity argument formalised in Lean.
 
 #show raw: set text(7pt)
 #codeblock[```lean
@@ -677,7 +677,7 @@ This assignment respects all four families of defining relations:
 Since every relator in the presentation maps to the identity under this assignment, the universal property of the presented group guarantees that the assignment extends uniquely to a group homomorphism
 $ Gamma arrow.long U(n, CC). $
 
-=== Formalization in Lean
+=== Formalisation in Lean
 
 The first step is to define the generator-level assignment. Each solution-group generator is mapped to a concrete element of the unitary group `unitary (Matrix n n ℂ)`: variable generators are sent to their packaged observables, and `J` is sent to the scalar matrix $-I$.
 
@@ -733,10 +733,10 @@ This is the main end-to-end result of the project.
 It shows that any bipartite observable strategy achieving perfect play on a binary LCS game gives rise to a unitary representation of the associated solution group.
 The representation lands in the unitary group (rather than just the general linear group) because observables are by definition self-adjoint involutions, and the scalar matrix $-I$ is trivially unitary.
 
-=== Main Formalization Challenge
+=== Main Formalisation Challenge
 
 The file `Representation.lean` is roughly 600 lines long, which may seem surprising given that the mathematical argument is short: define the generator map, check the relators, invoke the universal property.
-The bulk of the formalization is devoted to bridging between two different descriptions of the same algebraic object.
+The bulk of the formalisation is devoted to bridging between two different descriptions of the same algebraic object.
 
 On the group-theoretic side, the equation relator for row $i$ is a word in the free group on the generators `SolutionGen S`, constructed from the explicit equation support of the linear system.
 On the analytic side, the row identity extracted from the EPR argument is a matrix equation involving the ordered product of observables indexed by the game's row support.
@@ -819,7 +819,7 @@ In this way, the classical parity equations are replaced by operator identities 
 
 == The Support-Based Description in Lean
 
-In the formalization, the game is first encoded in the support-based language introduced earlier.
+In the formalisation, the game is first encoded in the support-based language introduced earlier.
 The layout records only which variables occur in each equation, while the right-hand side vector records the parity bits.
 
 For the magic square, the layout has $6$ equations and $9$ variables.
@@ -854,7 +854,7 @@ This is a good example of why the support-based description is convenient.
 At this stage one only needs to specify the incidence pattern of the variables and the parity bit attached to each constraint.
 The resulting object is already enough to state the game and to instantiate the general strategy and winning-condition framework.
 
-== Formalizing the Grid Strategy
+== Formalising the Grid Strategy
 
 The observable grid itself is encoded as a function from the nine variable indices to $4 times 4$ matrices, obtained as Kronecker products of the Pauli matrices and the identity.
 
@@ -933,7 +933,7 @@ Second, it provides a concrete binary linear system and hence a concrete solutio
 
 == What the Case Study Shows
 
-The present formalization of the Mermin-Peres game therefore establishes the following points.
+The present formalisation of the Mermin-Peres game therefore establishes the following points.
 
 - The game itself is encoded explicitly as a binary LCS game.
 - The standard Pauli-grid construction is encoded explicitly as a family of observables.
@@ -948,7 +948,7 @@ The case study lacks a theorem stating that this particular concrete strategy is
 Thus the case study currently verifies the strategy data and the associated algebraic structures, while stopping short of a complete formal proof of perfect play for this concrete example.
 
 Even with this limitation, the magic square remains a useful and informative case study.
-It demonstrates that the abstract framework developed in the project is expressive enough to capture the most familiar example of quantum pseudotelepathy, and it provides a concrete benchmark against which the strategy, EPR, and solution-group layers of the formalization can be understood.
+It demonstrates that the abstract framework developed in the project is expressive enough to capture the most familiar example of quantum pseudotelepathy, and it provides a concrete benchmark against which the strategy, EPR, and solution-group layers of the formalisation can be understood.
 
 
 = Limitations and Future Work
@@ -964,7 +964,7 @@ The present development has several important limitations.
   appear and not general coefficients over an arbitrary field. #v(1em)
 
 - *Finite-dimensional matrix setting for the EPR argument.* \
-  The extraction results are proved only after specializing to complex matrices, so the final EPR and
+  The extraction results are proved only after specialising to complex matrices, so the final EPR and
   representation arguments do not yet apply in a more abstract operator-algebraic or infinite-dimensional setting.
   #v(1em)
 
@@ -973,7 +973,7 @@ The present development has several important limitations.
   does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way. One concrete obstruction is that the observables recovered from a projector strategy on Alice's side are naturally indexed by a pair $(i,j)$ of an equation and a variable in that equation, whereas `ObservableStrategyData` is formulated with a single observable for each variable. 
   #v(1em)
 
-- *The current bipartite observable interface is too specialized for the full EPR converse story.* \
+- *The current bipartite observable interface is too specialised for the full EPR converse story.* \
   The `BipartiteObservableStrategy` wrapper used in the EPR part of the development starts from a single family of observables and lifts it symmetrically to the two tensor factors. This is sufficient for packaging valid bipartite strategies and for the conditional row-identity and representation results proved in the project. However, the EPR extraction argument naturally produces transpose-related local observables, and the current interface does not yet formalise the more general two-family setup needed to reconstruct perfect strategies from solution-group representations or to instantiate the full perfect-play pipeline for the concrete Magic Square strategy. 
   #v(1em)
 
@@ -983,10 +983,10 @@ The present development has several important limitations.
 
 == Future Work
 
-The project can be extended by addressing the limiatations and/or adding more concrete examples. 
+The project can be extended by addressing the limitations and/or adding more concrete examples. 
 
-More interestingly, a natural next step would be to move toward *robust self-testing* results, by replacing the exact annhilation
+More interestingly, a natural next step would be to move toward *robust self-testing* results, by replacing the exact annihilation
 condition on the EPR state with an approximate version, and showing that this implies approximate versions of the row identities, which in turn can be used to show that the strategy is close to an ideal strategy in a suitable sense. This would require developing a robust version of the EPR extraction argument, which is a significant technical challenge but would be a very interesting direction for future work.
 
 = Conclusion
-Overall, this project successfully formalizes the core mathematical framework of binary Linear Constraint System games in Lean 4. By providing these foundational definitions and formalizing a handful of key results, including quantum strategy frameworks and matrix representations of the solution group, this work opens the door to verifying more advanced LCS game theory theorems in Lean.
+Overall, this project successfully formalises the core mathematical framework of binary Linear Constraint System games in Lean 4. By providing these foundational definitions and formalising a handful of key results, including quantum strategy frameworks and matrix representations of the solution group, this work opens the door to verifying more advanced LCS game theory theorems in Lean.
