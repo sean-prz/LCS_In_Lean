@@ -46,6 +46,7 @@
   ),
   index-terms: ("Lean 4", "Formal verification", "Linear Constraint System Games", "Quantum strategies", "Solution groups", "Mermin-Peres magic square game") ,
   figure-supplement: [Fig.],
+  bibliography: bibliography("references.bib"),
 )
 
 
@@ -62,13 +63,13 @@ This setting makes it possible to compare the correlations achievable by classic
 
 == Historical Context and Significance
 The study of such games is rooted in the foundations of quantum mechanics.
-The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, famously described as "spooky action at a distance."
-In 1964, Bell's theorem showed that no local hidden-variable theory can reproduce all quantum predictions, establishing non-locality as a central feature of quantum theory rather than a purely philosophical curiosity.
+The Einstein-Podolsky-Rosen (EPR) paradox, proposed in 1935 @EPR1935, challenged the completeness of quantum theory by arguing that its predictions suggested an unacceptable form of long-range influence, famously described as "spooky action at a distance."
+In 1964, Bell's theorem showed @Bell1964 that no local hidden-variable theory can reproduce all quantum predictions, establishing non-locality as a central feature of quantum theory rather than a purely philosophical curiosity.
 Since then, non-local games have become a standard language for expressing and analysing this phenomenon.
 They also play an important role in quantum information theory, for instance in device-independent quantum cryptography, where security guarantees are derived from the violation of classical bounds without relying on assumptions about the internal structure of the devices used.
 
 == Linear Constraint System Games
-Within this broad class, Linear Constraint System (LCS) games form a particularly simple and structured family.
+Within this broad class, Linear Constraint System (LCS) games @cleve2013 @coladangelo2019 form a particularly simple and structured family.
 Instead of arbitrary input-output rules, the winning conditions in an LCS game are determined by a system of linear equations over a finite field, most often in the binary setting over $F_2$.
 In such a game, the first player, conventionally called Alice, is asked for an assignment to the variables appearing in a given equation, while the second player, Bob, is asked for the value of a single variable appearing in that equation.
 The players win if Alice's assignment satisfies the chosen equation and if Bob's answer agrees with Alice's value on the queried variable.
@@ -519,10 +520,10 @@ Thus the solution group is defined in Lean as the presented group on the generat
 
 #colbreak()
 = Results
-With the definitions and constructions described in the previous section, we can now formalise the result of interest, all taken from the thesis of Arthur Mehta.
+With the definitions and constructions described in the previous section, we can now formalise the result of interest, all taken from the thesis of Arthur Mehta @Mehta2021.
 
 == Sum-of-Squares Decomposition
-The first main result is a sum-of-squares decomposition of the local loss operator. The proof in mathematical terms is described in section 4.7 of Mehta's thesis. 
+The first main result is a sum-of-squares decomposition of the local loss operator. The proof in mathematical terms is described in section 4.7 of Mehta's thesis @Mehta2021. 
 
 $
 L_(i,j)
@@ -645,7 +646,7 @@ Together these give the row identities that are used in the construction of repr
 
 == Matrix Representations of the Solution Group
 The final step of this project is to show that these row identities can be used to construct a matrix representation of
-the solution group of the binary linear system associated with the game, given a perfect quantum strategy for the game.
+the solution group of the binary linear system associated with the game, given a perfect quantum strategy for the game (see Section 4.2.3 of @Mehta2021).
 
 === The Construction
 
@@ -739,7 +740,7 @@ This kind of alignment work, connecting two representations of the same mathemat
 = Magic Square Game Case Study <magic-square>
 
 
-The Mermin-Peres Magic Square game is the main concrete example developed in this project. It is a particularly natural case study for binary LCS games: the rules are simple to state, the contradiction for classical assignments is easy to understand, and the quantum strategy can be written as an explicit $3 times 3$ grid of Pauli observables. For this reason it is often regarded as one of the most intuitive examples of quantum pseudotelepathy.
+The Mermin-Peres Magic Square game @Mermin1990 is the main concrete example developed in this project. It is a particularly natural case study for binary LCS games: the rules are simple to state, the contradiction for classical assignments is easy to understand, and the quantum strategy can be written as an explicit $3 times 3$ grid of Pauli observables. For this reason it is often regarded as one of the most intuitive examples of quantum pseudotelepathy.
 
 == The Game
 
@@ -974,8 +975,9 @@ The present development has several important limitations.
 
 The project can be extended by addressing the limitations and/or adding more concrete examples. 
 
-More interestingly, a natural next step would be to move toward *robust self-testing* results, by replacing the exact annihilation
+More interestingly, a natural next step would be to move toward *robust self-testing* results @coladangelo2019, by replacing the exact annihilation
 condition on the EPR state with an approximate version, and showing that this implies approximate versions of the row identities, which in turn can be used to show that the strategy is close to an ideal strategy in a suitable sense. This would require developing a robust version of the EPR extraction argument, which is a significant technical challenge but would be a very interesting direction for future work.
 
 = Conclusion
 Overall, this project successfully formalises the core mathematical framework of binary Linear Constraint System games in Lean 4. By providing these foundational definitions and formalising a handful of key results, including quantum strategy frameworks and matrix representations of the solution group, this work opens the door to verifying more advanced LCS game theory theorems in Lean.
+#colbreak()
