@@ -12,9 +12,6 @@ cp -r source/doc/. "$BASE_DIR/docs/documentation"
 
 # 2. Compile.typ
 echo "Compiling status report"
-cd "$BASE_DIR/typst"
-typst compile status.typ
-mv status.pdf "$BASE_DIR/docs/status.pdf"
 cd "$BASE_DIR/report"
 typst compile main.typ
 mv main.pdf "$BASE_DIR/docs/report.pdf"
