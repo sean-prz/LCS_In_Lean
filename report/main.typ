@@ -946,6 +946,25 @@ Even with this limitation, the magic square remains a useful and informative cas
 It demonstrates that the abstract framework developed in the project is expressive enough to capture the most familiar example of quantum pseudotelepathy, and it provides a concrete benchmark against which the strategy, EPR, and solution-group layers of the formalisation can be understood.
 
 
+= Project Timeline
+
+#figure(
+  caption: [week by week formalisation and development progress.],
+  table(
+    columns: (auto, 1fr),
+    stroke: 0.5pt + luma(200),
+    align: (left, left),
+    [*Week*], [*Key Achievements*],
+    [Weeks 1 & 2], [Literature review of LCS games and the Mermin-Peres magic square; familiarisation with the Lean 4 proof assistant.],
+    [Weeks 3 & 4], [Formalisation of LCS layouts and games; definition of projector-based and observable-based strategies.],
+    [Weeks 5 & 6], [Formal proof of equivalence between observable and projector strategies; definition of local winning operators.],
+    [Weeks 7 & 8 \ _(Milestones 1 & 2)_], [Formalisation of the sum-of-squares decomposition of local loss (Milestone 1) and verification of the Mermin-Peres Magic Square as a valid observable strategy (Milestone 2).],
+    [Weeks 9 & 10], [Group-theoretic formalisation mapping LCS games to presented Solution Groups; derivation of global matrix identities via EPR annihilation.],
+    [Weeks 11 & 12 \ _(Milestone 3)_], [Construction of the Solution Group representation via matrix homomorphisms.],
+    [Weeks 13 & 14], [Writing the final report and preparing the codebase for submission.]
+  )
+)
+
 = Limitations and Future Work
 
 
@@ -989,4 +1008,3 @@ Overall, this project successfully formalises the core mathematical framework of
 
 = AI Use Disclosure
 The focus of this project is on the high-level formalisation architecture and theorem statements rather than the cleanliness of the proof bodies. Accordingly, the detailed Lean 4 proof steps and their execution were left to an AI coding assistant.
-#colbreak()
