@@ -10,6 +10,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Batteries.Tactic.OpenPrivate:leanArts", "5e685293727946a5"]],
- "depHash": "9d2c764e68ad9492"}
+ "depHash": "64137a2c745104a2"}

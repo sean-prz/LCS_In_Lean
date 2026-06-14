@@ -10,6 +10,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.Tactic.Linter.DirectoryDependency:leanArts", "9365c057870d1e62"]],
- "depHash": "e2a224f6b7c542c4"}
+ "depHash": "ac662ab6e15752b4"}

@@ -14,6 +14,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.LinearAlgebra.TensorProduct.Tower:leanArts", "3c5a420a1a0a4a92"]],
- "depHash": "a54aa71cb44b3504"}
+ "depHash": "723aacb4e78f5054"}

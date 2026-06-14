@@ -14,7 +14,7 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.LinearAlgebra.DirectSum.TensorProduct:leanArts",
    "d5f479c42bcafd50"]],
- "depHash": "e53e68869c429521"}
+ "depHash": "26ac5bf5c4b278b1"}

@@ -14,6 +14,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.Algebra.Group.Commute.Basic:leanArts", "9ecd8d4cc26838b5"]],
- "depHash": "abab690285058afc"}
+ "depHash": "b6c90e33bfe2eb2c"}

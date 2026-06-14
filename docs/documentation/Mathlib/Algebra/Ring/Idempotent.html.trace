@@ -20,6 +20,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.Algebra.Ring.Idempotent:leanArts", "5dcf7a4146222e3f"]],
- "depHash": "0c48767d570b7207"}
+ "depHash": "976ba6ffb2eb1417"}

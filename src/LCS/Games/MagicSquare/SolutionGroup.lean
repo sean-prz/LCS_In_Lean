@@ -59,11 +59,12 @@ def equationPresentation : List (List Nat × Nat) :=
 def formattedRelators : List String :=
   (solutionRelatorsList magic_square_system).map (formatRelator (S := magic_square_system))
 
-#eval coefficientMatrix
-#eval rhsVector
-#eval equationSupports
-#eval equationPresentation
-#eval formattedRelators.forM IO.println
+/- Inspect the solution group presentation data. -/
+/- #eval coefficientMatrix -/
+/- #eval rhsVector -/
+/- #eval equationSupports -/
+/- #eval equationPresentation -/
+/- #eval formattedRelators.forM IO.println -/
 
 
 

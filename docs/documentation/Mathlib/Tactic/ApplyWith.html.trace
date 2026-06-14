@@ -12,6 +12,6 @@
   ["/Users/sean/Documents/MA2/lean/src/docbuild/.lake/build/doc-data/references.json",
    "a50f2257f35adb49"],
   ["/Users/sean/Documents/MA2/lean/src/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
-   "0664fab7eedc0c85"],
+   "2c5f6248e7996898"],
   ["Mathlib.Tactic.ApplyWith:leanArts", "2794bc40f456af0c"]],
- "depHash": "90cb23d86b060462"}
+ "depHash": "78a0c69c1d69d152"}
