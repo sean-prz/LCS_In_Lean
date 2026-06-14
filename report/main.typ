@@ -40,7 +40,7 @@
   authors: (
     (
       name: "Sean Perazzolo",
-      organization: [EPFL],
+      organization: [EPFL, supervised by Prof. Thomas Vidick],
       email: "sean.perazzolo@epfl.ch"
     ),
   ),

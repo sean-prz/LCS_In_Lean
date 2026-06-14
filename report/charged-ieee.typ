@@ -143,11 +143,11 @@ show raw: set text(font: "Fira Code", size: 8pt)
       }
       // subtitle
       v(-0.8em)
-      {
-        set align(center)
-        set text(size: 14pt, font: "Libertinus Serif", weight: "bold")
-        "Research Project at QCC"
-      }
+      // {
+      //   set align(center)
+      //   set text(size: 14pt, font: "Libertinus Serif", weight: "bold")
+      //   "Research Project at QCC"
+      // }
 
       // Display the authors list.
       set par(leading: 0.6em)
