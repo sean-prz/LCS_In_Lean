@@ -508,7 +508,8 @@ lemma lift_equationRelator_of_rowIdentity
       FreeGroup.lift
           (solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable)
           (equationWord game.toLinearSystem i) =
-        solutionGroupGeneratorImage (S := game.toLinearSystem) obs obs_is_observable .J ^ (game.b i).val := by
+        solutionGroupGeneratorImage (S := game.toLinearSystem)
+          obs obs_is_observable .J ^ (game.b i).val := by
     apply Subtype.ext
     rw [hword, hrow]
     simpa [solutionGroupGeneratorImage] using
@@ -591,7 +592,7 @@ lemma rowObservableProduct_eq_sign_of_local_loss
     simp
   have hRowLift :
       Alice_Row_Prod strat.toProjectorStrategy i = bipartiteAliceLift row := by
-    simpa [row] using aliceRowProd_bipartite (n := n) strat i
+    simp [row, aliceRowProd_bipartite (n := n) strat i]
   exact
     (local_matrix_identities_of_local_loss_annihilate_epr
       game n strat.toProjectorStrategy i j (strat.obs j.1) (strat.obs j.1) row

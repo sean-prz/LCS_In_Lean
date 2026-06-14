@@ -11,7 +11,8 @@ and basic properties of the outcome space $\mathbb{F}_2$.
 
 ## Key Lemmas
 - `sign_mul`: The product of signs corresponds to the sum in $\mathbb{F}_2$.
-- `sign_indicator`: Relates the sign-based expression $(1/2)(1 + (-1)^{b+s})$ to the Kronecker delta.
+- `sign_indicator`: Relates the sign-based expression $(1/2)(1 + (-1)^{b+s})$
+  to the Kronecker delta.
 -/
 open scoped BigOperators
 
@@ -29,7 +30,8 @@ lemma sign_mul (a b : Fin 2) :
   fin_cases a <;> fin_cases b <;> simp
 
 
-/-- Arithmetic helper: the sign factor `$(1/2)(1 + (-1)^b * (-1)^s)$` equals the indicator `s = b`. -/
+/-- Arithmetic helper: the sign factor `$(1/2)(1 + (-1)^b * (-1)^s)$` equals the
+indicator `s = b`. -/
 lemma sign_indicator (b s : Fin 2) :
     (1 / 2 : ℂ) + (1 / 2 : ℂ) * (-1 : ℂ) ^ b.val * (-1 : ℂ) ^ s.val = if s = b then 1 else 0 := by
   match b, s with

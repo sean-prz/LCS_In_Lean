@@ -25,7 +25,8 @@ set_option linter.unusedSectionVars false
 variable {R : Type*} [Ring R] [StarRing R] [Algebra ℂ R] [StarModule ℂ R]
 
 
-/-- Converts an observable $O$ and an outcome $a \in \{0, 1\}$ to a projector $P = (1/2)(I + (-1)^a O)$. -/
+/-- Converts an observable $O$ and an outcome $a \in \{0, 1\}$ to a projector
+$P = (1/2)(I + (-1)^a O)$. -/
 noncomputable def ObservableToProjector
   (O : R) (a : Fin 2) : R :=
   (1 / 2 : ℂ) • (1 + observableSign a • O)
@@ -56,7 +57,6 @@ lemma idempotent_observableToProjector (O : R) (hO : IsObservable O) (a : Fin 2)
             rw [add_mul, one_mul, mul_add, mul_one, hO.involutive]
             rw [two_smul]
             abel
-
       _ = (1 / 2 : ℂ) • (1 + O) := by
             rw [smul_smul]
             norm_num

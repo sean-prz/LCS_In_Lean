@@ -207,13 +207,10 @@ end DefiningRelators
 
 section PresentedSolutionGroup
 
-/--!
+/--
 ## The Presented Solution Group
 The solution group of a linear system is the presented group with the relators defined above.
-
---/
-
-/- The presented solution group attached to `S`. -/
+-/
 abbrev SolutionGroup (S : LinearSystem) :=
   PresentedGroup (solutionRelators S)
 

@@ -116,8 +116,8 @@ lemma jointOn_sum_one
                   JointOn S i (insert a s) (assignEquiv.symm p) := by
                     refine Fintype.sum_equiv assignEquiv _ _ ?_
                     intro assignment
-                    simpa using congrArg (fun y => JointOn S i (insert a s) y)
-                      (assignEquiv.left_inv assignment).symm
+                    simp [congrArg (fun y => JointOn S i (insert a s) y)
+                      (assignEquiv.left_inv assignment).symm]
           _ = ∑ p : Fin 2 × (∀ j ∈ s, Fin 2),
                 ObservableToProjector (S.alice_obs a.1) p.1 * JointOn S i s p.2 := by
                 refine Finset.sum_congr rfl ?_
@@ -130,7 +130,7 @@ lemma jointOn_sum_one
                   change Finset.prodPiInsert (fun _ : G.V i => Fin 2) (b, β) a
                     (Finset.mem_insert_self a s) = b
                   simp [Finset.prodPiInsert]
-                simp [ha_eval]
+                simp only [ha_eval, Finset.mem_insert, true_or, ↓reduceDIte]
                 apply congrArg (fun z => ObservableToProjector (S.alice_obs a.1) b * z)
                 refine Finset.noncommProd_congr rfl ?_ ?_
                 · intro x hx
@@ -206,13 +206,13 @@ private lemma alice_partial_idempotent
   (s : Finset (G.V i)) (assignment : Assignment G i) :
   let f : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (assignment j)
   (s.noncommProd f (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (assignment j) (assignment j'))) *
   (s.noncommProd f (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (assignment j) (assignment j'))) =
   (s.noncommProd f (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (assignment j) (assignment j'))) := by
   classical
   dsimp
@@ -237,10 +237,10 @@ private lemma alice_partial_selfAdjoint
   (s : Finset (G.V i)) (assignment : Assignment G i) :
   let f : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (assignment j)
   star (s.noncommProd f (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (assignment j) (assignment j'))) =
   s.noncommProd f (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (assignment j) (assignment j')) := by
   classical
   dsimp
@@ -250,7 +250,7 @@ private lemma alice_partial_selfAdjoint
     simpa [f] using projector_commute_in_equation S i j j' (assignment j) (assignment j')
   induction s using Finset.induction with
   | empty =>
-      simp [f]
+      simp
   | @insert a s ha ih =>
       have hcomm_a_s :
           Commute (f a) (s.noncommProd f (comm.mono fun _ => Finset.mem_insert_of_mem)) := by
@@ -274,10 +274,10 @@ private lemma alice_partial_orthogonal
   let fα : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (α j)
   let fβ : G.V i → R := fun j => ObservableToProjector (S.alice_obs j.1) (β j)
   (s.noncommProd fα (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (α j) (α j'))) *
   (s.noncommProd fβ (by
-    intro j hj j' hj' hne
+    intro j _ j' _ _
     exact projector_commute_in_equation S i j j' (β j) (β j'))) = 0 := by
   classical
   dsimp
@@ -303,7 +303,8 @@ private lemma alice_partial_orthogonal
           exact hmul
     _ = (s.erase j0).noncommProd (fun j => fα j * fβ j) (by
           intro j hj j' hj' hne
-          exact hcomm_prod (s.mem_of_mem_erase hj) (s.mem_of_mem_erase hj') hne) * (fα j0 * fβ j0) := by
+          exact hcomm_prod (s.mem_of_mem_erase hj)
+            (s.mem_of_mem_erase hj') hne) * (fα j0 * fβ j0) := by
             symm
             exact Finset.noncommProd_erase_mul s hj0 (fun j => fα j * fβ j) hcomm_prod
     _ = 0 := by
@@ -312,7 +313,8 @@ private lemma alice_partial_orthogonal
               (β j0) hneq
           simp [hj0zero]
 
-/-- For each equation $i$, the assignment-indexed family of Alice projectors is a measurement system. -/
+/-- For each equation $i$, the assignment-indexed family of Alice projectors
+is a measurement system. -/
 lemma aliceMeasurementFromObservables_isMeasurementSystem
   (S : ObservableStrategy R G) (i : Fin G.r) :
   IsMeasurementSystem (AliceMeasurementFromObservables S i) := by
@@ -344,7 +346,8 @@ lemma aliceMeasurement_bobMeasurement_commute
     BobMeasurementFromObservables S j β * AliceMeasurementFromObservables S i α := by
   classical
   let f : G.V i → R := fun k => ObservableToProjector (S.alice_obs k.1) (α k)
-  let comm : ((Finset.univ : Finset (G.V i)) : Set (G.V i)).Pairwise (fun x y => Commute (f x) (f y)) := by
+  let comm : ((Finset.univ : Finset (G.V i)) : Set (G.V i)).Pairwise
+      (fun x y => Commute (f x) (f y)) := by
     intro x hx y hy hxy
     simpa [f] using projector_commute_in_equation S i x y (α x) (α y)
   have hBob : ∀ x ∈ (Finset.univ : Finset (G.V i)),
