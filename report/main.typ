@@ -989,4 +989,7 @@ condition on the EPR state with an approximate version, and showing that this im
 
 = Conclusion
 Overall, this project successfully formalises the core mathematical framework of binary Linear Constraint System games in Lean 4. By providing these foundational definitions and formalising several key results, including quantum strategy frameworks and matrix representations of the solution group, this work opens the door to verifying more advanced LCS game theory theorems in Lean.
+
+= AI Use Disclosure
+The focus of this project is on the high-level formalisation architecture and theorem statements rather than the cleanliness of the proof bodies. Accordingly, the detailed Lean 4 proof steps and their execution were left to an AI coding assistant.
 #colbreak()
