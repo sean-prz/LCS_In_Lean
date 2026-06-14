@@ -148,9 +148,6 @@ Alice responds with an assignment of values to the variables appearing in the ch
 The players win if Alice's assignment satisfies the chosen equation and if Bob's answer agrees with Alice's value on the queried variable.
 
 === Representation in Lean
-_Code snippets of this section are taken from `LCS/Basic.lean`._
-
-\
 
 We define an `LCSLayout` structure to represent the following data:
 - the number of variables `s`,
@@ -405,7 +402,7 @@ This is the point at which the right-hand side values $b_i$ of the equations com
 
 For a fixed equation $i$, the set of winning assignments consists of the assignments whose parity matches $b_i$. This set is used to define the local winning operator for a pair $(i,j)$ of an equation and a variable appearing in that equation. Intuitively, this operator collects exactly those outcomes for which Alice's assignment satisfies the equation and agrees with Bob's answer on variable $j$. 
 
-In `WinningCondition.lean`, the notation `S[i]` is used as a shorthand for `winning_assignments game i`, namely the set of assignments on equation $i$ whose parity matches $b_i$.
+In the codebase, the notation `S[i]` is used as a shorthand for `winning_assignments game i`, namely the set of assignments on equation $i$ whose parity matches $b_i$.
 
 #codeblock[```lean
 def winning_assignments (i : Fin G.r) : Finset (Assignment G i) :=
@@ -735,7 +732,7 @@ The representation lands in the unitary group (rather than just the general line
 
 === Main Formalisation Challenge
 
-The file `Representation.lean` is roughly 600 lines long, which may seem surprising given that the mathematical argument is short: define the generator map, check the relators, invoke the universal property.
+The formalisation of this step is roughly 600 lines long, which may seem surprising given that the mathematical argument is short: define the generator map, check the relators, invoke the universal property.
 The bulk of the formalisation is devoted to bridging between two different descriptions of the same algebraic object.
 
 On the group-theoretic side, the equation relator for row $i$ is a word in the free group on the generators `SolutionGen S`, constructed from the explicit equation support of the linear system.
@@ -921,7 +918,7 @@ The magic-square solution group is simply the solution group attached to `magic_
 abbrev MPSolutionGroup := SolutionGroup magic_square_system
 ```]
 
-The accompanying module `LCS/Games/MagicSquare/SolutionGroup.lean` then extracts inspectable data from this system:
+The formalisation then extracts inspectable data from this system:
 the coefficient rows, the right-hand side vector, the supports of the equations, and the resulting list of relators in presentation form.
 This does not yet prove any new analytic property of the concrete strategy, but it shows that the abstract algebraic machinery developed earlier can be applied to a canonical and highly nontrivial example.
 
