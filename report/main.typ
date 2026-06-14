@@ -210,6 +210,13 @@ For this reason strategies are naturally described in terms of measurement syste
 
 In the binary LCS setting, Alice and Bob have different answer types. 
 When Alice is asked an equation $i$, she must provide a full assignment to all variables appearing in that equation.
+In Lean, an assignment for equation `i` is defined simply as a function mapping each variable in $V_i$ to a binary value:
+
+#codeblock[```lean
+def Assignment (G : LCSLayout) (i : Fin G.r) : Type :=
+  (j : G.V i) → Fin 2
+```]
+
 Her measurement is therefore indexed by the set of assignments on that equation.
 When Bob is asked a variable $j$, he must provide a single bit, so his measurement is indexed by the two outcomes in $F_2$.
 
@@ -288,8 +295,8 @@ structure ObservableStrategy
 
 === Bridge Between Projector and Observable-Based Strategies
 
-The two formalisms are closely related, and it is possible to translate strategies from one description to the other.
-This bridge is essential for this project as explicit examples are most often described in terms of observables, while the main developments, such as the loss operator, are more naturally expressed in terms of projective measurements.
+The two formalisms are closely related, and it is possible to translate strategies between these two descriptions.
+This bridge is essential for this project as explicit examples are most often described in terms of observables, while the main developments, such as the loss operator, are more naturally expressed in terms of projective measurements. Note, however, that the provided translation is strictly a one-way construction from observables to projectors, rather than a canonical two-way equivalence. The reason for this asymmetry will become clear once the mechanism for extracting observables from projectors is introduced below.
 
 On Bob's side, the passage from projectors to observables is immediate. Since Bob's measurements are binary, each family `F j : Fin 2 -> R` gives rise to a single observable obtained from the difference of the two projectors. In Lean, this is the definition `Bob_B`.
 
@@ -311,6 +318,8 @@ def Bob_B (strat : ProjectorStrategy R G) (j : Fin G.s) : R :=
 
 The project also proves that these derived operators are genuine binary observables. Bob's observable is obtained directly from his binary measurement, while Alice's observable is obtained from the induced binary measurement associated with a single variable in a fixed equation. In both cases, the fact that the underlying family is a measurement system implies that the resulting operator is a self-adjoint involution.
 
+It is now possible to see why the formalisms do not perfectly round-trip. While observables can be extracted from a projector strategy as just described, those derived observables on Alice's side (`Alice_A`) are intrinsically indexed by a pair $(i, j)$ of an equation and a variable within it. In contrast, an `ObservableStrategy` demands a single global observable $A_j$ for each variable $j$.
+
 Conversely, starting from an observable-based strategy, the project constructs a projector-based strategy by taking the two spectral projectors associated with each observable.
 Bob's measurement is obtained directly from his observable, while Alice's measurement is built by combining the projectors associated with the commuting observables appearing in a common equation.
 This construction is implemented in Lean by `ObservableStrategy_To_ProjectorStrategy`.
@@ -331,9 +340,11 @@ noncomputable def ObservableStrategy_To_ProjectorStrategy
   }
 ```]
 
-On Bob's side, each observable gives a binary measurement by taking its two associated spectral projectors, and the corresponding family is proved to form a measurement system. 
-On Alice's side, the measurement attached to an equation is obtained by multiplying the projectors associated with the observables appearing in that equation; the row-wise commutation assumptions ensure that these products are well defined, and the project proves that the resulting family is again a measurement system.
-Finally, the global commutation hypothesis between Alice's and Bob's observables is used to show that every Alice projector commutes with every Bob projector. These results together justify the construction of ObservableStrategy_To_ProjectorStrategy as a valid ProjectorStrategy. 
+On Bob's side, each observable $B_j$ gives a binary measurement by taking its two associated spectral projectors, defined by the formula $F_(j,y) = 1/2 (I + (-1)^y B_j)$ for outcomes $y in {0, 1}$, and the corresponding family is proved to form a measurement system. 
+On Alice's side, the measurement projector $E_(i,x)$ attached to an equation $i$ and an assignment $x$ is obtained by multiplying the individual variable projectors associated with the observables appearing in that equation:
+$ E_(i,x) = product_(j in V_i) 1/2 (I + (-1)^(x_j) A_j) $
+The row-wise commutation assumptions ensure that these products are well defined independently of the multiplication order, and the project proves that the resulting family is again a measurement system.
+Finally, the global commutation hypothesis between Alice's and Bob's observables is used to show that every Alice projector commutes with every Bob projector. These results together justify the construction of `ObservableStrategy_To_ProjectorStrategy` as a valid `ProjectorStrategy`. 
 
 === Bipartite Observable Strategies
 
@@ -665,7 +676,6 @@ This assignment respects all four families of defining relations:
 + _Equation relators._ The row identity $product_(j in "supp"(i)) O_j = (-1)^(b_i) I$ is exactly the relation $product g_j = J^(b_i)$ under the assignment $g_j arrow.bar O_j$, $J arrow.bar -I$.
 
 Since every relator in the presentation maps to the identity under this assignment, the universal property of the presented group guarantees that the assignment extends uniquely to a group homomorphism
-$ Gamma arrow.long U(n, CC). $
 
 === Formalisation in Lean
 
