@@ -749,7 +749,6 @@ These two descriptions refer to the same underlying product, but they arise from
 
 The key bridge lemma `lift_equationRelator_of_rowIdentity` closes this gap. It shows that evaluating the free-group lift of the equation relator under the generator map yields the same matrix as the row observable product, so that the matrix identity $product_(j in "supp"(i)) O_j = (-1)^(b_i) I$ can be used directly to verify the relator.
 Proving this requires a chain of intermediate steps: converting the game's support set to the linear system's equation support, showing that the sorted list product agrees with the `Finset.noncommProd` used in the strategy layer, and carefully tracking the passage between the free-group word evaluation and the matrix product.
-This kind of alignment work, connecting two representations of the same mathematical object through Lean's type system, accounts for the majority of the file's length.
 
 
 = Magic Square Game Case Study <magic-square>
