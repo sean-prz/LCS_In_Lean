@@ -490,7 +490,7 @@ These lemmas make it possible to replace operator equalities on the distinguishe
 
 == Defining the Solution Group of a Binary Linear System
 
-The final algebraic object introduced in the project is the solution group associated with a binary linear system. In the binary LCS setting, this group packages the combinatorial structure of the constraints into a presented group whose generators correspond to variables and whose relations encode the equations of the system.
+The final algebraic object introduced in the project is the solution group associated with a binary linear system. In the binary LCS setting, this group packages the combinatorial structure of the constraints into a presented group whose generators correspond to variables and whose relations encode the equations of the system (see Section 4.2.3 of @Mehta2021).
 
 More precisely, let
 $ sum_(j=1)^s A_(i j) x_j = b_i $
@@ -652,7 +652,7 @@ Together these give the row identities that are used in the construction of repr
 
 == Matrix Representations of the Solution Group
 The final step of this project is to show that these row identities can be used to construct a matrix representation of
-the solution group of the binary linear system associated with the game, given a perfect quantum strategy for the game (see Section 4.2.3 of @Mehta2021).
+the solution group of the binary linear system associated with the game, given a perfect quantum strategy for the game.
 
 === The Construction
 
@@ -961,7 +961,7 @@ It demonstrates that the abstract framework developed in the project is expressi
     [Weeks 13 & 14], [Writing the final report and preparing the codebase for submission.]
   )
 )
-
+#colbreak()
 = Limitations and Future Work
 
 
