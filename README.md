@@ -1,6 +1,6 @@
 # LCS in Lean 4
 
-This repository formalizes binary Linear Constraint System (LCS) games in Lean 4.
+This repository provides a Lean 4 framework for reasoning about binary Linear Constraint System (LCS) games and their quantum strategies.
 
 The development includes:
 
