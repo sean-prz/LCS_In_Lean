@@ -1,17 +1,14 @@
 <section>
   <h2>Linear Constraint System Games in Lean</h2>
   <p>
-    This project formalizes <em>Linear Constraint System (LCS) games</em> in Lean 4, with a focus on
-    quantum strategies, the Mermin-Peres magic square example, and the operator-theoretic conditions
-    behind perfect play.
+    This project provides a Lean framework for reasoning about Binary Linear Constraint System games. It enables the formalization of the games themselves, of strategies in both the projector and observable formalisms, and of associated constructions such as winning and losing operators and the solution group.
   </p>
   <p>
-    The formal development has two main goals: relate the observable description of a strategy to the
-    projector-based one, and prove winning conditions through the analysis of the local loss operator.
-  </p>
-  <p>
-    The library is organized around core game definitions, algebraic foundations for observables and
-    measurements, strategy constructions, and theorem files proving the main results.
+    Building on this framework, the project formalizes results 
+    concerning perfect strategies, including the sum-of-squares 
+    decomposition of the losing operator and the connection with 
+    representations of the solution group. The magic square game is 
+    developed as a central example.
   </p>
   <p>
     Browse the <a href="https://github.com/sean-prz/LCS_In_Lean" target="_blank" rel="noopener noreferrer">GitHub repository</a>
