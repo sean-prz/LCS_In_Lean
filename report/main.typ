@@ -69,7 +69,7 @@ Since then, non-local games have become a standard language for expressing and a
 They also play an important role in quantum information theory, for instance in device-independent quantum cryptography, where security guarantees are derived from the violation of classical bounds without relying on assumptions about the internal structure of the devices used.
 
 == Linear Constraint System Games
-Within this broad class, Linear Constraint System (LCS) games @cleve2013 @coladangelo2019 form a particularly simple and structured family.
+Within this broad class, Linear Constraint System (LCS) games (@cleve2013 @coladangelo2019) form a particularly simple and structured family.
 Instead of arbitrary input-output rules, the winning conditions in an LCS game are determined by a system of linear equations over a finite field, most often in the binary setting over $F_2$.
 In such a game, the first player, conventionally called Alice, is asked for an assignment to the variables appearing in a given equation, while the second player, Bob, is asked for the value of a single variable appearing in that equation.
 The players win if Alice's assignment satisfies the chosen equation and if Bob's answer agrees with Alice's value on the queried variable.
@@ -200,8 +200,6 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 
 === Projector-Based Strategies
 
-*The Mathematical Object*
-
 In a quantum strategy, a player's response to a question is not modelled as a deterministic function from questions to answers.
 Instead, the question determines which measurement the player performs on their share of quantum state, and the answer is then given by the outcome of that measurement.
 For this reason strategies are naturally described in terms of measurement systems, which are families of projective measurements.
@@ -253,15 +251,15 @@ structure ProjectorStrategy
 Here `E i` denotes Alice's projective measurement associated with equation $i$; it is the full family of operators indexed by all  assignments `x : Assignment G i`.
 For a specific assignment $x$, the operator `E i x` is the projector onto the event that Alice answers exactly $x$ when asked equation $i$. Similarly, `F j` denotes Bob's binary projective measurement associated with variable $j$, and for a bit `y : Fin 2`, the operator `F j y` is the projector onto the event that Bob answers $y$ when asked variable $j$. The fields alice_ms and bob_ms assert that these families define projective measurements. Finally, the commutation condition expresses the operator-theoretic separation between Alice and Bob: Alice's and Bob's measurement operators commute for all questions and outcomes.
 
-\
-
 Although this formalism is expressed in terms of projective measurements, the later development also makes systematic use of observables derived from these measurements. Their role is explained after the observable-based formalism has been introduced.
 
 === Observable-Based Strategies
-Although the projector-based formalism is the most direct way to describe quantum strategies, it is often more convenient to work with observables, which are self-adjoint operators whose spectral decomposition corresponds to the projective measurements. For this reason, the project also introduces an observable-based formalism.
+While the projector-based formalism is the most direct way to describe quantum strategies, it is often more convenient to work with observables, which are self-adjoint operators whose spectral decomposition corresponds to the projective measurements. For this reason, the project also introduces an observable-based formalism.
 
 In this setting, a strategy is described by one observable for each variable on Alice's side, and one observable for each variable on Bob's side.
 They must satisfy the commutation relation dictated by the structure of the game. On Alice's side, observables corresponding to variables appearing in the same equation must commute, so that their products are well defined independently of the order of multiplication. In addition Alice's observables must commute with all of Bob's observables, reflecting the spatial separation between the players.
+
+*Representation in Lean*
 
 Because the present project is restricted to binary outcomes, the observable formalism is also specialised accordingly. Rather than considering arbitrary observables, we work with self-adjoint 
 involutions, which are exactly the operators arising from two-outcome projective measurements. This is encoded in Lean by the predicate `IsObservable`.
@@ -986,8 +984,8 @@ The present development has several important limitations.
   does not prove a complete round-trip equivalence showing that the two formalisms determine the same data in a canonical way. One concrete obstruction is that the observables recovered from a projector strategy on Alice's side are naturally indexed by a pair $(i,j)$ of an equation and a variable in that equation, whereas `ObservableStrategy` is formulated with a single observable for each variable. 
   #v(1em)
 
-- *The current bipartite observable interface is too specialised for the full EPR converse story.* \
-  The `BipartiteObservableStrategy` wrapper used in the EPR part of the development starts from a single family of observables and lifts it symmetrically to the two tensor factors. This is sufficient for packaging valid bipartite strategies and for the conditional row-identity and representation results proved in the project. However, the EPR extraction argument naturally produces transpose-related local observables, and the current interface does not yet formalise the more general two-family setup needed to reconstruct perfect strategies from solution-group representations or to instantiate the full perfect-play pipeline for the concrete Magic Square strategy. 
+- *The symmetric bipartite lift is too restrictive to prove perfect play.* \
+  The `BipartiteObservableStrategy` wrapper used in the EPR part of the development starts from a single family of observables $M_j$ and lifts it symmetrically to the two tensor factors: Alice uses $M_j otimes I$ and Bob uses $I otimes M_j$. However, the EPR extraction argument shows that achieving perfect play forces Alice's and Bob's observables to be transpose-related ($A_j = B_j^T$). For our symmetric lift, this would require every observable to be symmetric ($M_j = M_j^T$). Because of this, the current interface is too limited to represent perfect strategies that rely on non-symmetric observables. A more general two-family setup, where Alice applies $M_j$ and Bob applies $M_j^T$, is needed to complete the perfect-play pipeline for concrete examples like the Magic Square strategy. 
   #v(1em)
 
 - *No direct computation with real or complex operator entries.* \
