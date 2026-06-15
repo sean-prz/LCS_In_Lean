@@ -42,6 +42,7 @@ The file is organized in three layers.
 -/
 
 open scoped BigOperators
+open Matrix
 
 namespace SolutionGroup
 
@@ -574,9 +575,7 @@ lemma rowObservableProduct_eq_sign_of_local_loss
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
-        Matrix.mulVec
-          (local_loss_operator game strat.toProjectorStrategy i j)
-          (eprVec n) = 0)
+        (local_loss_operator game strat.toProjectorStrategy i j) *ᵥ (eprVec n) = 0)
     (i : Fin G.r) :
     rowObservableProduct strat.obs i =
       (-1 : ℂ) ^ (game.b i).val • (1 : Matrix n n ℂ) := by
@@ -614,9 +613,7 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss :
       ∀ i (j : G.V i),
-        Matrix.mulVec
-          (local_loss_operator game strat.toProjectorStrategy i j)
-          (eprVec n) = 0) :
+        (local_loss_operator game strat.toProjectorStrategy i j) *ᵥ (eprVec n) = 0) :
     SolutionGroup game.toLinearSystem →* unitary (Matrix n n ℂ) :=
   solutionGroupRepresentationOfRows game
     strat.obs strat.is_observable strat.sameEquation_comm

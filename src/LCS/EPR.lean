@@ -108,7 +108,7 @@ $$
 lemma kronecker_mulVec_epr
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
-    Matrix.mulVec (M ⊗ₖ N) (eprVec n)
+    (M ⊗ₖ N) *ᵥ (eprVec n)
       =
     fun ab => ∑ k : n, M ab.1 k * N ab.2 k := by
   ext ab
@@ -123,7 +123,7 @@ $$
 lemma kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
-    Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
+    (M ⊗ₖ N) *ᵥ (eprVec n) = 0 ↔
       M * Nᵀ = 0 := by
   constructor
   · intro h
@@ -143,7 +143,7 @@ $$
 lemma alice_lift_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M : Matrix n n ℂ) :
-    Matrix.mulVec (bipartiteAliceLift M) (eprVec n) = 0 ↔ M = 0 := by
+    (bipartiteAliceLift M) *ᵥ (eprVec n) = 0 ↔ M = 0 := by
   rw [bipartiteAliceLift, kronecker_mulVec_epr_eq_zero_iff]
   simp
 
@@ -155,7 +155,7 @@ $$
 lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
-    Matrix.mulVec (1 - M ⊗ₖ N) (eprVec n) = 0 ↔
+    (1 - M ⊗ₖ N) *ᵥ (eprVec n) = 0 ↔
       M * Nᵀ = 1 := by
   constructor
   · intro h
@@ -250,7 +250,7 @@ $$
 lemma alice_lift_one_sub_smul_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (c : ℂ) (M : Matrix n n ℂ) :
-    Matrix.mulVec (1 - c • bipartiteAliceLift M) (eprVec n) = 0 ↔
+    (1 - c • bipartiteAliceLift M) *ᵥ (eprVec n) = 0 ↔
       1 - c • M = 0 := by
   rw [← bipartiteAliceLift_one_sub_smul]
   exact alice_lift_mulVec_epr_eq_zero_iff n (1 - c • M)
@@ -265,7 +265,7 @@ $$
 lemma one_sub_smul_kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (c : ℂ) (M N : Matrix n n ℂ) :
-    Matrix.mulVec (1 - c • (M ⊗ₖ N)) (eprVec n) = 0 ↔
+    (1 - c • (M ⊗ₖ N)) *ᵥ (eprVec n) = 0 ↔
       c • (M * Nᵀ) = 1 := by
   rw [← Matrix.smul_kronecker c M N, one_sub_kronecker_mulVec_epr_eq_zero_iff]
   simp

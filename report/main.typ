@@ -201,6 +201,7 @@ For a concrete example of these definitions, see the case study of the Mermin-Pe
 === Projector-Based Strategies
 
 *The Mathematical Object*
+
 In a quantum strategy, a player's response to a question is not modelled as a deterministic function from questions to answers.
 Instead, the question determines which measurement the player performs on their share of quantum state, and the answer is then given by the outcome of that measurement.
 For this reason strategies are naturally described in terms of measurement systems, which are families of projective measurements.
@@ -468,7 +469,7 @@ This gives the basic extraction principle used later in the development.
 lemma kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
-    Matrix.mulVec (M ⊗ₖ N) (eprVec n) = 0 ↔
+    (M ⊗ₖ N) *ᵥ (eprVec n) = 0 ↔
       M * Nᵀ = 0
 ```]
 
@@ -479,7 +480,7 @@ The project also proves the corresponding affine variant, which is the form used
 lemma one_sub_kronecker_mulVec_epr_eq_zero_iff
     (n : Type*) [Fintype n] [DecidableEq n]
     (M N : Matrix n n ℂ) :
-    Matrix.mulVec (1 - M ⊗ₖ N) (eprVec n) = 0 ↔
+    (1 - M ⊗ₖ N) *ᵥ (eprVec n) = 0 ↔
       M * Nᵀ = 1
 ```]
 
@@ -609,8 +610,8 @@ This is the positivity argument formalised in Lean.
 lemma three_selfAdjoint_squares_mulVec_eq_zero
     (hT₁ : T₁ᴴ = T₁) (hT₂ : T₂ᴴ = T₂) (hT₃ : T₃ᴴ = T₃)
     (h :
-      Matrix.mulVec (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) v = 0) :
-    Matrix.mulVec T₁ v = 0 ∧ Matrix.mulVec T₂ v = 0 ∧ Matrix.mulVec T₃ v = 0
+      (T₁ ^ 2 + T₂ ^ 2 + T₃ ^ 2) *ᵥ v = 0) :
+    T₁ *ᵥ v = 0 ∧ T₂ *ᵥ v = 0 ∧ T₃ *ᵥ v = 0
 ```]
 2. Then, using the extraction lemmas introduced in the EPR framework, each annihilation relation is rewritten in bipartite form and converted into an ordinary matrix identity. These lemmas are applied to the three SOS terms after expressing Alice's operators as lifts
   $A otimes I$ and Bob's operators as lifts $I otimes B$.
@@ -636,8 +637,7 @@ lemma consistency_of_epr_annihilates
     (i : Fin G.r) (j : G.V i)
     (A B : Matrix n n ℂ)
     (hCons :
-      Matrix.mulVec
-        (sosConsistencyTerm strat i j)
+      (sosConsistencyTerm strat i j) *ᵥ
         Ω = 0)
     (hAlice : Alice_A strat i j = bipartiteAliceLift A)
     (hBob : Bob_B strat ↑j = bipartiteBobLift B)
@@ -718,9 +718,8 @@ noncomputable def solutionGroupRepresentationOfEPRLoss
     (strat : BipartiteObservableStrategy n G)
     (hNonempty : ∀ i, Nonempty (G.V i))
     (hLoss : ∀ i (j : G.V i),
-      Matrix.mulVec
-        (local_loss_operator game
-          strat.toProjectorStrategy i j)
+      (local_loss_operator game
+          strat.toProjectorStrategy i j) *ᵥ
         (eprVec n) = 0) :
     SolutionGroup game.toLinearSystem
       →* unitary (Matrix n n ℂ)
