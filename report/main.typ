@@ -512,18 +512,24 @@ In Lean, the solution group is defined from the structure `LinearSystem`, which 
 
 At this stage, the project works with `LinearSystem` rather than directly with `LCSGame`. This is because the solution-group presentation is most naturally phrased in terms of explicit coefficients and equation supports extracted from a coefficient matrix. In particular, the commuting and row-product relations are defined by reading off which variables occur in each equation from the matrix `A`, while the right-hand side vector `b` determines the exponent of the distinguished generator `J`.
 
-#codeblock[```lean
+In Lean, the presented group machinery from Mathlib expects the relators as a set of words in the free group, a predicate of type `Set (FreeGroup G)`. The definition of `solutionRelators` below therefore takes a word `w` in the free group on `SolutionGen S` and returns a proposition stating that `w` is equal to one of the concrete relator words. Each clause in the disjunction encodes a family of relations: the first two cover the involution relators, the next two cover the commutation relators (centrality and same-equation), and the last covers the equation relators.
+
+#codeblock(size: 6pt)[```lean
 inductive SolutionGen (S : LinearSystem) where
   | var : Fin S.layout.s → SolutionGen S
   | J : SolutionGen S
 
 def solutionRelators (S : LinearSystem) : Set (FreeGroup (SolutionGen S)) :=
   fun w =>
-    (∃ j, w = involutionRel (genVar (S := S) j)) ∨
-    w = involutionRel (genJ (S := S)) ∨
-    (∃ j, w = commuteRel (genVar (S := S) j) (genJ (S := S))) ∨
+    (∃ j, w = involutionRel (genVar (S := S) j)) 
+  ∨
+    w = involutionRel (genJ (S := S)) 
+  ∨
+    (∃ j, w = commuteRel (genVar (S := S) j) (genJ (S := S))) 
+  ∨
     (∃ j k, j < k ∧ sameEquation S j k ∧
-      w = commuteRel (genVar (S := S) j) (genVar (S := S) k)) ∨
+      w = commuteRel (genVar (S := S) j) (genVar (S := S) k)) 
+  ∨
     (∃ i, w = equationRelator S i)
 
 
@@ -675,7 +681,7 @@ This assignment respects all four families of defining relations:
 + _Same-equation commutation._ Observables appearing in a common equation commute, which is a hypothesis of the observable strategy formalism.
 + _Equation relators._ The row identity $product_(j in "supp"(i)) O_j = (-1)^(b_i) I$ is exactly the relation $product g_j = J^(b_i)$ under the assignment $g_j arrow.bar O_j$, $J arrow.bar -I$.
 
-Since every relator in the presentation maps to the identity under this assignment, the universal property of the presented group guarantees that the assignment extends uniquely to a group homomorphism
+Since every relator in the presentation maps to the identity under this assignment, the universal property of the presented group guarantees that the assignment extends uniquely to a group homomorphism.
 
 === Formalisation in Lean
 
@@ -762,7 +768,7 @@ The winning condition is the same as for any binary LCS game, and it has two par
 First, Alice's assignment must satisfy the parity rule attached to the row or column she was asked about.
 Second, Bob's answer must agree with Alice's value on the overlapping cell.
 
-The parity rules of this game are as  follows: 
+The parity rules of this game are as follows: 
 all three row equations have even parity, the first two column equations have even parity, and the final column has odd parity.
 Equivalently, if the variables are denoted by
 $
@@ -857,7 +863,8 @@ The resulting object is already enough to state the game and to instantiate the 
 The observable grid itself is encoded as a function from the nine variable indices to $4 times 4$ matrices, obtained as Kronecker products of the Pauli matrices and the identity.
 
 #codeblock[```lean
-def magic_square_grid : Fin 9 → mat4
+def magic_square_grid : 
+  Fin 9 → Matrix (Fin 2 × Fin 2) (Fin 2 × Fin 2) ℂ
   | 0 => X  ⊗ₖ I2
   | 1 => I2 ⊗ₖ X
   | 2 => X  ⊗ₖ X
